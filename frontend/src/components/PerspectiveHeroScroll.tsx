@@ -50,10 +50,13 @@ export function PerspectiveHeroScroll() {
     offset: ["start start", "end end"],
   });
 
-  // Skiper 28 3D Perspective interpolation:
-  // Glides gracefully from lower depth up through the perspective vanishing plane
-  const yMotionValue = useTransform(scrollYProgress, [0, 1], [480, -360]);
-  const transform = useMotionTemplate`rotateX(24deg) translateY(${yMotionValue}px) translateZ(10px)`;
+  // Authentic Skiper 28 3D Perspective motion:
+  // yMotionValue goes from 487 to 0 as in user code, with rotateX(30deg) and perspective 200px
+  const yMotionValue = useTransform(scrollYProgress, [0, 1], [487, 0]);
+  const transform = useMotionTemplate`rotateX(30deg) translateY(${yMotionValue}px) translateZ(10px)`;
+
+  // Clean fade out near the end so 3D text NEVER bleeds or coincides behind subsequent sections!
+  const textOpacity = useTransform(scrollYProgress, [0, 0.85, 0.98], [1, 1, 0]);
 
   const content = (
     <div className="relative w-full bg-[#FBF8F2] text-[#1B2A22]">
@@ -190,19 +193,20 @@ export function PerspectiveHeroScroll() {
 
       {/* ─────────────────────────────────────────────────────────────
           SECTION 2: AUTHENTIC SKIPER 28 3D PERSPECTIVE SCROLL CANVAS
-          Dedicated 280vh runway. No hero interference.
-          3D Perspective (perspective: 260px, rotateX: 24deg).
+          Dedicated 300vh runway. Clean exit before next section.
+          3D Perspective (perspective: 200px, rotateX: 30deg).
           Glides seamlessly on native #FBF8F2 cream background.
+          Uniform rich color #1E5B45 throughout (no color changes).
          ───────────────────────────────────────────────────────────── */}
       <div
         ref={perspectiveContainerRef}
-        className="relative z-0 h-[280vh] w-full bg-[#FBF8F2]"
+        className="relative z-0 h-[300vh] w-full overflow-hidden bg-[#FBF8F2]"
       >
         <div
-          className="sticky top-0 mx-auto flex h-screen w-full items-center justify-center overflow-hidden bg-transparent"
+          className="sticky top-0 mx-auto flex h-screen w-full items-center justify-center overflow-hidden bg-transparent py-20"
           style={{
             transformStyle: "preserve-3d",
-            perspective: "260px",
+            perspective: "200px",
           }}
         >
           {/* Subtle Runway Header */}
@@ -213,52 +217,25 @@ export function PerspectiveHeroScroll() {
             <div className="h-6 w-px bg-gradient-to-b from-[#1E5B45]/60 to-transparent" />
           </div>
 
-          {/* Top Atmospheric Fog on native canvas */}
-          <div className="pointer-events-none absolute top-0 left-0 z-10 h-36 w-full bg-gradient-to-b from-[#FBF8F2] via-[#FBF8F2]/80 to-transparent" />
-
           {/* 3D Tilted Text Plane */}
           <motion.div
             style={{
               transformStyle: "preserve-3d",
               transform,
+              opacity: textOpacity,
             }}
-            className="w-full max-w-4xl px-6 text-center select-none space-y-6 sm:space-y-8"
+            className="w-full max-w-4xl text-center text-4xl sm:text-6xl md:text-7xl font-bold tracking-tighter text-[#1E5B45] select-none px-6"
           >
-            <p className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-[#1E5B45] leading-tight">
-              No more misleading health claims.
-            </p>
-
-            <p className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight text-[#2E8B63] leading-tight">
-              Decode every single preservative, additive, and emulsifier in plain language.
-            </p>
-
-            <p className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-[#164634] leading-tight">
-              Zero propaganda. Zero guilt. Zero moral judgments.
-            </p>
-
-            <p className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight text-[#C88214] leading-tight">
-              Direct verification from Open Food Facts database records.
-            </p>
-
-            <p className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-[#1E5B45] leading-tight">
-              100% on-device camera scanning with absolute local privacy.
-            </p>
-
-            <p className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight text-[#2E8B63] leading-tight">
-              Missing nutrients are explicitly marked — never replaced with zero.
-            </p>
-
-            <p className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-[#C88214] leading-tight">
-              Pure, unfiltered evidence for every conscious decision.
-            </p>
-
-            <p className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-[#1E5B45] leading-tight">
-              Know what you eat. Understand what you buy.
-            </p>
+            No more misleading health claims ..
+            Decode every single preservative, additive, and emulsifier ..
+            Zero propaganda, zero guilt, and zero moral judgments ..
+            Direct verification from Open Food Facts database records ..
+            On-device camera scanning with 100% local privacy ..
+            Missing nutrients are never replaced with zero ..
+            Ingrivo is the pure, unfiltered truth on packaged food ..
+            Know what you eat, understand what you buy.
+            <div className="absolute bottom-0 left-0 h-[60vh] w-full bg-gradient-to-b from-transparent to-[#FBF8F2]" />
           </motion.div>
-
-          {/* Bottom Atmospheric Fog on native canvas */}
-          <div className="pointer-events-none absolute bottom-0 left-0 z-10 h-44 w-full bg-gradient-to-t from-[#FBF8F2] via-[#FBF8F2]/90 to-transparent" />
         </div>
       </div>
     </div>
