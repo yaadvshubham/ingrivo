@@ -10,7 +10,7 @@ import ReactLenis from "lenis/react";
 import React, { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import { ScanBarcode, Search, ArrowDown, ShieldCheck, Database, Cpu, Sparkles } from "lucide-react";
-import { BrandPillLoader } from "@/components/BrandPillLoader";
+import { HeroBrandShowcase } from "@/components/HeroBrandShowcase";
 
 export function PerspectiveHeroScroll() {
   const [mounted, setMounted] = useState(false);
@@ -36,21 +36,10 @@ export function PerspectiveHeroScroll() {
     <div className="w-full bg-[#FBF8F2] text-[#1B2A22]">
       {/* ─────────────────────────────────────────────────────────────
           STAGE 1: BRAND SHOWCASE & TAGLINE
-          Visible on first viewport without any obscuring overlays
+          Dynamic expanding capsule reveals INGRIVO and tagline
          ───────────────────────────────────────────────────────────── */}
-      <section className="relative px-4 pt-12 pb-20 sm:px-6 md:pt-16 md:pb-24 max-w-5xl mx-auto text-center space-y-8">
-        {/* Dynamic Interactive Brand Pill Loader */}
-        <BrandPillLoader />
-
-        {/* Brand Name & Tagline */}
-        <div className="space-y-4">
-          <h1 className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tight text-[#1B2A22] leading-none">
-            INGRIVO
-          </h1>
-          <p className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-[#1E5B45]">
-            Know what you eat. Understand what you buy.
-          </p>
-        </div>
+      <section className="relative px-4 pt-10 pb-16 sm:px-6 md:pt-14 md:pb-20 max-w-5xl mx-auto text-center space-y-6">
+        <HeroBrandShowcase />
 
         {/* Concise Description */}
         <p className="text-base sm:text-lg text-[#5E6B63] max-w-2xl mx-auto leading-relaxed">
