@@ -46,6 +46,9 @@ async def run_live_eval():
     passed_count = 0
 
     for i, case in enumerate(GOLDEN_PACKETS, 1):
+        if i > 1:
+            await asyncio.sleep(4.5)  # Pace requests to comply with Gemini 15 RPM free-tier limit
+
         cid = case["id"]
         cname = case["name"]
         packet = case["packet"]
@@ -68,6 +71,7 @@ async def run_live_eval():
             if not val.is_valid:
                 # Retry once
                 retried = True
+                await asyncio.sleep(3.0)
                 feedback = "\n".join(f"- {err}" for err in val.errors)
                 retry_prompt = build_user_prompt(serialized, retry_feedback=feedback)
                 parsed_data, meta = await gemini_client.generate_structured(

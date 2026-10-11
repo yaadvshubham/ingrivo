@@ -72,6 +72,29 @@ if (typeof globalThis.ImageData === 'undefined') {
   globalThis.ImageData = MockImageData as unknown as typeof ImageData;
 }
 
+if (typeof globalThis.ResizeObserver === 'undefined') {
+  globalThis.ResizeObserver = class ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver;
+}
+
+if (typeof window !== 'undefined') {
+  window.matchMedia = window.matchMedia || function (query: string) {
+    return {
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    };
+  };
+}
+
 afterEach(() => {
   cleanup();
 });

@@ -17,50 +17,13 @@ import { DataRow } from "@/components/DataRow";
 import { SampleBanner } from "@/components/SampleBanner";
 import { DisabledAction } from "@/components/DisabledAction";
 import { Disclaimer } from "@/components/Disclaimer";
+import { PerspectiveHeroScroll } from "@/components/PerspectiveHeroScroll";
 
 export default function HomePage() {
   return (
     <div className="space-y-16 pb-16">
-      {/* a) & b) Headline & intro */}
-      <section className="relative overflow-hidden pt-12 md:pt-20 px-4 sm:px-6 max-w-5xl mx-auto text-center space-y-6">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1E5B45]/10 text-[#1E5B45] text-xs font-semibold tracking-wide uppercase border border-[#1E5B45]/20">
-          <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-          <span>Evidence-Based Food Intelligence</span>
-        </div>
-
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-[#1B2A22] max-w-4xl mx-auto leading-tight">
-          Know what you eat. <br className="hidden sm:inline" />
-          <span className="text-[#1E5B45]">Understand what you buy.</span>
-        </h1>
-
-        <p className="text-lg md:text-xl text-[#5E6B63] max-w-2xl mx-auto leading-relaxed">
-          Ingrivo breaks down packaged food labels into plain English using
-          transparent evidence. We distinguish verified database facts, parsed label
-          text, and AI explanations—with zero moral judgments.
-        </p>
-
-        {/* c) Primary actions & d) Secondary action */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4 max-w-2xl mx-auto">
-          <DisabledAction
-            label="Scan a barcode"
-            explanation="Requires camera scanner (Phase 3)"
-            icon={<ScanBarcode className="h-4 w-4" />}
-            variant="primary"
-          />
-          <DisabledAction
-            label="Search a product"
-            explanation="Requires Open Food Facts search (Phase 3)"
-            icon={<Search className="h-4 w-4" />}
-            variant="secondary"
-          />
-          <DisabledAction
-            label="Upload label photo"
-            explanation="Requires on-device OCR (Phase 4)"
-            icon={<Camera className="h-4 w-4" />}
-            variant="outline"
-          />
-        </div>
-      </section>
+      {/* 3D Perspective Text Scroll Hero */}
+      <PerspectiveHeroScroll />
 
       {/* e) Sample insight card for a fictional product inside SampleBanner */}
       <section className="max-w-4xl mx-auto px-4 sm:px-6">
