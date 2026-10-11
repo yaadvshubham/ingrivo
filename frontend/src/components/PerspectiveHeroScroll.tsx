@@ -5,293 +5,192 @@ import {
   useMotionTemplate,
   useScroll,
   useTransform,
-  type MotionValue,
 } from "framer-motion";
 import ReactLenis from "lenis/react";
 import React, { useRef, useState, useEffect } from "react";
 import Link from "next/link";
-import {
-  ScanBarcode,
-  Search,
-  Sparkles,
-  ShieldCheck,
-  Database,
-  Cpu,
-  CheckCircle2,
-} from "lucide-react";
+import { ScanBarcode, Search, Sparkles, ArrowRight, ShieldCheck, Database, Cpu } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const MANIFESTO_LINES = [
-  "No more misleading health claims ..",
-  "Decode every single preservative, additive, and emulsifier ..",
-  "Zero propaganda, zero guilt, and zero moral judgments ..",
-  "Direct verification from Open Food Facts database records ..",
-  "On-device camera scanning with 100% local privacy ..",
-  "Missing nutrients are explicitly marked — never replaced with zero ..",
-  "Ingrivo is the pure, unfiltered truth on packaged food ..",
-  "Know what you eat, understand what you buy.",
-];
-
 /**
- * Independent 3D Perspective Line
- *
- * Each line moves INDEPENDENTLY through the 3D perspective field:
- * - Rises from lower 3D perspective (rotateX: 32deg, translateY: 300px)
- * - Holds center stage majestically (rotateX: 10deg, translateY: 0px, opacity: 1)
- * - Sails away upward in 3D perspective (rotateX: -18deg, translateY: -300px)
- *
- * Line 0 starts at center stage (opacity: 1), so the canvas is NEVER empty!
- */
-function Independent3DLine({
-  text,
-  index,
-  total,
-  scrollYProgress,
-}: {
-  text: string;
-  index: number;
-  total: number;
-  scrollYProgress: MotionValue<number>;
-}) {
-  const step = 0.88 / (total - 1);
-  const center = 0.05 + index * step;
-  const span = step * 1.05;
-
-  const t0 = Math.max(0, center - span);
-  const t1 = center;
-  const t2 = Math.min(1, center + span);
-
-  // Line 0 is already visible at scroll = 0, so screen is never blank!
-  // Line 7 lingers at center at the end
-  const yValues =
-    index === 0
-      ? [0, 0, -300]
-      : index === total - 1
-      ? [300, 0, 0]
-      : [300, 0, -300];
-
-  const opacityValues =
-    index === 0
-      ? [1, 1, 0]
-      : index === total - 1
-      ? [0, 1, 1]
-      : [0, 1, 0];
-
-  const rotateValues =
-    index === 0
-      ? [10, 10, -18]
-      : index === total - 1
-      ? [32, 10, 10]
-      : [32, 10, -18];
-
-  const y = useTransform(scrollYProgress, [t0, t1, t2], yValues);
-  const opacity = useTransform(scrollYProgress, [t0, t1, t2], opacityValues);
-  const rotateX = useTransform(scrollYProgress, [t0, t1, t2], rotateValues);
-
-  const transform = useMotionTemplate`rotateX(${rotateX}deg) translateY(${y}px) translateZ(10px)`;
-
-  return (
-    <motion.div
-      style={{
-        transformStyle: "preserve-3d",
-        transform,
-        opacity,
-      }}
-      className="absolute flex items-center justify-center w-full max-w-4xl px-6 text-center pointer-events-none select-none"
-    >
-      <p className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tighter text-[#1E5B45] leading-tight">
-        {text}
-      </p>
-    </motion.div>
-  );
-}
-
-/**
- * Editorial Luxury 3D Perspective Experience
- *
- * Senior Design Architecture:
- * - SECTION 1: Pristine Editorial Luxury Hero with Skiper 3 Spring Brand Capsule.
- * - SECTION 2: Authentic 3D Perspective Runway.
- *   Each line moves up INDEPENDENTLY with genuine 3D perspective incline.
- *   Full viewport space dedicated to each statement for luxury and richness.
- *   Uniform #1E5B45 Forest Emerald. Never empty.
+ * Unified Premium Homepage Hero & 3D Perspective Experience
+ * Combines:
+ * 1. Skiper 3: Spring expanding brand pill & tagline reveal
+ * 2. Skiper 28: Authentic 3D preserve-3d perspective text scroll in warm luxury aesthetic
  */
 export function PerspectiveHeroScroll() {
   const [mounted, setMounted] = useState(false);
-  const [capsuleExpanded, setCapsuleExpanded] = useState(true);
-
-  // Dedicated scroll tracking container for the 3D Perspective runway
-  const perspectiveContainerRef = useRef<HTMLDivElement | null>(null);
+  const [capsuleExpanded, setCapsuleExpanded] = useState(false);
+  const targetRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setMounted(true);
+    // Smooth auto-expand after initial entrance
+    const timer = setTimeout(() => {
+      setCapsuleExpanded(true);
+    }, 400);
+    return () => clearTimeout(timer);
   }, []);
 
+  // Skiper 28 Scroll Tracking
   const { scrollYProgress } = useScroll({
-    target: perspectiveContainerRef,
-    offset: ["start start", "end end"],
+    target: targetRef,
   });
 
+  // Authentic Skiper 28 Motion Values
+  const yMotionValue = useTransform(scrollYProgress, [0, 1], [487, 0]);
+  const transform = useMotionTemplate`rotateX(30deg) translateY(${yMotionValue}px) translateZ(10px)`;
+
   const content = (
-    <div className="relative w-full bg-[#FBF8F2] text-[#1B2A22]">
+    <div
+      ref={targetRef}
+      className="relative z-0 h-[280vh] w-full bg-[#f5f4f3] text-black overflow-x-hidden selection:bg-[#ff5800] selection:text-white"
+    >
       {/* ─────────────────────────────────────────────────────────────
-          SECTION 1: EDITORIAL LUXURY HERO (Pristine, Zero Collision)
+          TOP STICKY HEADER & CALL TO ACTION (Clean, interactive)
          ───────────────────────────────────────────────────────────── */}
-      <section className="relative flex min-h-[85vh] flex-col items-center justify-between px-4 pt-6 pb-12 sm:px-6">
-        <div className="flex flex-col items-center gap-6 text-center max-w-4xl pt-2">
-          {/* Skiper 3 Dynamic Brand Pill Capsule */}
+      <div className="sticky top-0 z-20 flex min-h-screen flex-col items-center justify-between px-4 py-8 sm:px-6 pointer-events-none">
+        {/* Dynamic Expanding Brand Capsule (Skiper 3) */}
+        <div className="pointer-events-auto flex flex-col items-center gap-4 text-center max-w-4xl pt-4">
           <motion.div layout>
             <motion.div
               className={cn(
-                "relative flex items-center justify-between overflow-hidden shadow-md border border-[#E4DEC3] bg-white/95 backdrop-blur-md cursor-pointer transition-shadow hover:shadow-lg hover:border-[#1E5B45]/40",
+                "relative flex items-center justify-between overflow-hidden shadow-xl border border-black/10 bg-white/90 backdrop-blur-md transition-all cursor-pointer",
                 capsuleExpanded
-                  ? "rounded-full px-5 py-2.5 w-[min(94vw,500px)]"
-                  : "rounded-full p-2.5 w-[58px]"
+                  ? "rounded-full px-5 py-2.5 w-[min(92vw,460px)]"
+                  : "rounded-full p-3 w-[64px]"
               )}
-              initial={{ scale: 0, y: "60%" }}
+              initial={{ scale: 0, y: "100%" }}
               animate={{
                 scale: 1,
                 y: 0,
-                width: !capsuleExpanded ? 58 : "min(94vw, 500px)",
+                width: !capsuleExpanded ? 64 : "min(92vw, 460px)",
               }}
-              transition={{ type: "spring", bounce: 0.16, duration: 0.7 }}
-              onClick={() => setCapsuleExpanded((prev) => !prev)}
+              transition={{ type: "spring", bounce: 0.16, duration: 0.8 }}
+              onClick={() => setCapsuleExpanded((x) => !x)}
             >
+              {/* Brand Logo & Name */}
               <div className="flex items-center gap-3">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#1E5B45] to-[#164634] text-white shadow-sm shadow-[#1E5B45]/30">
-                  <Sparkles className="h-4.5 w-4.5 text-emerald-300" />
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#ff5800] text-white shadow-md">
+                  <Sparkles className="h-5 w-5" />
                 </span>
-
                 {capsuleExpanded && (
                   <motion.div
-                    initial={{ opacity: 0, x: -6 }}
+                    initial={{ opacity: 0, x: -8 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.15 }}
+                    transition={{ delay: 0.2 }}
                     className="text-left"
                   >
-                    <div className="flex items-center gap-1.5">
-                      <span className="font-black text-sm tracking-widest uppercase text-[#1B2A22]">
-                        INGRIVO
-                      </span>
-                      <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#C88214]" />
-                      <span className="text-[10px] font-bold text-[#5E6B63] uppercase tracking-wider">
-                        Veracity Engine
-                      </span>
-                    </div>
-                    <span className="block text-[11px] font-semibold text-[#1E5B45] tracking-tight">
+                    <span className="block font-black text-base tracking-wider uppercase text-black">
+                      INGRIVO
+                    </span>
+                    <span className="block text-[11px] font-semibold text-[#ff5800] tracking-tight">
                       Know what you eat. Understand what you buy.
                     </span>
                   </motion.div>
                 )}
               </div>
 
+              {/* Toggle button */}
               {capsuleExpanded && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ delay: 0.2 }}
+                  transition={{ delay: 0.25 }}
                   className="flex items-center gap-1.5 pl-2"
                 >
-                  <span className="hidden sm:inline text-[10px] font-bold uppercase tracking-wider text-[#5E6B63]">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-black/40 mr-1">
                     Verified
                   </span>
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#1E5B45]/10 text-[#1E5B45]">
-                    <CheckCircle2 className="h-4 w-4" />
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-black/5 text-black text-xs font-bold">
+                    ✓
                   </div>
                 </motion.div>
               )}
             </motion.div>
           </motion.div>
 
-          {/* Headline & Mission Subtitle */}
-          <div className="space-y-4 pt-2">
-            <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-[#1B2A22] leading-[1.08]">
+          {/* Tagline & Subtext */}
+          <div className="space-y-3 pt-2">
+            <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-black leading-tight">
               Know what you eat. <br />
-              <span className="bg-gradient-to-r from-[#1E5B45] via-[#2E8B63] to-[#C88214] bg-clip-text text-transparent">
-                Understand what you buy.
-              </span>
+              <span className="text-[#ff5800]">Understand what you buy.</span>
             </h1>
-            <p className="text-base sm:text-lg md:text-xl text-[#5E6B63] max-w-2xl mx-auto leading-relaxed font-normal">
-              Ingrivo turns packaged food ingredient lists into transparent, plain-language facts with strict evidence, verified provenance, and zero moralizing.
+            <p className="text-sm sm:text-base text-black/60 max-w-xl mx-auto leading-relaxed">
+              Ingrivo turns packaged food ingredient lists into plain-language facts with zero moralizing.
             </p>
           </div>
 
           {/* Action CTAs */}
-          <div className="flex flex-wrap items-center justify-center gap-3.5 pt-2">
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
             <Link
               href="/scan"
-              className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full bg-[#1E5B45] text-white text-sm font-bold shadow-lg shadow-[#1E5B45]/25 hover:bg-[#164634] transition-all hover:scale-[1.02] active:scale-95"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#ff5800] text-white text-sm font-bold shadow-lg shadow-[#ff5800]/25 hover:bg-[#e04e00] transition-transform active:scale-95"
             >
-              <ScanBarcode className="h-4.5 w-4.5" />
+              <ScanBarcode className="h-4 w-4" />
               <span>Scan Barcode</span>
             </Link>
             <Link
               href="/search"
-              className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full bg-white border border-[#E4DEC3] text-[#1B2A22] text-sm font-bold shadow-xs hover:bg-[#FAF8F5] hover:border-[#1E5B45]/40 transition-all hover:scale-[1.02] active:scale-95"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white border border-black/10 text-black text-sm font-bold shadow-sm hover:bg-black/5 transition-transform active:scale-95"
             >
-              <Search className="h-4.5 w-4.5 text-[#1E5B45]" />
-              <span>Search 3M+ Products</span>
+              <Search className="h-4 w-4" />
+              <span>Search Products</span>
             </Link>
           </div>
 
-          {/* Trust Anchors */}
-          <div className="flex flex-wrap items-center justify-center gap-5 pt-3 text-xs font-semibold text-[#5E6B63]">
+          {/* Trust points */}
+          <div className="hidden sm:flex items-center gap-6 pt-4 text-xs font-semibold text-black/50">
             <span className="flex items-center gap-1.5">
-              <Database className="h-4 w-4 text-[#1E5B45]" />
+              <Database className="h-3.5 w-3.5 text-[#ff5800]" />
               Open Food Facts Data
             </span>
-            <span className="hidden sm:inline text-[#E4DEC3]">•</span>
+            <span>•</span>
             <span className="flex items-center gap-1.5">
-              <ShieldCheck className="h-4 w-4 text-[#1E5B45]" />
+              <ShieldCheck className="h-3.5 w-3.5 text-[#ff5800]" />
               100% On-Device Camera
             </span>
-            <span className="hidden sm:inline text-[#E4DEC3]">•</span>
+            <span>•</span>
             <span className="flex items-center gap-1.5">
-              <Cpu className="h-4 w-4 text-[#C88214]" />
+              <Cpu className="h-3.5 w-3.5 text-[#ff5800]" />
               Veracity-Locked AI
             </span>
           </div>
         </div>
-      </section>
+
+        {/* Scroll Cue (Skiper 28 style) */}
+        <div className="pointer-events-auto flex flex-col items-center gap-3 pb-8 text-center text-black">
+          <span className="relative text-[11px] font-bold tracking-widest uppercase opacity-40 after:absolute after:left-1/2 after:top-full after:h-12 after:w-px after:bg-gradient-to-b after:from-black/40 after:to-transparent after:content-['']">
+            scroll down to see
+          </span>
+        </div>
+      </div>
 
       {/* ─────────────────────────────────────────────────────────────
-          SECTION 2: INDEPENDENT 3D PERSPECTIVE LINE-BY-LINE RUNWAY
-          Dedicated 300vh runway.
-          Lines go up INDEPENDENTLY through the 3D perspective field.
-          Proper space, luxury aesthetic, uniform #1E5B45 tone.
+          SKIPER 28 3D PERSPECTIVE TEXT SCROLL
+          Exact perspective: 200px and rotateX: 30deg transform
          ───────────────────────────────────────────────────────────── */}
       <div
-        ref={perspectiveContainerRef}
-        className="relative z-0 h-[300vh] w-full bg-[#FBF8F2]"
+        className="sticky top-0 mx-auto flex h-screen items-center justify-center bg-transparent py-20 overflow-hidden pointer-events-none"
+        style={{
+          transformStyle: "preserve-3d",
+          perspective: "200px",
+        }}
       >
-        <div
-          className="sticky top-0 mx-auto flex h-screen w-full items-center justify-center bg-transparent py-20"
+        <motion.div
           style={{
             transformStyle: "preserve-3d",
-            perspective: "220px",
+            transform,
           }}
+          className="w-full max-w-4xl text-center text-5xl sm:text-7xl font-bold tracking-tighter text-[#ff5800] leading-tight select-none px-4"
         >
-          {/* Independent Line-by-Line 3D Field */}
-          <div
-            className="relative flex h-full w-full items-center justify-center"
-            style={{
-              transformStyle: "preserve-3d",
-            }}
-          >
-            {MANIFESTO_LINES.map((line, idx) => (
-              <Independent3DLine
-                key={idx}
-                text={line}
-                index={idx}
-                total={MANIFESTO_LINES.length}
-                scrollYProgress={scrollYProgress}
-              />
-            ))}
-          </div>
-
-          {/* Bottom Atmospheric Mask */}
-          <div className="pointer-events-none absolute bottom-0 left-0 h-[35vh] w-full bg-gradient-to-b from-transparent to-[#FBF8F2]" />
-        </div>
+          DECODE EVERY INGREDIENT .. UNMASK FOOD LABELS .. ZERO MARKETING GIMMICKS ..
+          ZERO MORAL JUDGMENTS .. REAL EVIDENCE DIRECT FROM FOOD LABELS ..
+          TRANSPARENT .. UNBIASED .. EVIDENCE YOU CAN TRUST ..
+          KNOW WHAT YOU EAT .. UNDERSTAND WHAT YOU BUY ..
+          INGRIVO IS THE TRUTH ON PACKAGED FOOD.
+          <div className="absolute bottom-0 left-0 h-[60vh] w-full bg-gradient-to-b from-transparent to-[#f5f4f3]" />
+        </motion.div>
       </div>
     </div>
   );
