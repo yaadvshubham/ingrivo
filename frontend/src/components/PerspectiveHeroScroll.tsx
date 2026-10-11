@@ -32,26 +32,38 @@ export function PerspectiveHeroScroll() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Skiper 28 Scroll Tracking
+  // Skiper 28 Scroll Tracking - Pinned across full sticky container duration
   const { scrollYProgress } = useScroll({
     target: targetRef,
+    offset: ["start start", "end end"],
   });
 
-  // Authentic Skiper 28 Motion Values
-  const yMotionValue = useTransform(scrollYProgress, [0, 1], [487, 0]);
+  // Authentic Skiper 28 Motion Values: complete scroll through the perspective field
+  const yMotionValue = useTransform(scrollYProgress, [0, 1], [487, -260]);
   const transform = useMotionTemplate`rotateX(30deg) translateY(${yMotionValue}px) translateZ(10px)`;
+
+  // Smooth exit fade at the very end (0.85 -> 0.98) so it doesn't abruptly jump when unsticking
+  const textOpacity = useTransform(scrollYProgress, [0.85, 0.98], [1, 0]);
+
+  // Smooth hero fadeout as user starts scrolling down (0 -> 0.12)
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.12], [1, 0]);
+  const heroY = useTransform(scrollYProgress, [0, 0.12], [0, -30]);
+  const heroPointerEvents = useTransform(heroOpacity, (v) => (v > 0.05 ? "auto" : "none"));
 
   const content = (
     <div
       ref={targetRef}
-      className="relative z-0 h-[280vh] w-full bg-[#FBF8F2] text-[#1B2A22] overflow-x-hidden selection:bg-[#1E5B45] selection:text-white"
+      className="relative z-0 h-[300vh] w-full bg-[#FBF8F2] text-[#1B2A22] overflow-x-hidden selection:bg-[#1E5B45] selection:text-white"
     >
       {/* ─────────────────────────────────────────────────────────────
-          TOP STICKY HEADER & CALL TO ACTION (Clean, interactive)
+          TOP STICKY HEADER & CALL TO ACTION (Smooth fade on scroll)
          ───────────────────────────────────────────────────────────── */}
       <div className="sticky top-0 z-20 flex min-h-screen flex-col items-center justify-between px-4 py-8 sm:px-6 pointer-events-none">
-        {/* Dynamic Expanding Brand Capsule (Skiper 3) */}
-        <div className="pointer-events-auto flex flex-col items-center gap-4 text-center max-w-4xl pt-4">
+        {/* Dynamic Expanding Brand Capsule (Skiper 3) & Hero Content */}
+        <motion.div
+          style={{ opacity: heroOpacity, y: heroY, pointerEvents: heroPointerEvents }}
+          className="flex flex-col items-center gap-4 text-center max-w-4xl pt-4"
+        >
           <motion.div layout>
             <motion.div
               className={cn(
@@ -156,14 +168,17 @@ export function PerspectiveHeroScroll() {
               Veracity-Locked AI
             </span>
           </div>
-        </div>
+        </motion.div>
 
         {/* Scroll Cue (Skiper 28 style) */}
-        <div className="pointer-events-auto flex flex-col items-center gap-3 pb-8 text-center text-[#1B2A22]">
+        <motion.div
+          style={{ opacity: heroOpacity }}
+          className="flex flex-col items-center gap-3 pb-8 text-center text-[#1B2A22]"
+        >
           <span className="relative text-[11px] font-bold tracking-widest uppercase opacity-40 after:absolute after:left-1/2 after:top-full after:h-12 after:w-px after:bg-gradient-to-b after:from-[#1E5B45]/40 after:to-transparent after:content-['']">
             scroll down to see
           </span>
-        </div>
+        </motion.div>
       </div>
 
       {/* ─────────────────────────────────────────────────────────────
@@ -181,11 +196,15 @@ export function PerspectiveHeroScroll() {
           style={{
             transformStyle: "preserve-3d",
             transform,
+            opacity: textOpacity,
           }}
           className="w-full max-w-4xl text-center text-5xl sm:text-7xl font-bold tracking-tighter text-[#1E5B45] leading-tight select-none px-4"
         >
-          DECODE EVERY INGREDIENT .. UNMASK FOOD LABELS .. ZERO MARKETING GIMMICKS ..
-          ZERO MORAL JUDGMENTS .. REAL EVIDENCE DIRECT FROM FOOD LABELS ..
+          DECODE EVERY INGREDIENT .. UNMASK PACKAGED FOOD ..
+          ZERO MARKETING GIMMICKS .. ZERO MORAL JUDGMENTS ..
+          PLAIN-LANGUAGE EVIDENCE DIRECT FROM FOOD LABELS ..
+          100% PRIVATE ON-DEVICE SCANNING .. ZERO TRACKING ..
+          VERIFIED OPEN FOOD FACTS DATA .. FULL PROVENANCE TRACEABILITY ..
           TRANSPARENT .. UNBIASED .. EVIDENCE YOU CAN TRUST ..
           KNOW WHAT YOU EAT .. UNDERSTAND WHAT YOU BUY ..
           INGRIVO IS THE TRUTH ON PACKAGED FOOD.
