@@ -33,33 +33,76 @@ const MANIFESTO_LINES = [
 ];
 
 /**
- * Line item with subtle relative parallax stagger.
- * Creates an organic line-by-line kinetic wave as you scroll,
- * while staying perfectly visible in the natural layout stream.
+ * Independent 3D Perspective Line
+ *
+ * Each line moves INDEPENDENTLY through the 3D perspective field:
+ * - Rises from lower 3D perspective (rotateX: 32deg, translateY: 300px)
+ * - Holds center stage majestically (rotateX: 10deg, translateY: 0px, opacity: 1)
+ * - Sails away upward in 3D perspective (rotateX: -18deg, translateY: -300px)
+ *
+ * Line 0 starts at center stage (opacity: 1), so the canvas is NEVER empty!
  */
-function ManifestoLineItem({
+function Independent3DLine({
   text,
   index,
+  total,
   scrollYProgress,
 }: {
   text: string;
   index: number;
+  total: number;
   scrollYProgress: MotionValue<number>;
 }) {
-  // Staggered line-by-line kinetic motion:
-  // Each line glides with a small trailing parallax offset
-  const lineY = useTransform(scrollYProgress, [0, 1], [index * 22, -index * 16]);
+  const step = 0.88 / (total - 1);
+  const center = 0.05 + index * step;
+  const span = step * 1.05;
+
+  const t0 = Math.max(0, center - span);
+  const t1 = center;
+  const t2 = Math.min(1, center + span);
+
+  // Line 0 is already visible at scroll = 0, so screen is never blank!
+  // Line 7 lingers at center at the end
+  const yValues =
+    index === 0
+      ? [0, 0, -300]
+      : index === total - 1
+      ? [300, 0, 0]
+      : [300, 0, -300];
+
+  const opacityValues =
+    index === 0
+      ? [1, 1, 0]
+      : index === total - 1
+      ? [0, 1, 1]
+      : [0, 1, 0];
+
+  const rotateValues =
+    index === 0
+      ? [10, 10, -18]
+      : index === total - 1
+      ? [32, 10, 10]
+      : [32, 10, -18];
+
+  const y = useTransform(scrollYProgress, [t0, t1, t2], yValues);
+  const opacity = useTransform(scrollYProgress, [t0, t1, t2], opacityValues);
+  const rotateX = useTransform(scrollYProgress, [t0, t1, t2], rotateValues);
+
+  const transform = useMotionTemplate`rotateX(${rotateX}deg) translateY(${y}px) translateZ(10px)`;
 
   return (
-    <motion.p
+    <motion.div
       style={{
         transformStyle: "preserve-3d",
-        y: lineY,
+        transform,
+        opacity,
       }}
-      className="leading-tight select-none"
+      className="absolute flex items-center justify-center w-full max-w-4xl px-6 text-center pointer-events-none select-none"
     >
-      {text}
-    </motion.p>
+      <p className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tighter text-[#1E5B45] leading-tight">
+        {text}
+      </p>
+    </motion.div>
   );
 }
 
@@ -68,9 +111,10 @@ function ManifestoLineItem({
  *
  * Senior Design Architecture:
  * - SECTION 1: Pristine Editorial Luxury Hero with Skiper 3 Spring Brand Capsule.
- * - SECTION 2: Authentic Skiper 28 3D Perspective Scroll Canvas.
- *   Text is always visible, glides smoothly in 3D perspective (rotateX: 30deg, perspective: 200px)
- *   with kinetic line-by-line motion in uniform rich #1E5B45 forest emerald.
+ * - SECTION 2: Authentic 3D Perspective Runway.
+ *   Each line moves up INDEPENDENTLY with genuine 3D perspective incline.
+ *   Full viewport space dedicated to each statement for luxury and richness.
+ *   Uniform #1E5B45 Forest Emerald. Never empty.
  */
 export function PerspectiveHeroScroll() {
   const [mounted, setMounted] = useState(false);
@@ -87,14 +131,6 @@ export function PerspectiveHeroScroll() {
     target: perspectiveContainerRef,
     offset: ["start start", "end end"],
   });
-
-  // Authentic Skiper 28 motion:
-  // Glides smoothly from lower perspective up through the vanishing plane
-  const yMotionValue = useTransform(scrollYProgress, [0, 1], [360, -280]);
-  const transform = useMotionTemplate`rotateX(30deg) translateY(${yMotionValue}px) translateZ(10px)`;
-
-  // Soft fade near the end so it never leaks behind subsequent sections
-  const canvasOpacity = useTransform(scrollYProgress, [0, 0.88, 0.98], [1, 1, 0]);
 
   const content = (
     <div className="relative w-full bg-[#FBF8F2] text-[#1B2A22]">
@@ -219,44 +255,42 @@ export function PerspectiveHeroScroll() {
       </section>
 
       {/* ─────────────────────────────────────────────────────────────
-          SECTION 2: AUTHENTIC SKIPER 28 3D PERSPECTIVE SCROLL CANVAS
-          Dedicated 280vh runway. Clean exit before next section.
-          3D Perspective (perspective: 200px, rotateX: 30deg).
-          Glides seamlessly on native #FBF8F2 cream background.
-          Moves LINE BY LINE in uniform rich #1E5B45 tone.
+          SECTION 2: INDEPENDENT 3D PERSPECTIVE LINE-BY-LINE RUNWAY
+          Dedicated 300vh runway.
+          Lines go up INDEPENDENTLY through the 3D perspective field.
+          Proper space, luxury aesthetic, uniform #1E5B45 tone.
          ───────────────────────────────────────────────────────────── */}
       <div
         ref={perspectiveContainerRef}
-        className="relative z-0 h-[280vh] w-full bg-[#FBF8F2]"
+        className="relative z-0 h-[300vh] w-full bg-[#FBF8F2]"
       >
         <div
-          className="sticky top-0 mx-auto flex min-h-screen items-center justify-center bg-transparent py-20"
+          className="sticky top-0 mx-auto flex h-screen w-full items-center justify-center bg-transparent py-20"
           style={{
             transformStyle: "preserve-3d",
-            perspective: "200px",
+            perspective: "220px",
           }}
         >
-          {/* 3D Tilted Text Canvas */}
-          <motion.div
+          {/* Independent Line-by-Line 3D Field */}
+          <div
+            className="relative flex h-full w-full items-center justify-center"
             style={{
               transformStyle: "preserve-3d",
-              transform,
-              opacity: canvasOpacity,
             }}
-            className="w-full max-w-4xl text-center text-3xl sm:text-5xl md:text-6xl font-bold tracking-tighter text-[#1E5B45] select-none px-6 space-y-6 sm:space-y-8"
           >
             {MANIFESTO_LINES.map((line, idx) => (
-              <ManifestoLineItem
+              <Independent3DLine
                 key={idx}
                 text={line}
                 index={idx}
+                total={MANIFESTO_LINES.length}
                 scrollYProgress={scrollYProgress}
               />
             ))}
+          </div>
 
-            {/* Bottom Atmospheric Mask */}
-            <div className="pointer-events-none absolute bottom-0 left-0 h-[50vh] w-full bg-gradient-to-b from-transparent to-[#FBF8F2]" />
-          </motion.div>
+          {/* Bottom Atmospheric Mask */}
+          <div className="pointer-events-none absolute bottom-0 left-0 h-[35vh] w-full bg-gradient-to-b from-transparent to-[#FBF8F2]" />
         </div>
       </div>
     </div>
