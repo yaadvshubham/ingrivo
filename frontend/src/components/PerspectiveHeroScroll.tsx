@@ -5,6 +5,7 @@ import {
   useMotionTemplate,
   useScroll,
   useTransform,
+  type MotionValue,
 } from "framer-motion";
 import ReactLenis from "lenis/react";
 import React, { useRef, useState, useEffect } from "react";
@@ -21,6 +22,72 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+const MANIFESTO_LINES = [
+  "No more misleading health claims ..",
+  "Decode every single preservative, additive, and emulsifier ..",
+  "Zero propaganda, zero guilt, and zero moral judgments ..",
+  "Direct verification from Open Food Facts database records ..",
+  "100% on-device camera scanning with total local privacy ..",
+  "Missing nutrients are explicitly marked — never replaced with zero ..",
+  "Pure, unfiltered evidence for every conscious decision ..",
+  "Know what you eat. Understand what you buy.",
+];
+
+/**
+ * Individual Manifesto Line Component
+ * Moves line-by-line with staggered 3D perspective physics.
+ * Each line glides independently through the focal plane with smooth parallax,
+ * avoiding rigid block/image movement.
+ */
+function ManifestoLine({
+  text,
+  index,
+  total,
+  scrollYProgress,
+}: {
+  text: string;
+  index: number;
+  total: number;
+  scrollYProgress: MotionValue<number>;
+}) {
+  const step = 0.85 / total;
+  const center = 0.08 + index * step;
+  const start = Math.max(0, center - step * 1.5);
+  const end = Math.min(0.98, center + step * 1.5);
+
+  // Smooth Y glide through the 3D perspective field:
+  // Starts below at +320px, hits focal center at 0px, ascends away at -300px
+  const y = useTransform(scrollYProgress, [start, center, end], [320, 0, -300]);
+
+  // Smooth opacity: enters gently, reaches 100% in focal center, recedes gently
+  const opacity = useTransform(
+    scrollYProgress,
+    [start, center - step * 0.6, center, center + step * 0.6, end],
+    [0, 0.45, 1, 0.45, 0]
+  );
+
+  // Staggered 3D incline: rotates in 3D perspective space (perspective: 200px)
+  const rotateX = useTransform(scrollYProgress, [start, center, end], [32, 18, 28]);
+  const scale = useTransform(scrollYProgress, [start, center, end], [0.94, 1.03, 0.94]);
+
+  const transform = useMotionTemplate`rotateX(${rotateX}deg) translateY(${y}px) translateZ(10px) scale(${scale})`;
+
+  return (
+    <motion.div
+      style={{
+        transformStyle: "preserve-3d",
+        transform,
+        opacity,
+      }}
+      className="absolute w-full max-w-4xl px-6 text-center select-none pointer-events-none"
+    >
+      <p className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tighter text-[#1E5B45] leading-tight">
+        {text}
+      </p>
+    </motion.div>
+  );
+}
+
 /**
  * Editorial Luxury 3D Perspective Experience
  *
@@ -30,9 +97,9 @@ import { cn } from "@/lib/utils";
  *   Lives in its own breathing space so it NEVER overlaps or collides with 3D text.
  *
  * - SECTION 2: Authentic Skiper 28 3D Perspective Scroll Canvas.
- *   As user scrolls down, this sticky 3D runway engages.
- *   Text glides upward in pure 3D perspective (rotateX: 24deg, perspective: 260px)
- *   with atmospheric fog on the native #FBF8F2 cream canvas (no black, no white cards).
+ *   Text moves LINE BY LINE through the 3D perspective field.
+ *   Uniform rich color #1E5B45 throughout.
+ *   Zero bleed-through into subsequent sections.
  */
 export function PerspectiveHeroScroll() {
   const [mounted, setMounted] = useState(false);
@@ -49,14 +116,6 @@ export function PerspectiveHeroScroll() {
     target: perspectiveContainerRef,
     offset: ["start start", "end end"],
   });
-
-  // Authentic Skiper 28 3D Perspective motion:
-  // yMotionValue goes from 487 to 0 as in user code, with rotateX(30deg) and perspective 200px
-  const yMotionValue = useTransform(scrollYProgress, [0, 1], [487, 0]);
-  const transform = useMotionTemplate`rotateX(30deg) translateY(${yMotionValue}px) translateZ(10px)`;
-
-  // Clean fade out near the end so 3D text NEVER bleeds or coincides behind subsequent sections!
-  const textOpacity = useTransform(scrollYProgress, [0, 0.85, 0.98], [1, 1, 0]);
 
   const content = (
     <div className="relative w-full bg-[#FBF8F2] text-[#1B2A22]">
@@ -196,7 +255,7 @@ export function PerspectiveHeroScroll() {
           Dedicated 300vh runway. Clean exit before next section.
           3D Perspective (perspective: 200px, rotateX: 30deg).
           Glides seamlessly on native #FBF8F2 cream background.
-          Uniform rich color #1E5B45 throughout (no color changes).
+          Moves LINE BY LINE in uniform rich #1E5B45 tone.
          ───────────────────────────────────────────────────────────── */}
       <div
         ref={perspectiveContainerRef}
@@ -217,25 +276,27 @@ export function PerspectiveHeroScroll() {
             <div className="h-6 w-px bg-gradient-to-b from-[#1E5B45]/60 to-transparent" />
           </div>
 
-          {/* 3D Tilted Text Plane */}
-          <motion.div
+          {/* Top and Bottom Atmospheric Fading Masks */}
+          <div className="pointer-events-none absolute top-0 left-0 z-10 h-32 w-full bg-gradient-to-b from-[#FBF8F2] to-transparent" />
+          <div className="pointer-events-none absolute bottom-0 left-0 z-10 h-36 w-full bg-gradient-to-t from-[#FBF8F2] to-transparent" />
+
+          {/* Line-by-Line 3D Perspective Plane */}
+          <div
+            className="relative flex h-full w-full items-center justify-center"
             style={{
               transformStyle: "preserve-3d",
-              transform,
-              opacity: textOpacity,
             }}
-            className="w-full max-w-4xl text-center text-4xl sm:text-6xl md:text-7xl font-bold tracking-tighter text-[#1E5B45] select-none px-6"
           >
-            No more misleading health claims ..
-            Decode every single preservative, additive, and emulsifier ..
-            Zero propaganda, zero guilt, and zero moral judgments ..
-            Direct verification from Open Food Facts database records ..
-            On-device camera scanning with 100% local privacy ..
-            Missing nutrients are never replaced with zero ..
-            Ingrivo is the pure, unfiltered truth on packaged food ..
-            Know what you eat, understand what you buy.
-            <div className="absolute bottom-0 left-0 h-[60vh] w-full bg-gradient-to-b from-transparent to-[#FBF8F2]" />
-          </motion.div>
+            {MANIFESTO_LINES.map((line, idx) => (
+              <ManifestoLine
+                key={idx}
+                text={line}
+                index={idx}
+                total={MANIFESTO_LINES.length}
+                scrollYProgress={scrollYProgress}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>
