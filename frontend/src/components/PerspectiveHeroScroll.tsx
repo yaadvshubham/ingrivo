@@ -17,7 +17,6 @@ import {
   ShieldCheck,
   Database,
   Cpu,
-  ArrowDown,
   CheckCircle2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -27,19 +26,19 @@ const MANIFESTO_LINES = [
   "Decode every single preservative, additive, and emulsifier ..",
   "Zero propaganda, zero guilt, and zero moral judgments ..",
   "Direct verification from Open Food Facts database records ..",
-  "100% on-device camera scanning with total local privacy ..",
+  "On-device camera scanning with 100% local privacy ..",
   "Missing nutrients are explicitly marked — never replaced with zero ..",
-  "Pure, unfiltered evidence for every conscious decision ..",
-  "Know what you eat. Understand what you buy.",
+  "Ingrivo is the pure, unfiltered truth on packaged food ..",
+  "Know what you eat, understand what you buy.",
 ];
 
 /**
  * Individual Manifesto Line Component
  * Moves line-by-line with staggered 3D perspective physics.
- * Each line glides independently through the focal plane with smooth parallax,
- * avoiding rigid block/image movement.
+ * Each line glides with its own individual vertical trajectory and tilt,
+ * ensuring fluid line-by-line scrolling without ever being invisible.
  */
-function ManifestoLine({
+function LineItem({
   text,
   index,
   total,
@@ -50,41 +49,24 @@ function ManifestoLine({
   total: number;
   scrollYProgress: MotionValue<number>;
 }) {
-  const step = 0.85 / total;
-  const center = 0.08 + index * step;
-  const start = Math.max(0, center - step * 1.5);
-  const end = Math.min(0.98, center + step * 1.5);
+  // Staggered line-by-line Y progression:
+  // Each line has its own individual start and end trajectory
+  const startY = 460 + index * 45;
+  const endY = -180 - (total - 1 - index) * 35;
+  const y = useTransform(scrollYProgress, [0, 1], [startY, endY]);
 
-  // Smooth Y glide through the 3D perspective field:
-  // Starts below at +320px, hits focal center at 0px, ascends away at -300px
-  const y = useTransform(scrollYProgress, [start, center, end], [320, 0, -300]);
-
-  // Smooth opacity: enters gently, reaches 100% in focal center, recedes gently
-  const opacity = useTransform(
-    scrollYProgress,
-    [start, center - step * 0.6, center, center + step * 0.6, end],
-    [0, 0.45, 1, 0.45, 0]
-  );
-
-  // Staggered 3D incline: rotates in 3D perspective space (perspective: 200px)
-  const rotateX = useTransform(scrollYProgress, [start, center, end], [32, 18, 28]);
-  const scale = useTransform(scrollYProgress, [start, center, end], [0.94, 1.03, 0.94]);
-
-  const transform = useMotionTemplate`rotateX(${rotateX}deg) translateY(${y}px) translateZ(10px) scale(${scale})`;
+  const transform = useMotionTemplate`rotateX(28deg) translateY(${y}px) translateZ(10px)`;
 
   return (
-    <motion.div
+    <motion.p
       style={{
         transformStyle: "preserve-3d",
         transform,
-        opacity,
       }}
-      className="absolute w-full max-w-4xl px-6 text-center select-none pointer-events-none"
+      className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tighter text-[#1E5B45] leading-tight select-none"
     >
-      <p className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tighter text-[#1E5B45] leading-tight">
-        {text}
-      </p>
-    </motion.div>
+      {text}
+    </motion.p>
   );
 }
 
@@ -94,11 +76,11 @@ function ManifestoLine({
  * Senior Design Architecture:
  * - SECTION 1: Editorial Luxury Hero with Skiper 3 Spring Brand Capsule.
  *   Contains pristine brand identity, headline, CTAs, and trust metrics.
- *   Lives in its own breathing space so it NEVER overlaps or collides with 3D text.
+ *   No redundant "scroll to see" labels.
  *
  * - SECTION 2: Authentic Skiper 28 3D Perspective Scroll Canvas.
  *   Text moves LINE BY LINE through the 3D perspective field.
- *   Uniform rich color #1E5B45 throughout.
+ *   All lines are clearly visible and readable in uniform rich #1E5B45 tone.
  *   Zero bleed-through into subsequent sections.
  */
 export function PerspectiveHeroScroll() {
@@ -117,12 +99,15 @@ export function PerspectiveHeroScroll() {
     offset: ["start start", "end end"],
   });
 
+  // Soft exit fade only at the very end (90% to 98%) so it never leaks behind next section
+  const containerOpacity = useTransform(scrollYProgress, [0, 0.9, 0.98], [1, 1, 0]);
+
   const content = (
     <div className="relative w-full bg-[#FBF8F2] text-[#1B2A22]">
       {/* ─────────────────────────────────────────────────────────────
           SECTION 1: EDITORIAL LUXURY HERO (Pristine, Zero Collision)
          ───────────────────────────────────────────────────────────── */}
-      <section className="relative flex min-h-[88vh] flex-col items-center justify-between px-4 pt-6 pb-12 sm:px-6">
+      <section className="relative flex min-h-[85vh] flex-col items-center justify-between px-4 pt-6 pb-12 sm:px-6">
         <div className="flex flex-col items-center gap-6 text-center max-w-4xl pt-2">
           {/* Skiper 3 Dynamic Brand Pill Capsule */}
           <motion.div layout>
@@ -237,58 +222,37 @@ export function PerspectiveHeroScroll() {
             </span>
           </div>
         </div>
-
-        {/* Scroll Invitation Cue */}
-        <div className="flex flex-col items-center gap-2 pt-10 pb-2 text-center text-[#1B2A22]">
-          <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-[#5E6B63]/80">
-            Scroll to experience manifesto
-          </span>
-          <div className="relative flex flex-col items-center">
-            <div className="h-10 w-px bg-gradient-to-b from-[#1E5B45] via-[#C88214] to-transparent" />
-            <ArrowDown className="h-3.5 w-3.5 text-[#1E5B45] animate-bounce -mt-1 opacity-70" />
-          </div>
-        </div>
       </section>
 
       {/* ─────────────────────────────────────────────────────────────
           SECTION 2: AUTHENTIC SKIPER 28 3D PERSPECTIVE SCROLL CANVAS
-          Dedicated 300vh runway. Clean exit before next section.
-          3D Perspective (perspective: 200px, rotateX: 30deg).
+          Dedicated 280vh runway. Clean exit before next section.
+          3D Perspective (perspective: 200px, rotateX: 28deg).
           Glides seamlessly on native #FBF8F2 cream background.
           Moves LINE BY LINE in uniform rich #1E5B45 tone.
          ───────────────────────────────────────────────────────────── */}
       <div
         ref={perspectiveContainerRef}
-        className="relative z-0 h-[300vh] w-full overflow-hidden bg-[#FBF8F2]"
+        className="relative z-0 h-[280vh] w-full overflow-hidden bg-[#FBF8F2]"
       >
-        <div
+        <motion.div
+          style={{ opacity: containerOpacity }}
           className="sticky top-0 mx-auto flex h-screen w-full items-center justify-center overflow-hidden bg-transparent py-20"
-          style={{
-            transformStyle: "preserve-3d",
-            perspective: "200px",
-          }}
         >
-          {/* Subtle Runway Header */}
-          <div className="absolute top-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 pointer-events-none">
-            <span className="inline-flex items-center gap-2 rounded-full border border-[#E4DEC3] bg-[#FBF8F2]/90 backdrop-blur-xs px-4 py-1 text-[10px] font-extrabold uppercase tracking-[0.25em] text-[#1E5B45] shadow-xs">
-              The Ingrivo Manifesto
-            </span>
-            <div className="h-6 w-px bg-gradient-to-b from-[#1E5B45]/60 to-transparent" />
-          </div>
-
           {/* Top and Bottom Atmospheric Fading Masks */}
           <div className="pointer-events-none absolute top-0 left-0 z-10 h-32 w-full bg-gradient-to-b from-[#FBF8F2] to-transparent" />
           <div className="pointer-events-none absolute bottom-0 left-0 z-10 h-36 w-full bg-gradient-to-t from-[#FBF8F2] to-transparent" />
 
           {/* Line-by-Line 3D Perspective Plane */}
           <div
-            className="relative flex h-full w-full items-center justify-center"
+            className="relative flex flex-col items-center justify-center gap-6 sm:gap-8 w-full max-w-4xl px-6 text-center select-none"
             style={{
               transformStyle: "preserve-3d",
+              perspective: "200px",
             }}
           >
             {MANIFESTO_LINES.map((line, idx) => (
-              <ManifestoLine
+              <LineItem
                 key={idx}
                 text={line}
                 index={idx}
@@ -297,7 +261,7 @@ export function PerspectiveHeroScroll() {
               />
             ))}
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
