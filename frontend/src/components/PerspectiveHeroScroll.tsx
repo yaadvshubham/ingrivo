@@ -13,7 +13,15 @@ import { ScanBarcode, Search, Sparkles, ShieldCheck, Database, Cpu, ArrowDown } 
 import { cn } from "@/lib/utils";
 
 /**
- * Unified Premium Homepage Experience with Intense 3D Star Wars Style Spatial Perspective
+ * Unified Premium Homepage Experience
+ *
+ * Design Palette:
+ * - Surface: Warm Natural Silk Cream (#FBF8F2)
+ * - Contrast Scroll Track: Rich Linen (#EFECE4 -> #FBF8F2)
+ * - Deep Luxury Forest: #1E5B45 / #164634
+ * - Emerald Leaf: #2E8B63
+ * - Saffron Amber: #C88214
+ * - Crisp Ink: #1B2A22
  */
 export function PerspectiveHeroScroll() {
   const [mounted, setMounted] = useState(false);
@@ -29,18 +37,18 @@ export function PerspectiveHeroScroll() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Track scroll through the spatial track
+  // Track scroll specifically through the 3D manifesto section
   const { scrollYProgress } = useScroll({
     target: scrollSectionRef,
-    offset: ["start start", "end end"],
+    offset: ["start end", "end end"],
   });
 
-  // DRAMATIC 3D PERSPECTIVE VALUES:
-  // Starts receding deeply in distance with steep 45° angle, glides forward into view
-  const yMotionValue = useTransform(scrollYProgress, [0, 1], [650, -180]);
-  const rotateXValue = useTransform(scrollYProgress, [0, 1], [46, 28]);
-  const translateZValue = useTransform(scrollYProgress, [0, 1], [-80, 40]);
-  const transform = useMotionTemplate`rotateX(${rotateXValue}deg) translateY(${yMotionValue}px) translateZ(${translateZValue}px)`;
+  // Balanced, highly readable 3D perspective incline (24° tapering down to 8°)
+  // Maintains depth sensation without unreadable text tilting
+  const yMotionValue = useTransform(scrollYProgress, [0, 1], [420, -60]);
+  const rotateXValue = useTransform(scrollYProgress, [0, 1], [24, 8]);
+  const opacityValue = useTransform(scrollYProgress, [0, 0.15, 0.85, 1], [0.3, 1, 1, 0.7]);
+  const transform = useMotionTemplate`rotateX(${rotateXValue}deg) translateY(${yMotionValue}px) translateZ(10px)`;
 
   const content = (
     <div className="w-full bg-[#FBF8F2] text-[#1B2A22] selection:bg-[#1E5B45] selection:text-white">
@@ -161,61 +169,78 @@ export function PerspectiveHeroScroll() {
           </div>
         </div>
 
-        {/* Scroll Cue (Skiper 28 style) */}
+        {/* Scroll Cue */}
         <div className="flex flex-col items-center gap-2 pt-12 pb-2 text-center text-[#1B2A22] z-10">
-          <span className="relative text-[11px] font-bold tracking-widest uppercase opacity-40 after:absolute after:left-1/2 after:top-full after:h-10 after:w-px after:bg-gradient-to-b after:from-[#1B2A22]/40 after:to-transparent after:content-['']">
-            scroll down to explore the manifesto
+          <span className="relative text-[11px] font-bold tracking-widest uppercase opacity-50 after:absolute after:left-1/2 after:top-full after:h-10 after:w-px after:bg-gradient-to-b after:from-[#1E5B45]/40 after:to-transparent after:content-['']">
+            scroll down for our food manifesto
           </span>
           <ArrowDown className="h-4 w-4 text-[#1E5B45] animate-bounce mt-4 opacity-70" />
         </div>
       </section>
 
       {/* ─────────────────────────────────────────────────────────────
-          STAGE 2: INTENSE 3D PERSPECTIVE SCROLL RIG
-          Deep 180px perspective camera with dramatic 46° spatial incline
+          STAGE 2: WARM LUXURY 3D PERSPECTIVE SCROLL (No Black Background!)
+          Clean 300px perspective camera, comfortable 24° reading tilt,
+          rich editorial typography telling the Ingrivo story
          ───────────────────────────────────────────────────────────── */}
       <div
         ref={scrollSectionRef}
-        className="relative z-0 h-[280vh] w-full bg-[#0D1612] text-white overflow-hidden border-t border-[#1E5B45]/30 shadow-2xl"
+        className="relative z-0 h-[260vh] w-full bg-gradient-to-b from-[#FBF8F2] via-[#EFECE4] to-[#FBF8F2] overflow-hidden border-t border-[#E4DEC3]/80"
       >
-        {/* Spatial 3D Perspective Plane */}
         <div
           className="sticky top-0 mx-auto flex h-screen items-center justify-center overflow-hidden pointer-events-none"
           style={{
             transformStyle: "preserve-3d",
-            perspective: "180px",
-            perspectiveOrigin: "50% 70%",
+            perspective: "300px",
+            perspectiveOrigin: "50% 60%",
           }}
         >
           <motion.div
             style={{
               transformStyle: "preserve-3d",
               transform,
+              opacity: opacityValue,
             }}
-            className="w-full max-w-4xl text-center space-y-6 font-black tracking-tight select-none px-6"
+            className="w-full max-w-4xl text-center space-y-6 select-none px-6"
           >
-            {/* Carefully structured poetic lining */}
-            <p className="text-3xl sm:text-5xl md:text-6xl text-emerald-400/90 tracking-wider uppercase drop-shadow-[0_4px_12px_rgba(52,211,153,0.3)]">
-              No More Marketing Masks.
-            </p>
-            <p className="text-4xl sm:text-6xl md:text-7xl bg-gradient-to-r from-emerald-300 via-teal-200 to-amber-300 bg-clip-text text-transparent uppercase drop-shadow-[0_6px_16px_rgba(251,191,36,0.25)]">
-              Decode Every Single Ingredient.
-            </p>
-            <p className="text-3xl sm:text-5xl md:text-6xl text-emerald-300 tracking-wider uppercase">
-              Zero Propaganda. Zero Guilt.
-            </p>
-            <p className="text-4xl sm:text-6xl md:text-7xl bg-gradient-to-r from-amber-300 via-yellow-200 to-emerald-400 bg-clip-text text-transparent uppercase">
-              Pure Unfiltered Label Truth.
-            </p>
-            <p className="text-3xl sm:text-5xl md:text-6xl text-emerald-400/90 tracking-wider uppercase">
-              Evidence Direct From The Box.
-            </p>
-            <p className="text-5xl sm:text-7xl md:text-8xl text-white font-black tracking-tighter uppercase drop-shadow-[0_8px_24px_rgba(255,255,255,0.4)]">
-              INGRIVO.
+            {/* Thoughtful, project-specific manifesto lines */}
+            <p className="text-xs sm:text-sm font-bold tracking-[0.25em] text-[#C88214] uppercase">
+              The Ingrivo Promise
             </p>
 
-            {/* Cinematic depth fade */}
-            <div className="pointer-events-none absolute bottom-[-100px] left-0 h-[45vh] w-full bg-gradient-to-t from-[#0D1612] via-[#0D1612]/80 to-transparent" />
+            <h2 className="text-3xl sm:text-5xl md:text-6xl font-black text-[#1B2A22] tracking-tight leading-tight">
+              NO MARKETING SPINS. <br />
+              <span className="bg-gradient-to-r from-[#1E5B45] via-[#2E8B63] to-[#C88214] bg-clip-text text-transparent">
+                JUST TRANSPARENT FACTS.
+              </span>
+            </h2>
+
+            <p className="text-xl sm:text-3xl font-extrabold text-[#1E5B45] tracking-tight">
+              Decode Cryptic E-Numbers & Chemical Names
+            </p>
+
+            <p className="text-lg sm:text-2xl font-bold text-[#1B2A22]/80">
+              Verified Database Records From 3 Million+ Products
+            </p>
+
+            <p className="text-lg sm:text-2xl font-bold text-[#C88214]">
+              Zero Health Moralizing. Zero Food Shaming.
+            </p>
+
+            <p className="text-xl sm:text-3xl font-black text-[#1E5B45] tracking-tight">
+              100% On-Device Camera Privacy — No Photos Stored
+            </p>
+
+            <p className="text-lg sm:text-2xl font-bold text-[#5E6B63]">
+              Missing Nutrients Are Never Hidden Or Replaced With Zeros
+            </p>
+
+            <p className="text-2xl sm:text-4xl md:text-5xl font-black tracking-tight text-[#1B2A22] pt-4">
+              FOOD INTELLIGENCE YOU CAN ACTUALLY TRUST.
+            </p>
+
+            {/* Seamless luxury bottom fog fade */}
+            <div className="pointer-events-none absolute bottom-0 left-0 h-[45vh] w-full bg-gradient-to-t from-[#FBF8F2] via-[#FBF8F2]/80 to-transparent" />
           </motion.div>
         </div>
       </div>
