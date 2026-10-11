@@ -158,7 +158,35 @@ export default function AboutPage() {
         </Card>
       </section>
 
-      {/* Coming Soon Notice */}
+      {/* Privacy and Data Flow */}
+      <section className="space-y-4">
+        <h2 className="text-xl font-bold text-[#1B2A22]">
+          Privacy & AI Data Flow
+        </h2>
+        <Card className="border border-[#E4DEC3] bg-white shadow-xs">
+          <CardContent className="pt-4 space-y-3 text-sm text-[#5E6B63] leading-relaxed">
+            <p>
+              Ingrivo follows an evidence-first, zero-retention architecture:
+            </p>
+            <ul className="list-disc pl-5 space-y-1.5 text-xs">
+              <li>
+                <strong>On-Device Image Processing:</strong> Label photos are read locally in your browser using self-hosted WebAssembly OCR. Photos are never uploaded or stored on any server.
+              </li>
+              <li>
+                <strong>Explicit AI Explanations:</strong> AI explanations are triggered only when you explicitly press &quot;Explain this product&quot;. Never on page load.
+              </li>
+              <li>
+                <strong>Evidence-Only Prompts:</strong> Only verified text and nutrition numbers (or barcode digits) are sent to the AI service. No photos, cookies, or user profile information are ever transmitted.
+              </li>
+              <li>
+                <strong>Third-Party Model:</strong> Explanations are powered by Google Gemini under developer API terms. We advise never entering personal or sensitive names in custom label fields.
+              </li>
+            </ul>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* Features in Roadmap */}
       <section className="space-y-4">
         <h2 className="text-xl font-bold text-[#1B2A22]">
           Features in Development
@@ -167,13 +195,10 @@ export default function AboutPage() {
           <CardContent className="pt-4 space-y-2 text-xs md:text-sm text-[#5E6B63]">
             <p className="flex items-center gap-2 font-medium text-[#1B2A22]">
               <Lock className="h-4 w-4 text-[#1E5B45]" />
-              &quot;Coming soon&quot; Features
+              Roadmap Features
             </p>
             <p>
-              Interactive barcode scanning, live search querying, OCR label image uploads,
-              side-by-side comparative views, and client scan histories are currently
-              flagged off while in staged development. Each feature is scheduled for
-              activation in subsequent phases.
+              Barcode scanning, database search, on-device label OCR, and structured AI explanations are now live. Side-by-side comparative product views and local scan history are planned for upcoming phases.
             </p>
           </CardContent>
         </Card>

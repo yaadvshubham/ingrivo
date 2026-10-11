@@ -4,6 +4,7 @@ export interface FeatureFlags {
   label: boolean;
   compare: boolean;
   history: boolean;
+  ai: boolean;
 }
 
 /**
@@ -14,6 +15,7 @@ export interface FeatureFlags {
  * - Phase 3: scan enabled (Manual barcode lookup + OFF API integration); search in development
  * - Phase 4: label (Browser OCR, nutrition & ingredient label parsing)
  * - Phase 5: compare, history (Side-by-side nutrition comparison, local history)
+ * - Phase 7: ai enabled (Structured AI product explanations)
  */
 export const FEATURES: FeatureFlags = {
   scan: true, // Enabled in Phase 3 for manual barcode lookup
@@ -21,6 +23,7 @@ export const FEATURES: FeatureFlags = {
   label: true, // Enabled in Phase 6 for on-device label OCR and review
   compare: false,
   history: false,
+  ai: true, // Enabled in Phase 7 for Gemini educational explanations
 };
 
 /**

@@ -28,9 +28,14 @@ class Settings(BaseSettings):
     SEARCH_MAX_PER_MIN: int = 8
     INBOUND_SEARCH_MAX_PER_MIN: int = 6
 
-    # Gemini (optional for Phase 1)
+    # Gemini Configuration & Cost / Rate Limits (Phase 7)
     GEMINI_API_KEY: str = ""
-    GEMINI_MODEL: str = ""
+    GEMINI_MODEL: str = "gemini-2.5-flash"
+    GEMINI_TIMEOUT_SECONDS: int = 20
+    GEMINI_MAX_OUTPUT_TOKENS: int = 1500
+    GEMINI_MAX_CALLS_PER_DAY: int = 100
+    EXPLAIN_RATE_LIMIT: int = 5
+    MAX_EVIDENCE_CHARS: int = 4000
 
     @property
     def allowed_origins_list(self) -> list[str]:

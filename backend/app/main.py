@@ -80,6 +80,22 @@ async def request_id_middleware(request: Request, call_next):
 # ---------------------------------------------------------------------------
 # Exception handlers
 # ---------------------------------------------------------------------------
+from app.core.errors import AppError
+
+@app.exception_handler(AppError)
+async def app_error_handler(request: Request, exc: AppError):
+    """Handle application-level typed errors."""
+    request_id = getattr(request.state, "request_id", "unknown")
+    return JSONResponse(
+        status_code=exc.status_code,
+        content=error_envelope(
+            code=exc.code,
+            message=exc.message,
+            request_id=request_id,
+            details=exc.details or None,
+        ),
+    )
+
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     """Handle Pydantic / FastAPI validation errors."""
@@ -134,8 +150,11 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
     )
 
 
+from app.routers import health, products, analysis
+
 # ---------------------------------------------------------------------------
 # Routers
 # ---------------------------------------------------------------------------
 app.include_router(health.router)
 app.include_router(products.router)
+app.include_router(analysis.router)

@@ -23,6 +23,7 @@ import { DataRow } from "@/components/DataRow";
 import { DisabledAction } from "@/components/DisabledAction";
 import { Disclaimer } from "@/components/Disclaimer";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { AiExplanationSection } from "@/components/product/AiExplanationSection";
 import { buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -624,6 +625,11 @@ export function ProductDetailView({ refParam }: ProductDetailViewProps) {
           )}
         </CardContent>
       </Card>
+
+      {/* AI Explanation Section (Phase 7: Explicit user-initiated click only) */}
+      {isFeatureEnabled("ai") && (
+        <AiExplanationSection product={product} />
+      )}
 
       {/* 6. Open Food Facts Computed Fields (Collapsed) - Barcode products only */}
       {!isLabelProduct && product.source_computed && (
