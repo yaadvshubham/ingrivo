@@ -9,76 +9,76 @@ import {
 import ReactLenis from "lenis/react";
 import React, { useRef, useState, useEffect } from "react";
 import Link from "next/link";
-import { ScanBarcode, Search, Sparkles, ArrowRight, ShieldCheck, Database, Cpu } from "lucide-react";
+import { ScanBarcode, Search, Sparkles, ShieldCheck, Database, Cpu, ArrowDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
- * Unified Premium Homepage Hero & 3D Perspective Scroll Experience
+ * Unified Premium Homepage Experience
  *
- * Design Palette:
- * - Surface / Canvas: Warm Natural Silk (#FBF8F2)
- * - Deep Luxury Forest: #164634 / #1E5B45
- * - Rich Royal Emerald: #2E8B63 / #34D399
- * - Warm Gold / Saffron Accent: #C88214 / #E3A02B
- * - Deep Velvet Ink: #14221A / #1B2A22
- * - Muted Botanical Slate: #5E6B63
- * - Border: Warm Linen (#E4DEC3)
+ * Flawless Two-Stage Flow:
+ * - STAGE 1: Crystal-clear Hero with interactive Skiper 3 Spring Brand Capsule,
+ *   crisp typography, primary call-to-actions, and trust anchors.
+ * - STAGE 2: Seamless transition into Skiper 28 3D Perspective Scroll with pure
+ *   momentum physics (Lenis lerp 0.06), zero visual collision, and rich editorial colors.
  */
 export function PerspectiveHeroScroll() {
   const [mounted, setMounted] = useState(false);
   const [capsuleExpanded, setCapsuleExpanded] = useState(false);
-  const targetRef = useRef<HTMLDivElement | null>(null);
+  const heroRef = useRef<HTMLDivElement | null>(null);
+  const scrollSectionRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setMounted(true);
-    // Smooth auto-expand after initial entrance
+    // Smooth auto-expand animation on mount
     const timer = setTimeout(() => {
       setCapsuleExpanded(true);
-    }, 450);
+    }, 400);
     return () => clearTimeout(timer);
   }, []);
 
-  // Skiper 28 Scroll Tracking
+  // Skiper 28 Scroll Tracking attached precisely to the 3D scroll section
   const { scrollYProgress } = useScroll({
-    target: targetRef,
+    target: scrollSectionRef,
+    offset: ["start end", "end end"],
   });
 
-  // Authentic Skiper 28 3D Perspective Motion Values
-  const yMotionValue = useTransform(scrollYProgress, [0, 1], [487, 0]);
-  const transform = useMotionTemplate`rotateX(30deg) translateY(${yMotionValue}px) translateZ(10px)`;
+  // Authentic Skiper 28 Perspective Transform Matrix with smooth easing
+  const yMotionValue = useTransform(scrollYProgress, [0, 1], [480, 0]);
+  const rotateXValue = useTransform(scrollYProgress, [0, 1], [32, 8]);
+  const opacityValue = useTransform(scrollYProgress, [0, 0.2, 0.85, 1], [0.1, 1, 1, 0.6]);
+  const transform = useMotionTemplate`rotateX(${rotateXValue}deg) translateY(${yMotionValue}px) translateZ(10px)`;
 
   const content = (
-    <div
-      ref={targetRef}
-      className="relative z-0 h-[280vh] w-full bg-[#FBF8F2] text-[#1B2A22] overflow-x-hidden selection:bg-[#1E5B45] selection:text-white"
-    >
-      {/* Subtle luxury botanical grain / grid background */}
-      <div className="absolute inset-0 bg-[radial-gradient(#1E5B45_1px,transparent_1px)] [background-size:32px_32px] opacity-[0.06] pointer-events-none" />
-
+    <div className="w-full bg-[#FBF8F2] text-[#1B2A22] selection:bg-[#1E5B45] selection:text-white">
       {/* ─────────────────────────────────────────────────────────────
-          TOP STICKY HERO & CALL TO ACTION (Clean, interactive, rich)
+          STAGE 1: CLEAN HERO SECTION (Unobstructed, elegant, functional)
          ───────────────────────────────────────────────────────────── */}
-      <div className="sticky top-0 z-20 flex min-h-screen flex-col items-center justify-between px-4 py-8 sm:px-6 pointer-events-none">
-        {/* Dynamic Expanding Brand Capsule (Skiper 3 Motion) */}
-        <div className="pointer-events-auto flex flex-col items-center gap-5 text-center max-w-4xl pt-4">
+      <section
+        ref={heroRef}
+        className="relative min-h-[90vh] flex flex-col items-center justify-between px-4 pt-10 pb-16 sm:px-6 md:pt-14 md:pb-20 max-w-5xl mx-auto text-center"
+      >
+        {/* Subtle radial luxury pattern */}
+        <div className="absolute inset-0 bg-[radial-gradient(#1E5B45_1px,transparent_1px)] [background-size:28px_28px] opacity-[0.05] pointer-events-none" />
+
+        {/* Dynamic Expanding Brand Capsule (Skiper 3) */}
+        <div className="flex flex-col items-center gap-6 max-w-3xl w-full z-10">
           <motion.div layout>
             <motion.div
               className={cn(
                 "relative flex items-center justify-between overflow-hidden shadow-lg border border-[#E4DEC3] bg-white/95 backdrop-blur-md transition-all cursor-pointer hover:border-[#1E5B45]/40 hover:shadow-xl",
                 capsuleExpanded
-                  ? "rounded-full px-5 py-2.5 w-[min(94vw,500px)]"
+                  ? "rounded-full px-5 py-2.5 w-[min(94vw,480px)]"
                   : "rounded-full p-3 w-[64px]"
               )}
               initial={{ scale: 0, y: "100%" }}
               animate={{
                 scale: 1,
                 y: 0,
-                width: !capsuleExpanded ? 64 : "min(94vw, 500px)",
+                width: !capsuleExpanded ? 64 : "min(94vw, 480px)",
               }}
-              transition={{ type: "spring", bounce: 0.16, duration: 0.85 }}
+              transition={{ type: "spring", bounce: 0.16, duration: 0.8 }}
               onClick={() => setCapsuleExpanded((x) => !x)}
             >
-              {/* Brand Logo & Name */}
               <div className="flex items-center gap-3">
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#1E5B45] to-[#164634] text-white shadow-md shadow-[#1E5B45]/20">
                   <Sparkles className="h-5 w-5 text-emerald-300" />
@@ -100,7 +100,6 @@ export function PerspectiveHeroScroll() {
                 )}
               </div>
 
-              {/* Verified Badge / Expansion indicator */}
               {capsuleExpanded && (
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -119,97 +118,103 @@ export function PerspectiveHeroScroll() {
             </motion.div>
           </motion.div>
 
-          {/* Headline & Subtext */}
-          <div className="space-y-3 pt-2">
+          {/* Headline & Tagline */}
+          <div className="space-y-4 pt-2">
             <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-[#1B2A22] leading-tight">
               Know what you eat. <br />
               <span className="bg-gradient-to-r from-[#1E5B45] via-[#2E8B63] to-[#C88214] bg-clip-text text-transparent">
                 Understand what you buy.
               </span>
             </h1>
-            <p className="text-sm sm:text-base md:text-lg text-[#5E6B63] max-w-xl mx-auto leading-relaxed">
-              Ingrivo turns packaged food ingredient lists into plain-language facts with strict evidence and zero moralizing.
+            <p className="text-base sm:text-lg md:text-xl text-[#5E6B63] max-w-xl mx-auto leading-relaxed">
+              Ingrivo turns packaged food ingredient lists into transparent, plain-language facts with strict evidence and zero moralizing.
             </p>
           </div>
 
-          {/* Action CTAs */}
+          {/* Interactive CTAs */}
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
             <Link
               href="/scan"
-              className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-[#1E5B45] text-white text-sm font-bold shadow-lg shadow-[#1E5B45]/25 hover:bg-[#164634] transition-all hover:scale-[1.02] active:scale-95"
+              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#1E5B45] text-white text-sm font-bold shadow-lg shadow-[#1E5B45]/25 hover:bg-[#164634] transition-all hover:scale-[1.02] active:scale-95"
             >
               <ScanBarcode className="h-4 w-4" />
               <span>Scan Barcode</span>
             </Link>
             <Link
               href="/search"
-              className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-white border border-[#E4DEC3] text-[#1B2A22] text-sm font-bold shadow-xs hover:bg-[#FAF8F5] hover:border-[#1E5B45]/40 transition-all hover:scale-[1.02] active:scale-95"
+              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-white border border-[#E4DEC3] text-[#1B2A22] text-sm font-bold shadow-xs hover:bg-[#FAF8F5] hover:border-[#1E5B45]/40 transition-all hover:scale-[1.02] active:scale-95"
             >
               <Search className="h-4 w-4 text-[#1E5B45]" />
               <span>Search 3M+ Products</span>
             </Link>
           </div>
 
-          {/* Trust points */}
-          <div className="hidden sm:flex items-center gap-6 pt-4 text-xs font-semibold text-[#5E6B63]">
+          {/* Trust Anchors */}
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 pt-4 text-xs font-semibold text-[#5E6B63]">
             <span className="flex items-center gap-1.5">
-              <Database className="h-3.5 w-3.5 text-[#1E5B45]" />
+              <Database className="h-4 w-4 text-[#1E5B45]" />
               Open Food Facts Data
             </span>
-            <span>•</span>
+            <span className="hidden sm:inline">•</span>
             <span className="flex items-center gap-1.5">
-              <ShieldCheck className="h-3.5 w-3.5 text-[#1E5B45]" />
-              100% On-Device Camera
+              <ShieldCheck className="h-4 w-4 text-[#1E5B45]" />
+              100% On-Device Camera Privacy
             </span>
-            <span>•</span>
+            <span className="hidden sm:inline">•</span>
             <span className="flex items-center gap-1.5">
-              <Cpu className="h-3.5 w-3.5 text-[#C88214]" />
+              <Cpu className="h-4 w-4 text-[#C88214]" />
               Veracity-Locked AI
             </span>
           </div>
         </div>
 
-        {/* Scroll Cue (Skiper 28 style in warm ink) */}
-        <div className="pointer-events-auto flex flex-col items-center gap-3 pb-8 text-center text-[#1B2A22]">
-          <span className="relative text-[11px] font-bold tracking-widest uppercase opacity-40 after:absolute after:left-1/2 after:top-full after:h-12 after:w-px after:bg-gradient-to-b after:from-[#1B2A22]/40 after:to-transparent after:content-['']">
-            scroll down to see
+        {/* Scroll Cue (Skiper 28 style) */}
+        <div className="flex flex-col items-center gap-2 pt-12 pb-2 text-center text-[#1B2A22] z-10">
+          <span className="relative text-[11px] font-bold tracking-widest uppercase opacity-40 after:absolute after:left-1/2 after:top-full after:h-10 after:w-px after:bg-gradient-to-b after:from-[#1B2A22]/40 after:to-transparent after:content-['']">
+            scroll down to explore
           </span>
+          <ArrowDown className="h-4 w-4 text-[#1E5B45] animate-bounce mt-4 opacity-70" />
         </div>
-      </div>
+      </section>
 
       {/* ─────────────────────────────────────────────────────────────
-          SKIPER 28 3D PERSPECTIVE TEXT SCROLL
-          Exact perspective: 200px and rotateX: 30deg transform
-          Styled in rich metallic emerald & saffron gradient
+          STAGE 2: SKIPER 28 3D PERSPECTIVE TEXT SCROLL
+          Triggers smoothly only as you scroll past the hero!
          ───────────────────────────────────────────────────────────── */}
       <div
-        className="sticky top-0 mx-auto flex h-screen items-center justify-center bg-transparent py-20 overflow-hidden pointer-events-none"
-        style={{
-          transformStyle: "preserve-3d",
-          perspective: "200px",
-        }}
+        ref={scrollSectionRef}
+        className="relative z-0 h-[220vh] w-full bg-gradient-to-b from-[#FBF8F2] via-[#EFECE4] to-[#FBF8F2] overflow-hidden"
       >
-        <motion.div
+        <div
+          className="sticky top-0 mx-auto flex h-screen items-center justify-center py-20 overflow-hidden pointer-events-none"
           style={{
             transformStyle: "preserve-3d",
-            transform,
+            perspective: "220px",
           }}
-          className="w-full max-w-4xl text-center text-5xl sm:text-7xl font-bold tracking-tighter leading-tight select-none px-4 bg-gradient-to-b from-[#1E5B45] via-[#2E8B63] to-[#C88214] bg-clip-text text-transparent drop-shadow-sm"
         >
-          DECODE EVERY INGREDIENT .. UNMASK FOOD LABELS .. ZERO MARKETING GIMMICKS ..
-          ZERO MORAL JUDGMENTS .. REAL EVIDENCE DIRECT FROM FOOD LABELS ..
-          TRANSPARENT .. UNBIASED .. EVIDENCE YOU CAN TRUST ..
-          KNOW WHAT YOU EAT .. UNDERSTAND WHAT YOU BUY ..
-          INGRIVO IS THE TRUTH ON PACKAGED FOOD.
-          <div className="absolute bottom-0 left-0 h-[60vh] w-full bg-gradient-to-b from-transparent to-[#FBF8F2]" />
-        </motion.div>
+          <motion.div
+            style={{
+              transformStyle: "preserve-3d",
+              transform,
+              opacity: opacityValue,
+            }}
+            className="w-full max-w-4xl text-center text-4xl sm:text-6xl md:text-7xl font-bold tracking-tighter leading-tight select-none px-6 bg-gradient-to-b from-[#1E5B45] via-[#2E8B63] to-[#C88214] bg-clip-text text-transparent drop-shadow-sm"
+          >
+            DECODE EVERY INGREDIENT .. UNMASK FOOD LABELS .. ZERO MARKETING GIMMICKS ..
+            ZERO MORAL JUDGMENTS .. REAL EVIDENCE DIRECT FROM FOOD LABELS ..
+            TRANSPARENT .. UNBIASED .. EVIDENCE YOU CAN TRUST ..
+            KNOW WHAT YOU EAT .. UNDERSTAND WHAT YOU BUY ..
+            INGRIVO IS THE TRUTH ON PACKAGED FOOD.
+            <div className="absolute bottom-0 left-0 h-[50vh] w-full bg-gradient-to-b from-transparent to-[#FBF8F2]" />
+          </motion.div>
+        </div>
       </div>
     </div>
   );
 
   if (mounted) {
     return (
-      <ReactLenis root options={{ lerp: 0.08, smoothWheel: true }}>
+      <ReactLenis root options={{ lerp: 0.06, smoothWheel: true }}>
         {content}
       </ReactLenis>
     );
