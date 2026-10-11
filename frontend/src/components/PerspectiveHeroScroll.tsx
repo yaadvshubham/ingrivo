@@ -9,7 +9,8 @@ import {
 import ReactLenis from "lenis/react";
 import React, { useRef, useState, useEffect } from "react";
 import Link from "next/link";
-import { ScanBarcode, Search, Sparkles, ArrowDown, ShieldCheck, Database, Cpu } from "lucide-react";
+import { ScanBarcode, Search, ArrowDown, ShieldCheck, Database, Cpu } from "lucide-react";
+import { BrandPillLoader } from "@/components/BrandPillLoader";
 
 export function PerspectiveHeroScroll() {
   const [mounted, setMounted] = useState(false);
@@ -36,11 +37,8 @@ export function PerspectiveHeroScroll() {
           STAGE 1: BRAND SHOWCASE & TAGLINE (Clean, visible, uncluttered)
          ───────────────────────────────────────────────────────────── */}
       <section className="relative px-4 pt-10 pb-16 sm:px-6 md:pt-16 md:pb-24 max-w-5xl mx-auto text-center space-y-6">
-        {/* Brand Pill */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#1E5B45]/10 text-[#1E5B45] text-xs font-semibold tracking-wider uppercase border border-[#1E5B45]/20 shadow-xs">
-          <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-          <span>Ingrivo — Food Transparency Intelligence</span>
-        </div>
+        {/* Interactive Dynamic Brand Pill Loader (Skiper 3 Motion) */}
+        <BrandPillLoader />
 
         {/* Brand Name & Tagline */}
         <div className="space-y-3">
