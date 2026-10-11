@@ -5,18 +5,98 @@ import {
   useMotionTemplate,
   useScroll,
   useTransform,
+  type MotionValue,
 } from "framer-motion";
 import ReactLenis from "lenis/react";
 import React, { useRef, useState, useEffect } from "react";
 import Link from "next/link";
-import { ScanBarcode, Search, Sparkles, ShieldCheck, Database, Cpu } from "lucide-react";
+import {
+  ScanBarcode,
+  Search,
+  Sparkles,
+  ShieldCheck,
+  Database,
+  Cpu,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const MANIFESTO_LINES = [
+  "No more misleading health halos or marketing gimmicks ..",
+  "Decode every single preservative, additive, and emulsifier ..",
+  "Zero guilt, zero propaganda, and zero moral judgments ..",
+  "Direct verification from Open Food Facts database records ..",
+  "100% on-device camera scanning with absolute local privacy ..",
+  "Missing nutrients are explicitly flagged — never assumed zero ..",
+  "Evidence-first transparency for every conscious decision ..",
+  "Know what you eat .. Understand what you buy ..",
+  "Ingrivo is the unfiltered truth on packaged food.",
+];
+
+/**
+ * Individual Manifesto Line Component
+ * Moves line-by-line through 3D perspective space (perspective: 220px, rotateX: 30deg).
+ * Each line glides independently with custom staggered focal depth, parallax scale, and soft overlap.
+ */
+function ManifestoLine({
+  text,
+  index,
+  total,
+  scrollYProgress,
+}: {
+  text: string;
+  index: number;
+  total: number;
+  scrollYProgress: MotionValue<number>;
+}) {
+  // Focal center for each line across the scroll runway
+  const step = 0.82 / (total - 1);
+  const center = 0.08 + index * step;
+
+  // Generous window radius ensures at least 2 lines are always active and visible in 3D space
+  const windowRadius = step * 1.35;
+  const start = Math.max(0, center - windowRadius);
+  const end = Math.min(1, center + windowRadius);
+
+  // Y-translation through the 3D perspective field:
+  // Starts below at +280px, reaches focal center at 0px, ascends away at -280px
+  const y = useTransform(scrollYProgress, [start, center, end], [280, 0, -280]);
+
+  // Dynamic 3D tilt: tilted backwards on entry, flattens in focal plane, tilts as it recedes
+  const rotateX = useTransform(scrollYProgress, [start, center, end], [30, 15, 26]);
+  const scale = useTransform(scrollYProgress, [start, center, end], [0.94, 1.04, 0.94]);
+  const z = useTransform(scrollYProgress, [start, center, end], [-12, 16, -12]);
+
+  // Smooth opacity: peak focus at center, soft overlap on borders
+  const startOpacity = index === 0 ? 0.95 : 0;
+  const opacity = useTransform(
+    scrollYProgress,
+    [start, center - step * 0.5, center, center + step * 0.5, end],
+    [startOpacity, 0.55, 1, 0.55, 0]
+  );
+
+  const transform = useMotionTemplate`rotateX(${rotateX}deg) translateY(${y}px) translateZ(${z}px) scale(${scale})`;
+
+  return (
+    <motion.div
+      style={{
+        transformStyle: "preserve-3d",
+        transform,
+        opacity,
+      }}
+      className="absolute w-full max-w-4xl px-4 sm:px-6 text-center select-none pointer-events-none"
+    >
+      <p className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-[#1E5B45] leading-tight drop-shadow-xs">
+        {text}
+      </p>
+    </motion.div>
+  );
+}
 
 /**
  * Unified Premium Homepage Hero & 3D Perspective Experience
  * Combines:
  * 1. Skiper 3: Spring expanding brand pill & tagline reveal
- * 2. Skiper 28: Authentic 3D preserve-3d perspective text scroll in warm luxury aesthetic
+ * 2. Skiper 28: Authentic 3D preserve-3d perspective line-by-line transitions in warm luxury palette
  */
 export function PerspectiveHeroScroll() {
   const [mounted, setMounted] = useState(false);
@@ -32,28 +112,21 @@ export function PerspectiveHeroScroll() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Skiper 28 Scroll Tracking - Pinned across full sticky container duration
+  // Pinned across full sticky container duration
   const { scrollYProgress } = useScroll({
     target: targetRef,
     offset: ["start start", "end end"],
   });
 
-  // Authentic Skiper 28 Motion Values: complete scroll through the perspective field
-  const yMotionValue = useTransform(scrollYProgress, [0, 1], [487, -260]);
-  const transform = useMotionTemplate`rotateX(30deg) translateY(${yMotionValue}px) translateZ(10px)`;
-
-  // Smooth exit fade at the very end (0.85 -> 0.98) so it doesn't abruptly jump when unsticking
-  const textOpacity = useTransform(scrollYProgress, [0.85, 0.98], [1, 0]);
-
-  // Smooth hero fadeout as user starts scrolling down (0 -> 0.12)
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.12], [1, 0]);
-  const heroY = useTransform(scrollYProgress, [0, 0.12], [0, -30]);
+  // Smooth hero fadeout as user starts scrolling into the manifesto lines (0 -> 0.10)
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.10], [1, 0]);
+  const heroY = useTransform(scrollYProgress, [0, 0.10], [0, -30]);
   const heroPointerEvents = useTransform(heroOpacity, (v) => (v > 0.05 ? "auto" : "none"));
 
   const content = (
     <div
       ref={targetRef}
-      className="relative z-0 h-[300vh] w-full bg-[#FBF8F2] text-[#1B2A22] overflow-x-hidden selection:bg-[#1E5B45] selection:text-white"
+      className="relative z-0 h-[350vh] w-full bg-[#FBF8F2] text-[#1B2A22] overflow-x-hidden selection:bg-[#1E5B45] selection:text-white"
     >
       {/* ─────────────────────────────────────────────────────────────
           TOP STICKY HEADER & CALL TO ACTION (Smooth fade on scroll)
@@ -182,34 +255,38 @@ export function PerspectiveHeroScroll() {
       </div>
 
       {/* ─────────────────────────────────────────────────────────────
-          SKIPER 28 3D PERSPECTIVE TEXT SCROLL
-          Exact perspective: 200px and rotateX: 30deg transform
+          SKIPER 28 3D PERSPECTIVE LINE-BY-LINE TEXT SCROLL
+          Exact perspective: 220px, rotateX: 30deg physics.
+          Each line transitions independently through the focal plane.
          ───────────────────────────────────────────────────────────── */}
       <div
         className="sticky top-0 mx-auto flex h-screen items-center justify-center bg-transparent py-20 overflow-hidden pointer-events-none"
         style={{
           transformStyle: "preserve-3d",
-          perspective: "200px",
+          perspective: "220px",
         }}
       >
-        <motion.div
+        {/* Soft atmospheric top and bottom gradient fades */}
+        <div className="pointer-events-none absolute top-0 left-0 z-10 h-32 w-full bg-gradient-to-b from-[#FBF8F2] to-transparent" />
+        <div className="pointer-events-none absolute bottom-0 left-0 z-10 h-40 w-full bg-gradient-to-t from-[#FBF8F2] to-transparent" />
+
+        {/* 3D Perspective Canvas with Independent Lines */}
+        <div
+          className="relative flex h-full w-full items-center justify-center"
           style={{
             transformStyle: "preserve-3d",
-            transform,
-            opacity: textOpacity,
           }}
-          className="w-full max-w-4xl text-center text-5xl sm:text-7xl font-bold tracking-tighter text-[#1E5B45] leading-tight select-none px-4"
         >
-          DECODE EVERY INGREDIENT .. UNMASK PACKAGED FOOD ..
-          ZERO MARKETING GIMMICKS .. ZERO MORAL JUDGMENTS ..
-          PLAIN-LANGUAGE EVIDENCE DIRECT FROM FOOD LABELS ..
-          100% PRIVATE ON-DEVICE SCANNING .. ZERO TRACKING ..
-          VERIFIED OPEN FOOD FACTS DATA .. FULL PROVENANCE TRACEABILITY ..
-          TRANSPARENT .. UNBIASED .. EVIDENCE YOU CAN TRUST ..
-          KNOW WHAT YOU EAT .. UNDERSTAND WHAT YOU BUY ..
-          INGRIVO IS THE TRUTH ON PACKAGED FOOD.
-          <div className="absolute bottom-0 left-0 h-[60vh] w-full bg-gradient-to-b from-transparent to-[#FBF8F2]" />
-        </motion.div>
+          {MANIFESTO_LINES.map((line, idx) => (
+            <ManifestoLine
+              key={idx}
+              text={line}
+              index={idx}
+              total={MANIFESTO_LINES.length}
+              scrollYProgress={scrollYProgress}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -224,3 +301,4 @@ export function PerspectiveHeroScroll() {
 
   return content;
 }
+
