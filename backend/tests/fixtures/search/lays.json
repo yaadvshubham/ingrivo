@@ -1,0 +1,188 @@
+{
+  "hits": [
+    {
+      "code": "6281036003164",
+      "brands": [
+        "Lays"
+      ],
+      "product_name": "Lays",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/628/103/600/3164/front_en.5.400.jpg"
+    },
+    {
+      "code": "6281036002655",
+      "brands": [
+        "Lays"
+      ],
+      "product_name": "Lays",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/628/103/600/2655/front_en.5.400.jpg"
+    },
+    {
+      "code": "8410199025258",
+      "brands": [
+        "lays"
+      ],
+      "product_name": "lays",
+      "categories": "en:potato-crisps",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/841/019/902/5258/front_en.4.400.jpg"
+    },
+    {
+      "code": "6281036002686",
+      "brands": [
+        "Lays"
+      ],
+      "product_name": "Lays",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/628/103/600/2686/front_en.5.400.jpg"
+    },
+    {
+      "code": "6281036003119",
+      "brands": [
+        "Lays"
+      ],
+      "product_name": "Lays",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/628/103/600/3119/front_en.5.400.jpg"
+    },
+    {
+      "code": "19640008",
+      "brands": [
+        "Lays"
+      ],
+      "product_name": "lays",
+      "categories": "Plant-based foods and beverages, Plant-based foods, Snacks, Cereals and potatoes, Salty snacks, Appetizers, Chips and fries, Crisps, Potato crisps",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/19640008/front_en.6.400.jpg"
+    },
+    {
+      "code": "6281036108203",
+      "brands": [
+        "Lays"
+      ],
+      "product_name": "Lays",
+      "categories": "Snacks",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/628/103/610/8203/front_en.12.400.jpg"
+    },
+    {
+      "code": "8964000101117",
+      "brands": [
+        "Lays"
+      ],
+      "product_name": "lays",
+      "categories": "Aliments et boissons à base de végétaux,Aliments d'origine végétale,Snacks,Céréales et pommes de terre,Snacks salés,Amuse-gueules,Chips et frites,Chips,Chips de pommes de terre",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/896/400/010/1117/front_en.6.400.jpg"
+    },
+    {
+      "code": "12210316",
+      "brands": [
+        "Lays"
+      ],
+      "product_name": "Lays",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/12210316/front_en.7.400.jpg"
+    },
+    {
+      "code": "6281036003218",
+      "brands": [
+        "Lays"
+      ],
+      "product_name": "Lays",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/628/103/600/3218/front_en.6.400.jpg"
+    },
+    {
+      "code": "6009510807462",
+      "brands": [
+        "lays"
+      ],
+      "product_name": "lays"
+    },
+    {
+      "code": "0028400752053",
+      "brands": [
+        "Lays"
+      ],
+      "nutriments": {
+        "carbohydrates_100g": 53.6,
+        "energy-kcal_100g": 536,
+        "fat_100g": 35.7,
+        "fiber_100g": 3.57,
+        "proteins_100g": 7.14,
+        "salt_100g": 1.25,
+        "saturated-fat_100g": 5.36,
+        "sodium_100g": 0.5,
+        "sugars_100g": 3.57
+      },
+      "product_name": "lays tzatziki"
+    }
+  ],
+  "aggregations": null,
+  "facets": {},
+  "charts": {},
+  "page": 1,
+  "page_size": 12,
+  "page_count": 101,
+  "debug": {
+    "query": {
+      "query": {
+        "bool": {
+          "should": [
+            {
+              "match_phrase": {
+                "product_name.en": {
+                  "query": "lays",
+                  "boost": 2.0
+                }
+              }
+            },
+            {
+              "match_phrase": {
+                "generic_name.en": {
+                  "query": "lays",
+                  "boost": 2.0
+                }
+              }
+            },
+            {
+              "match_phrase": {
+                "categories.en": {
+                  "query": "lays",
+                  "boost": 2.0
+                }
+              }
+            },
+            {
+              "match_phrase": {
+                "labels.en": {
+                  "query": "lays",
+                  "boost": 2.0
+                }
+              }
+            },
+            {
+              "match_phrase": {
+                "brands": {
+                  "query": "lays",
+                  "boost": 2.0
+                }
+              }
+            },
+            {
+              "multi_match": {
+                "query": "lays",
+                "fields": [
+                  "product_name.en",
+                  "generic_name.en",
+                  "categories.en",
+                  "labels.en",
+                  "brands"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "size": 12,
+      "from": 0
+    }
+  },
+  "took": 6,
+  "timed_out": false,
+  "count": 1206,
+  "is_count_exact": true,
+  "warnings": null
+}

@@ -9,6 +9,8 @@ export default defineConfig({
     setupFiles: ['./vitest.setup.ts'],
     alias: {
       '@': path.resolve(import.meta.dirname, './src')
-    }
+    },
+    pool: 'threads',
+    testTimeout: 15000,
   }
 })

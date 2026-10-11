@@ -1,0 +1,289 @@
+{
+  "hits": [
+    {
+      "code": "57045399",
+      "brands": [
+        "coca cola"
+      ],
+      "nutriments": {
+        "saturated-fat_100g": 0,
+        "proteins_100g": 0,
+        "salt_100g": 0,
+        "energy-kcal_100g": 42,
+        "fat_100g": 0,
+        "sodium_100g": 0,
+        "sugars_100g": 10.6,
+        "carbohydrates_100g": 10.6
+      },
+      "product_name": "Coca-Cola",
+      "categories": "Beverages, Carbonated drinks, Sodas, Colas, Sweetened beverages, es:Refresco",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/57045399/front_en.9.400.jpg"
+    },
+    {
+      "code": "0049000004632",
+      "brands": [
+        "Coca-Cola"
+      ],
+      "nutriments": {
+        "fiber_100g": 0,
+        "fat_100g": 0,
+        "salt_100g": 0,
+        "saturated-fat_100g": 0,
+        "sodium_100g": 0,
+        "energy-kcal_100g": 41.7,
+        "proteins_100g": 0,
+        "sugars_100g": 11,
+        "carbohydrates_100g": 11
+      },
+      "product_name": "Coca-Cola",
+      "categories": "Beverages, Carbonated drinks, Sodas, Colas, Sweetened beverages",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/004/900/000/4632/front_en.36.400.jpg"
+    },
+    {
+      "code": "4890008101306",
+      "brands": [
+        "Coca Cola"
+      ],
+      "nutriments": {
+        "carbohydrates_100g": 1.6,
+        "energy-kcal_100g": 0,
+        "energy-kj_100g": 0,
+        "fat_100g": 0,
+        "fiber_100g": 1.6,
+        "proteins_100g": 0,
+        "salt_100g": 0.03,
+        "saturated-fat_100g": 0,
+        "sodium_100g": 0.012,
+        "sugars_100g": 0
+      },
+      "product_name": "Coca Cola Plus",
+      "categories": "zh:Soft Drink, en:colas"
+    },
+    {
+      "code": "3948764012273",
+      "brands": [
+        "Coca cola"
+      ],
+      "nutriments": {
+        "carbohydrates_100g": 10.9,
+        "energy-kcal_100g": 44,
+        "fat_100g": 0,
+        "proteins_100g": 0,
+        "salt_100g": 0.02125,
+        "saturated-fat_100g": 0,
+        "sodium_100g": 0.0085,
+        "sugars_100g": 10.6
+      },
+      "product_name": "Coca cola Soft Drink 750ml",
+      "categories": "Beverages, Carbonated drinks, Sodas, Colas, Cola with sugar and artificial sweetener, en:sweetened-beverages",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/394/876/401/2273/front_en.7.400.jpg"
+    },
+    {
+      "code": "6415600567220",
+      "brands": [
+        "Coca-Cola"
+      ],
+      "nutriments": {
+        "carbohydrates_100g": 0,
+        "energy-kcal_100g": 0.3,
+        "energy-kj_100g": 1.4,
+        "fat_100g": 0,
+        "fiber_100g": 0,
+        "proteins_100g": 0,
+        "salt_100g": 0.01,
+        "saturated-fat_100g": 0,
+        "sodium_100g": 0.004,
+        "sugars_100g": 0
+      },
+      "product_name": "Coca-Cola Zero Sugar Kofeiiniton",
+      "categories": "Soft drinks",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/641/560/056/7220/front_en.3.400.jpg"
+    },
+    {
+      "code": "5000112594218",
+      "brands": [
+        "The Coca-Cola Company",
+        "Coca-Cola"
+      ],
+      "nutriments": {
+        "carbohydrates_100g": 0,
+        "energy-kj_100g": 0.9,
+        "fat_100g": 0,
+        "fiber_100g": 0,
+        "proteins_100g": 0,
+        "salt_100g": 0.02,
+        "saturated-fat_100g": 0,
+        "sodium_100g": 0.008,
+        "sugars_100g": 0
+      },
+      "product_name": "Coca cola Zero",
+      "categories": "Bevande e preparati per bevande,Bevande,Bevande effervescente,Bevande artificialmente zuccherate,Bibite gassate,Bevande dietetiche,Bevande analcoliche,Cola,Bibite gassate dietetiche,Cole dietetiche,Bevande zuccherate",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/500/011/259/4218/front.3.400.jpg"
+    },
+    {
+      "code": "7290000284316",
+      "brands": [
+        "קוקה קולה",
+        "Coca-Cola"
+      ],
+      "nutriments": {
+        "sugars_100g": 10.6,
+        "carbohydrates_100g": 10.6,
+        "proteins_100g": 0,
+        "energy-kcal_100g": 42,
+        "sodium_100g": 0.005,
+        "salt_100g": 0.0125,
+        "saturated-fat_100g": 0,
+        "fiber_100g": 0,
+        "fat_100g": 0
+      },
+      "product_name": "Coca-Cola Cachere- 1.5L- Klp -22",
+      "categories": "Beverages, Carbonated drinks, Sodas, Colas, משקאות קלים"
+    },
+    {
+      "code": "6954767410494",
+      "brands": [
+        "coca"
+      ],
+      "product_name": "coca-cola",
+      "categories": "Beverages, Sweetened beverages",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/695/476/741/0494/front_en.3.400.jpg"
+    },
+    {
+      "code": "9300675057899",
+      "brands": [
+        "Coke Zero"
+      ],
+      "nutriments": {
+        "carbohydrates_100g": 27,
+        "energy-kcal_100g": 108,
+        "energy-kj_100g": 1000,
+        "fat_100g": 20,
+        "proteins_100g": 0,
+        "salt_100g": 0.0625,
+        "saturated-fat_100g": 3,
+        "sodium_100g": 0.025,
+        "sugars_100g": 27
+      },
+      "product_name": "Coca Cola",
+      "categories": "Beverages and beverages preparations,Beverages,Carbonated drinks,Sodas,Colas",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/930/067/505/7899/front.3.400.jpg"
+    },
+    {
+      "code": "0049000046595",
+      "brands": [
+        "Coca Cola"
+      ],
+      "nutriments": {
+        "carbohydrates_100g": 53,
+        "energy-kcal_100g": 200,
+        "sugars_100g": 53
+      },
+      "product_name": "Coca Cola",
+      "categories": "Beverages, Carbonated drinks, Sodas"
+    },
+    {
+      "code": "5449000664686",
+      "brands": [
+        "Coca cola"
+      ],
+      "nutriments": {
+        "fat_100g": 0,
+        "sugars_100g": 10.6,
+        "fiber_100g": 0,
+        "proteins_100g": 0,
+        "salt_100g": 0.0175,
+        "saturated-fat_100g": 0,
+        "carbohydrates_100g": 11,
+        "energy-kcal_100g": 44,
+        "sodium_100g": 0.007000000000000001
+      },
+      "product_name": "Coca cola",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/544/900/066/4686/front_en.16.400.jpg"
+    },
+    {
+      "code": "87126037",
+      "brands": [
+        "Coca-Cola"
+      ],
+      "product_name": "Coca cola",
+      "categories": "Beverages, Carbonated drinks, Sodas, Colas, en:sweetened-beverages",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/87126037/front_en.27.400.jpg"
+    }
+  ],
+  "aggregations": null,
+  "facets": {},
+  "charts": {},
+  "page": 1,
+  "page_size": 12,
+  "page_count": 618,
+  "debug": {
+    "query": {
+      "query": {
+        "bool": {
+          "should": [
+            {
+              "match_phrase": {
+                "product_name.en": {
+                  "query": "coca cola",
+                  "boost": 2.0
+                }
+              }
+            },
+            {
+              "match_phrase": {
+                "generic_name.en": {
+                  "query": "coca cola",
+                  "boost": 2.0
+                }
+              }
+            },
+            {
+              "match_phrase": {
+                "categories.en": {
+                  "query": "coca cola",
+                  "boost": 2.0
+                }
+              }
+            },
+            {
+              "match_phrase": {
+                "labels.en": {
+                  "query": "coca cola",
+                  "boost": 2.0
+                }
+              }
+            },
+            {
+              "match_phrase": {
+                "brands": {
+                  "query": "coca cola",
+                  "boost": 2.0
+                }
+              }
+            },
+            {
+              "multi_match": {
+                "query": "coca cola",
+                "fields": [
+                  "product_name.en",
+                  "generic_name.en",
+                  "categories.en",
+                  "labels.en",
+                  "brands"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "size": 12,
+      "from": 0
+    }
+  },
+  "took": 13,
+  "timed_out": false,
+  "count": 7410,
+  "is_count_exact": true,
+  "warnings": null
+}

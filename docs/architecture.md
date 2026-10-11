@@ -28,6 +28,10 @@ Every field has provenance: `source` | `ocr` | `user_corrected` | `derived` | `m
 
 **Modular monolith.** Backend is stateless; in-memory cache is best-effort only.
 
+**Rate Limiting & Caching (Open Food Facts):**
+- In-memory TTLCache (LRU) for product lookups.
+- In-memory sliding window rate limiter (Inbound per-IP, Outbound globally to OFF).
+
 ---
 
 ## Data Flow Rules

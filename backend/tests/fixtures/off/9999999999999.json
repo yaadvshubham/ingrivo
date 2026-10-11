@@ -1,0 +1,23 @@
+{
+  "code": "9999999999999",
+  "errors": [],
+  "product": {
+    "allergens": "",
+    "allergens_tags": [],
+    "brands": "TestMarke",
+    "categories": "Snacks",
+    "code": "9999999999999",
+    "image_url": "https://images.openfoodfacts.net/images/products/999/999/999/9999/front_de.3.400.jpg",
+    "last_modified_t": 1791520430,
+    "nutriscore_grade": "unknown",
+    "product_name": "Test OCR packaging text",
+    "quantity": "1pcs"
+  },
+  "result": {
+    "id": "product_found",
+    "lc_name": "Product found",
+    "name": "Product found"
+  },
+  "status": "success",
+  "warnings": []
+}

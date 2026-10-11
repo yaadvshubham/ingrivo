@@ -17,7 +17,16 @@ class Settings(BaseSettings):
 
     # Open Food Facts
     OFF_BASE_URL: str = "https://world.openfoodfacts.org"
-    OFF_USER_AGENT: str = "Ingrivo/0.1.0 (https://github.com/ingrivo)"
+    OFF_USER_AGENT: str = "Ingrivo/0.1.0"
+    OFF_API_VERSION: str = "v3"
+    OFF_STAGING_BASIC_AUTH: str = ""
+    OFF_MAX_REQUESTS_PER_MIN: int = 12
+    INBOUND_MAX_REQUESTS_PER_MIN: int = 20
+
+    # Search (Phase 5: Search-a-licious)
+    SEARCH_BASE_URL: str = "https://search.openfoodfacts.org"
+    SEARCH_MAX_PER_MIN: int = 8
+    INBOUND_SEARCH_MAX_PER_MIN: int = 6
 
     # Gemini (optional for Phase 1)
     GEMINI_API_KEY: str = ""

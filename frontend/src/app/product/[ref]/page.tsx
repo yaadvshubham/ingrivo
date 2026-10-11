@@ -1,0 +1,615 @@
+"use client";
+
+import React, { useEffect, useState, use, Suspense } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import {
+  ArrowLeft,
+  AlertCircle,
+  Clock,
+  ExternalLink,
+  ChevronDown,
+  Info,
+  Camera,
+  Search as SearchIcon,
+} from "lucide-react";
+import { getProduct, ApiError } from "@/lib/api-client";
+import { Product } from "@/lib/schemas/product";
+import { ProvenanceBadge } from "@/components/ProvenanceBadge";
+import { MissingChip } from "@/components/MissingChip";
+import { DataRow } from "@/components/DataRow";
+import { DisabledAction } from "@/components/DisabledAction";
+import { Disclaimer } from "@/components/Disclaimer";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { buttonVariants } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+
+export interface ProductDetailViewProps {
+  refParam: string;
+}
+
+export function ProductDetailView({ refParam }: ProductDetailViewProps) {
+  // Validate ref format: bc-<digits>
+  const isBarcodeRef = /^bc-\d+$/.test(refParam);
+  const barcode = isBarcodeRef ? refParam.replace("bc-", "") : "";
+
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState<boolean>(Boolean(isBarcodeRef));
+  const [isSlow, setIsSlow] = useState<boolean>(false);
+  const [error, setError] = useState<ApiError | null>(null);
+  const [showOffComputed, setShowOffComputed] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!isBarcodeRef) {
+      return;
+    }
+
+    let isMounted = true;
+
+    getProduct(barcode, {
+      onSlow: () => {
+        if (isMounted) setIsSlow(true);
+      },
+    })
+      .then((data) => {
+        if (isMounted) {
+          setProduct(data);
+          setLoading(false);
+        }
+      })
+      .catch((err: unknown) => {
+        if (isMounted) {
+          if (err instanceof ApiError) {
+            setError(err);
+          } else {
+            setError(
+              new ApiError(
+                err instanceof Error ? err.message : "An unexpected error occurred.",
+                "UNKNOWN_ERROR",
+                500
+              )
+            );
+          }
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [barcode, isBarcodeRef]);
+
+  // 1. Invalid Reference Format
+  if (!isBarcodeRef) {
+    return (
+      <div className="max-w-xl mx-auto py-16 px-4 text-center space-y-6">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-stone-100 text-[#5E6B63]">
+          <AlertCircle className="h-6 w-6" aria-hidden="true" />
+        </div>
+        <h1 className="text-2xl font-bold text-[#1B2A22]">Invalid Product Reference</h1>
+        <p className="text-sm text-[#5E6B63]">
+          Expected a product barcode reference format (<code>bc-&lt;barcode&gt;</code>).
+        </p>
+        <div>
+          <Link href="/scan" className={buttonVariants({ variant: "outline" })}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Go to barcode entry
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // 2. Loading State with Skeleton & Server Wakeup Message
+  if (loading) {
+    return (
+      <div className="max-w-3xl mx-auto py-10 px-4 sm:px-6 space-y-6">
+        {isSlow && (
+          <div
+            role="status"
+            className="flex items-center gap-3 p-3.5 rounded-lg border border-amber-300 bg-amber-50 text-xs text-amber-900"
+          >
+            <Clock className="h-4 w-4 shrink-0 text-amber-700 animate-spin" />
+            <span>
+              Waking up the server or contacting Open Food Facts, this may take a few moments...
+            </span>
+          </div>
+        )}
+
+        <div className="flex items-center space-x-2">
+          <Skeleton className="h-4 w-28 bg-[#EFECE4]" />
+        </div>
+
+        <Card className="border border-[#E4DEC3] bg-white">
+          <CardContent className="pt-6 space-y-6">
+            <div className="flex flex-col sm:flex-row gap-6">
+              <Skeleton className="h-44 w-44 rounded-xl bg-[#EFECE4] shrink-0" />
+              <div className="space-y-3 flex-1">
+                <Skeleton className="h-8 w-3/4 bg-[#EFECE4]" />
+                <Skeleton className="h-5 w-1/3 bg-[#EFECE4]" />
+                <Skeleton className="h-4 w-1/4 bg-[#EFECE4]" />
+              </div>
+            </div>
+            <Skeleton className="h-24 w-full bg-[#EFECE4]" />
+            <Skeleton className="h-36 w-full bg-[#EFECE4]" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // 3. Error States (Product Not Found, Rate-limited, Upstream Timeout, Generic)
+  if (error || !product) {
+    const isNotFound = error?.code === "PRODUCT_NOT_FOUND" || error?.status === 404;
+    const isRateLimited = error?.code === "UPSTREAM_RATE_LIMITED" || error?.code === "RATE_LIMITED";
+    const isTimeout = error?.code === "UPSTREAM_TIMEOUT" || error?.status === 504;
+
+    return (
+      <div className="max-w-xl mx-auto py-14 px-4 sm:px-6 space-y-8">
+        <Card className="border border-[#E4DEC3] bg-white shadow-xs">
+          <CardHeader className="text-center space-y-2">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-stone-100 text-[#5E6B63]">
+              <AlertCircle className="h-6 w-6" aria-hidden="true" />
+            </div>
+            <CardTitle className="text-2xl font-bold text-[#1B2A22]">
+              {isNotFound
+                ? "Product Not Found"
+                : isRateLimited
+                ? "Rate Limit Reached"
+                : isTimeout
+                ? "Server Connection Timed Out"
+                : "Unable to Load Product"}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6 text-center">
+            <p className="text-sm text-[#5E6B63] leading-relaxed">
+              {isNotFound
+                ? `Barcode ${barcode} was not found in Open Food Facts. You can check the digits or use one of the alternative options below.`
+                : isRateLimited
+                ? "Too many requests were sent to Open Food Facts. Please wait a minute and retry."
+                : isTimeout
+                ? "Open Food Facts took too long to reply. Please check your internet connection or try again shortly."
+                : error?.message || "An unexpected error occurred while communicating with the service."}
+            </p>
+
+            {isNotFound && (
+              <div className="space-y-3 pt-2 text-left">
+                <p className="text-xs font-semibold text-[#1B2A22] uppercase tracking-wider">
+                  Available Alternatives
+                </p>
+                <div className="flex flex-col gap-2">
+                  <DisabledAction
+                    label="Search product by title"
+                    explanation="OFF Search integration planned for Phase 3"
+                    icon={<SearchIcon className="h-4 w-4" />}
+                    variant="secondary"
+                  />
+                  <DisabledAction
+                    label="Capture label photo (OCR)"
+                    explanation="On-device OCR parsing planned for Phase 4"
+                    icon={<Camera className="h-4 w-4" />}
+                    variant="outline"
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="pt-2 flex justify-center gap-3">
+              <Link href="/scan" className={buttonVariants({ variant: "outline" })}>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Try another barcode
+              </Link>
+              {!isNotFound && (
+                <button
+                  type="button"
+                  onClick={() => window.location.reload()}
+                  className={buttonVariants({ variant: "default" })}
+                >
+                  Retry request
+                </button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // 4. Normal Found Product View
+  const basisLabel =
+    product.nutrition.basis === "per_100g"
+      ? "per 100 g"
+      : product.nutrition.basis === "per_100ml"
+      ? "per 100 ml"
+      : product.nutrition.basis === "per_serving"
+      ? `per serving (${product.nutrition.serving_size || "size unstated"})`
+      : "basis not stated in source";
+
+  const isUnknownBasis = product.nutrition.basis === "unknown";
+
+  return (
+    <div className="max-w-3xl mx-auto py-8 px-4 sm:px-6 space-y-8">
+      {/* Back button */}
+      <div>
+        <Link
+          href="/scan"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-[#5E6B63] hover:text-[#1E5B45] transition-colors"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Back to barcode entry
+        </Link>
+      </div>
+
+      {/* 1. Overview */}
+      <Card className="border border-[#E4DEC3] bg-white shadow-xs">
+        <CardContent className="pt-6">
+          <div className="flex flex-col sm:flex-row gap-6 items-start">
+            {product.image_url ? (
+              <div className="relative w-full sm:w-44 h-44 bg-[#FBF8F2] rounded-xl border border-[#E4DEC3] overflow-hidden shrink-0 flex items-center justify-center">
+                <Image
+                  src={product.image_url}
+                  alt={product.name || "Packaged product image"}
+                  fill
+                  className="object-contain"
+                  unoptimized
+                />
+              </div>
+            ) : (
+              <div className="w-full sm:w-44 h-44 bg-stone-100 rounded-xl border border-stone-200 flex flex-col items-center justify-center shrink-0 text-[#5E6B63]">
+                <MissingChip label="No photo available" />
+              </div>
+            )}
+
+            <div className="space-y-2 flex-1">
+              <div className="flex items-center gap-2">
+                <ProvenanceBadge variant="source" />
+                {product.brand && (
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[#5E6B63]">
+                    {product.brand}
+                  </span>
+                )}
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1B2A22]">
+                {product.name || "Unnamed Product"}
+              </h1>
+              {product.quantity && (
+                <p className="text-xs text-[#5E6B63]">
+                  Quantity: <span className="font-medium text-[#1B2A22]">{product.quantity}</span>
+                </p>
+              )}
+              {product.categories.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {product.categories.slice(0, 4).map((cat, idx) => (
+                    <span
+                      key={idx}
+                      className="px-2 py-0.5 rounded text-[11px] font-normal bg-[#FBF8F2] text-[#5E6B63] border border-[#E4DEC3]"
+                    >
+                      {cat}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 2. Ingredients */}
+      <Card className="border border-[#E4DEC3] bg-white shadow-xs">
+        <CardHeader className="pb-3 border-b border-[#E4DEC3]/60 flex flex-row items-center justify-between">
+          <CardTitle className="text-lg font-bold text-[#1B2A22]">
+            Ingredients
+          </CardTitle>
+          <ProvenanceBadge variant={product.ingredients.provenance} />
+        </CardHeader>
+        <CardContent className="pt-4 space-y-3">
+          {product.ingredients.raw_text ? (
+            <p className="text-sm text-[#1B2A22] leading-relaxed bg-[#FBF8F2] p-3.5 rounded-lg border border-[#E4DEC3]">
+              {product.ingredients.raw_text}
+            </p>
+          ) : (
+            <div className="flex items-center gap-2">
+              <MissingChip label="No ingredients listed in source data" />
+            </div>
+          )}
+          {product.ingredients.items.length > 0 && (
+            <div className="pt-2">
+              <span className="text-xs font-semibold text-[#5E6B63] block mb-1.5">
+                Structured components ({product.ingredients.items.length}):
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {product.ingredients.items.map((it, i) => (
+                  <span
+                    key={i}
+                    className="text-xs px-2 py-0.5 rounded bg-stone-100 text-stone-700 border border-stone-200"
+                  >
+                    {it}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* 3. Nutrition Table */}
+      <Card className="border border-[#E4DEC3] bg-white shadow-xs">
+        <CardHeader className="pb-3 border-b border-[#E4DEC3]/60 flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-lg font-bold text-[#1B2A22]">
+              Nutrition Values
+            </CardTitle>
+            <span className="text-xs font-semibold text-[#1E5B45]">
+              Basis: {basisLabel}
+            </span>
+          </div>
+          <ProvenanceBadge variant={product.nutrition.provenance} />
+        </CardHeader>
+        <CardContent className="pt-4 space-y-4">
+          {isUnknownBasis && (
+            <div className="flex items-center gap-2 p-2.5 rounded-md border border-amber-300 bg-amber-50 text-xs text-amber-900">
+              <Info className="h-4 w-4 shrink-0 text-amber-700" />
+              <span>
+                Note: Nutrition basis is not specified in the database. Amounts may be per 100g or per serving.
+              </span>
+            </div>
+          )}
+
+          <div className="rounded-lg border border-[#E4DEC3]/80 bg-[#FBF8F2]/60 overflow-hidden divide-y divide-[#E4DEC3]/60">
+            <DataRow
+              label="Energy"
+              value={
+                product.nutrition.values.energy_kcal !== null
+                  ? `${product.nutrition.values.energy_kcal} kcal${
+                      product.nutrition.values.energy_kj !== null
+                        ? ` (${product.nutrition.values.energy_kj} kJ)`
+                        : ""
+                    }`
+                  : null
+              }
+              provenance="source"
+            />
+            <DataRow
+              label="Total Fat"
+              value={product.nutrition.values.fat}
+              unit="g"
+              provenance="source"
+            />
+            <DataRow
+              label="Saturated Fat"
+              value={product.nutrition.values.saturated_fat}
+              unit="g"
+              provenance="source"
+            />
+            <DataRow
+              label="Carbohydrates"
+              value={product.nutrition.values.carbohydrates}
+              unit="g"
+              provenance="source"
+            />
+            <DataRow
+              label="Total Sugars"
+              value={product.nutrition.values.sugars}
+              unit="g"
+              provenance="source"
+            />
+            <DataRow
+              label="Dietary Fibre"
+              value={product.nutrition.values.fibre}
+              unit="g"
+              provenance="source"
+            />
+            <DataRow
+              label="Protein"
+              value={product.nutrition.values.protein}
+              unit="g"
+              provenance="source"
+            />
+            <DataRow
+              label="Salt"
+              value={product.nutrition.values.salt}
+              unit="g"
+              provenance="source"
+            />
+            <DataRow
+              label="Sodium"
+              value={product.nutrition.values.sodium}
+              unit="g"
+              provenance="source"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 4. Allergens */}
+      <Card className="border border-[#E4DEC3] bg-white shadow-xs">
+        <CardHeader className="pb-3 border-b border-[#E4DEC3]/60 flex flex-row items-center justify-between">
+          <CardTitle className="text-lg font-bold text-[#1B2A22]">
+            Allergen Information
+          </CardTitle>
+          <ProvenanceBadge variant={product.allergens.provenance} />
+        </CardHeader>
+        <CardContent className="pt-4 space-y-3">
+          {product.allergens.declared.length > 0 ? (
+            <div>
+              <span className="text-xs font-semibold text-[#1B2A22] block mb-1">
+                Declared Allergens:
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {product.allergens.declared.map((a, i) => (
+                  <span
+                    key={i}
+                    className="text-xs px-2.5 py-1 rounded-md bg-amber-50 text-amber-900 border border-amber-200 font-medium"
+                  >
+                    {a}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <p className="text-xs text-[#5E6B63] bg-[#FBF8F2] p-3 rounded border border-[#E4DEC3]">
+              No allergens are listed in the source data. Always check the physical package for manufacturing alerts.
+            </p>
+          )}
+
+          {product.allergens.traces.length > 0 && (
+            <div className="pt-2">
+              <span className="text-xs font-semibold text-[#5E6B63] block mb-1">
+                May contain traces of:
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {product.allergens.traces.map((t, i) => (
+                  <span
+                    key={i}
+                    className="text-xs px-2 py-0.5 rounded bg-stone-100 text-stone-700 border border-stone-200"
+                  >
+                    {t}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* 5. Data Completeness */}
+      <Card className="border border-[#E4DEC3] bg-white shadow-xs">
+        <CardHeader className="pb-3 border-b border-[#E4DEC3]/60">
+          <CardTitle className="text-lg font-bold text-[#1B2A22]">
+            Source Data Completeness
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-[#1B2A22]">
+              Completeness Score
+            </span>
+            <span className="text-sm font-bold text-[#1E5B45]">
+              {Math.round(product.completeness.score * 100)}%
+            </span>
+          </div>
+          <div className="w-full bg-[#EFECE4] rounded-full h-2">
+            <div
+              className="bg-[#1E5B45] h-2 rounded-full transition-all"
+              style={{ width: `${Math.round(product.completeness.score * 100)}%` }}
+            />
+          </div>
+          {product.completeness.missing.length > 0 ? (
+            <div className="pt-2">
+              <span className="text-xs font-semibold text-[#5E6B63] block mb-1">
+                Missing from source record ({product.completeness.missing.length}):
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {product.completeness.missing.map((m, i) => (
+                  <span
+                    key={i}
+                    className="text-xs px-2 py-0.5 rounded bg-stone-100 text-[#5E6B63] border border-stone-200"
+                  >
+                    {m}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <p className="text-xs text-[#1E5B45]">
+              All core fields are documented in the source record.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* 6. Open Food Facts Computed Fields (Collapsed) */}
+      <Card className="border border-[#E4DEC3] bg-[#FBF8F2] shadow-xs">
+        <CardContent className="pt-4">
+          <button
+            type="button"
+            onClick={() => setShowOffComputed(!showOffComputed)}
+            className="flex items-center justify-between w-full text-left text-xs font-semibold text-[#5E6B63] hover:text-[#1B2A22]"
+            aria-expanded={showOffComputed}
+          >
+            <span>Computed by Open Food Facts, not by Ingrivo</span>
+            <ChevronDown
+              className={`h-4 w-4 transition-transform ${
+                showOffComputed ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+
+          {showOffComputed && (
+            <div className="pt-4 mt-3 border-t border-[#E4DEC3] space-y-2 text-xs text-[#5E6B63]">
+              <p>
+                <strong>Nutri-Score: </strong>
+                {product.source_computed.nutriscore
+                  ? product.source_computed.nutriscore.toUpperCase()
+                  : "Not computed"}
+              </p>
+              <p>
+                <strong>NOVA Group: </strong>
+                {product.source_computed.nova_group !== null
+                  ? `Group ${product.source_computed.nova_group}`
+                  : "Not computed"}
+              </p>
+              {product.source_computed.additive_tags.length > 0 && (
+                <div>
+                  <strong>Additives tagged by OFF: </strong>
+                  {product.source_computed.additive_tags.join(", ")}
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* 7. Source Attribution & Legal Disclaimer */}
+      <div className="rounded-xl border border-[#E4DEC3] bg-[#EFECE4]/50 p-4 space-y-3 text-xs text-[#5E6B63]">
+        <div className="flex items-center justify-between">
+          <span className="font-semibold text-[#1B2A22]">Data Source Attribution</span>
+          {product.source.product_url && (
+            <a
+              href={product.source.product_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-[#1E5B45] hover:underline"
+            >
+              View on Open Food Facts
+              <ExternalLink className="h-3 w-3" />
+            </a>
+          )}
+        </div>
+        <p className="leading-relaxed">
+          Product data retrieved from Open Food Facts under the Open Database License (ODbL).
+          Last modified in source: {product.source.last_modified || "Not recorded"}.
+          Product images are licensed under Creative Commons Attribution-ShareAlike (CC BY-SA).
+        </p>
+        <p className="leading-relaxed text-[#1B2A22]">
+          Open Food Facts is community-contributed; records may be incomplete or wrong. Always check physical package labels.
+        </p>
+        <Disclaimer />
+      </div>
+    </div>
+  );
+}
+
+function ProductPageContent({ paramsPromise }: { paramsPromise: Promise<{ ref: string }> }) {
+  const resolved = use(paramsPromise);
+  return <ProductDetailView refParam={resolved.ref} />;
+}
+
+interface PageProps {
+  params: Promise<{ ref: string }>;
+}
+
+export default function ProductPage({ params }: PageProps) {
+  return (
+    <Suspense
+      fallback={
+        <div className="max-w-3xl mx-auto py-10 px-4 sm:px-6 space-y-6">
+          <Skeleton className="h-8 w-48 bg-[#EFECE4]" />
+          <Skeleton className="h-64 w-full bg-[#EFECE4] rounded-xl" />
+        </div>
+      }
+    >
+      <ProductPageContent paramsPromise={params} />
+    </Suspense>
+  );
+}

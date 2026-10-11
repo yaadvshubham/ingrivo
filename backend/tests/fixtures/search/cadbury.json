@@ -1,0 +1,258 @@
+{
+  "hits": [
+    {
+      "code": "2000000145610",
+      "brands": [
+        "Cadbury"
+      ],
+      "product_name": "Cadbury Dairy Milk Milk Chocolate",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/200/000/014/5610/front_en.3.400.jpg"
+    },
+    {
+      "code": "7622210987884",
+      "brands": [
+        "Cadbury"
+      ],
+      "nutriments": {
+        "sodium_100g": 0.096,
+        "fiber_100g": 2.1,
+        "fat_100g": 30,
+        "salt_100g": 0.24,
+        "saturated-fat_100g": 18,
+        "sugars_100g": 56,
+        "carbohydrates_100g": 56,
+        "energy-kcal_100g": 537,
+        "proteins_100g": 7.3
+      },
+      "product_name": "Cadbury chocolate egg",
+      "categories": "Snacks, Sweet snacks, Confectioneries",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/762/221/098/7884/front_fr.4.400.jpg"
+    },
+    {
+      "code": "7622210449061",
+      "brands": [
+        "Cadbury"
+      ],
+      "nutriments": {
+        "salt_100g": 0.24,
+        "saturated-fat_100g": 18,
+        "fiber_100g": 2.1,
+        "fat_100g": 30,
+        "sodium_100g": 0.096,
+        "proteins_100g": 7.3,
+        "energy-kcal_100g": 537,
+        "carbohydrates_100g": 56,
+        "sugars_100g": 56
+      },
+      "product_name": "Cadbury chocolate egg",
+      "categories": "Snacks, Sweet snacks, Cocoa and its products, Confectioneries, Chocolates",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/762/221/044/9061/front_en.19.400.jpg"
+    },
+    {
+      "code": "7622210498519",
+      "brands": [
+        "Cadbury"
+      ],
+      "nutriments": {
+        "carbohydrates_100g": 56,
+        "energy-kcal_100g": 537,
+        "fat_100g": 26,
+        "fiber_100g": 1.6,
+        "proteins_100g": 6,
+        "salt_100g": 0.24,
+        "saturated-fat_100g": 16,
+        "sodium_100g": 0.096,
+        "sugars_100g": 58.5
+      },
+      "product_name": "Cadbury chocolate egg",
+      "categories": "Snacks, Sweet snacks, Cocoa and its products, Confectioneries, Chocolate candies",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/762/221/049/8519/front_en.13.400.jpg"
+    },
+    {
+      "code": "7622210430458",
+      "brands": [
+        "Cadbury"
+      ],
+      "nutriments": {
+        "fat_100g": 23.5,
+        "sugars_100g": 57.5,
+        "saturated-fat_100g": 14,
+        "fiber_100g": 1.4,
+        "proteins_100g": 5.1
+      },
+      "product_name": "Cadbury selection chocolate-mixed unit",
+      "categories": "Snacks, Sweet snacks, Confectioneries"
+    },
+    {
+      "code": "7622210438768",
+      "brands": [
+        "Cadbury"
+      ],
+      "nutriments": {
+        "sugars_100g": 57.5,
+        "saturated-fat_100g": 14,
+        "fat_100g": 23.5,
+        "fiber_100g": 1.4,
+        "proteins_100g": 5.1
+      },
+      "product_name": "Cadbury selection chocolate-mixed unit",
+      "categories": "Snacks, Sweet snacks, Confectioneries"
+    },
+    {
+      "code": "7622210438812",
+      "brands": [
+        "Cadbury"
+      ],
+      "nutriments": {
+        "fat_100g": 20.5,
+        "sugars_100g": 55,
+        "saturated-fat_100g": 11.5,
+        "proteins_100g": 3.8,
+        "fiber_100g": 0.9
+      },
+      "product_name": "Cadbury selection chocolate-mixed unit",
+      "categories": "Snacks, Sweet snacks, Confectioneries"
+    },
+    {
+      "code": "7622210318558",
+      "brands": [
+        "Cadbury"
+      ],
+      "nutriments": {
+        "proteins_100g": 5,
+        "fiber_100g": 1.4,
+        "saturated-fat_100g": 13,
+        "sugars_100g": 58,
+        "fat_100g": 23
+      },
+      "product_name": "Cadbury variety variety pack",
+      "categories": "Snacks, Sweet snacks, Confectioneries"
+    },
+    {
+      "code": "7622210438782",
+      "brands": [
+        "Cadbury"
+      ],
+      "nutriments": {
+        "fiber_100g": 1.5,
+        "proteins_100g": 5.4,
+        "fat_100g": 25,
+        "sugars_100g": 57,
+        "saturated-fat_100g": 15
+      },
+      "product_name": "Cadbury dairy milk chocolate-mixed unit",
+      "categories": "Snacks, Sweet snacks, Confectioneries"
+    },
+    {
+      "code": "32261707",
+      "brands": [
+        "Cadbury"
+      ],
+      "product_name": "Cadbury"
+    },
+    {
+      "code": "7622201807405",
+      "brands": [
+        "Cadbury"
+      ],
+      "nutriments": {
+        "carbohydrates_100g": 48,
+        "energy-kcal_100g": 540,
+        "fat_100g": 34.8,
+        "proteins_100g": 8.8
+      },
+      "product_name": "Cadbury Chocolate con Almendras",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/762/220/180/7405/front_fr.3.400.jpg"
+    },
+    {
+      "code": "7622210318572",
+      "brands": [
+        "Cadbury"
+      ],
+      "nutriments": {
+        "fat_100g": 22,
+        "sugars_100g": 57,
+        "saturated-fat_100g": 12,
+        "fiber_100g": 1.2,
+        "proteins_100g": 4.4
+      },
+      "product_name": "Cadbury variety variety pack",
+      "categories": "Snacks, Sweet snacks, Confectioneries"
+    }
+  ],
+  "aggregations": null,
+  "facets": {},
+  "charts": {},
+  "page": 1,
+  "page_size": 12,
+  "page_count": 193,
+  "debug": {
+    "query": {
+      "query": {
+        "bool": {
+          "should": [
+            {
+              "match_phrase": {
+                "product_name.en": {
+                  "query": "cadbury",
+                  "boost": 2.0
+                }
+              }
+            },
+            {
+              "match_phrase": {
+                "generic_name.en": {
+                  "query": "cadbury",
+                  "boost": 2.0
+                }
+              }
+            },
+            {
+              "match_phrase": {
+                "categories.en": {
+                  "query": "cadbury",
+                  "boost": 2.0
+                }
+              }
+            },
+            {
+              "match_phrase": {
+                "labels.en": {
+                  "query": "cadbury",
+                  "boost": 2.0
+                }
+              }
+            },
+            {
+              "match_phrase": {
+                "brands": {
+                  "query": "cadbury",
+                  "boost": 2.0
+                }
+              }
+            },
+            {
+              "multi_match": {
+                "query": "cadbury",
+                "fields": [
+                  "product_name.en",
+                  "generic_name.en",
+                  "categories.en",
+                  "labels.en",
+                  "brands"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "size": 12,
+      "from": 0
+    }
+  },
+  "took": 17,
+  "timed_out": false,
+  "count": 2305,
+  "is_count_exact": true,
+  "warnings": null
+}

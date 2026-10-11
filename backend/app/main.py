@@ -12,7 +12,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.core.config import settings, APP_VERSION
 from app.core.errors import error_envelope
-from app.routers import health
+from app.routers import health, products
 
 logger = logging.getLogger("ingrivo")
 
@@ -98,11 +98,22 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 async def http_exception_handler(request: Request, exc: StarletteHTTPException):
     """Handle HTTP exceptions (404, 405, etc.)."""
     request_id = getattr(request.state, "request_id", "unknown")
+    
+    code = f"HTTP_{exc.status_code}"
+    message = str(exc.detail)
+    
+    # Allow routers to specify custom codes by prefixing detail with CODE:
+    if ":" in message:
+        potential_code, rest = message.split(":", 1)
+        if potential_code.replace("_", "").isalpha() and potential_code.isupper():
+            code = potential_code
+            message = rest
+
     return JSONResponse(
         status_code=exc.status_code,
         content=error_envelope(
-            code=f"HTTP_{exc.status_code}",
-            message=str(exc.detail),
+            code=code,
+            message=message,
             request_id=request_id,
         ),
     )
@@ -127,3 +138,4 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
 # Routers
 # ---------------------------------------------------------------------------
 app.include_router(health.router)
+app.include_router(products.router)

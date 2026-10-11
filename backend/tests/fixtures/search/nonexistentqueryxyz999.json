@@ -1,0 +1,78 @@
+{
+  "hits": [],
+  "aggregations": null,
+  "facets": {},
+  "charts": {},
+  "page": 1,
+  "page_size": 12,
+  "page_count": 0,
+  "debug": {
+    "query": {
+      "query": {
+        "bool": {
+          "should": [
+            {
+              "match_phrase": {
+                "product_name.en": {
+                  "query": "nonexistentqueryxyz999",
+                  "boost": 2.0
+                }
+              }
+            },
+            {
+              "match_phrase": {
+                "generic_name.en": {
+                  "query": "nonexistentqueryxyz999",
+                  "boost": 2.0
+                }
+              }
+            },
+            {
+              "match_phrase": {
+                "categories.en": {
+                  "query": "nonexistentqueryxyz999",
+                  "boost": 2.0
+                }
+              }
+            },
+            {
+              "match_phrase": {
+                "labels.en": {
+                  "query": "nonexistentqueryxyz999",
+                  "boost": 2.0
+                }
+              }
+            },
+            {
+              "match_phrase": {
+                "brands": {
+                  "query": "nonexistentqueryxyz999",
+                  "boost": 2.0
+                }
+              }
+            },
+            {
+              "multi_match": {
+                "query": "nonexistentqueryxyz999",
+                "fields": [
+                  "product_name.en",
+                  "generic_name.en",
+                  "categories.en",
+                  "labels.en",
+                  "brands"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "size": 12,
+      "from": 0
+    }
+  },
+  "took": 2,
+  "timed_out": false,
+  "count": 0,
+  "is_count_exact": true,
+  "warnings": null
+}

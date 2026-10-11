@@ -1,0 +1,231 @@
+{
+  "hits": [
+    {
+      "code": "8901491367219",
+      "brands": [
+        "kurkure"
+      ],
+      "product_name": "kurkure",
+      "categories": "Kurkure",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/890/149/136/7219/front_en.6.400.jpg"
+    },
+    {
+      "code": "8901491103084",
+      "brands": [
+        "PepsiCo",
+        "Kurkure"
+      ],
+      "nutriments": {
+        "sugars_100g": 2.1,
+        "carbohydrates_100g": 56.3,
+        "energy-kcal_100g": 561,
+        "proteins_100g": 5.9,
+        "sodium_100g": 0.9590000000000001,
+        "fat_100g": 34.7,
+        "saturated-fat_100g": 15.6,
+        "salt_100g": 2.3975
+      },
+      "product_name": "Green chutney style",
+      "categories": "Botanas, Snacks salados",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/890/149/110/3084/front_es.3.400.jpg"
+    },
+    {
+      "code": "8901491103060",
+      "brands": [
+        "Kurkure"
+      ],
+      "product_name": "Kurkure Hyderabadi Hungama",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/890/149/110/3060/front_en.3.400.jpg"
+    },
+    {
+      "code": "6281036024046",
+      "brands": [
+        "Kurkure"
+      ],
+      "nutriments": {
+        "carbohydrates_100g": 56.7,
+        "energy-kcal_100g": 547,
+        "fat_100g": 33.3,
+        "fiber_100g": 0.667,
+        "proteins_100g": 5,
+        "salt_100g": 1.72,
+        "saturated-fat_100g": 15.7,
+        "sodium_100g": 0.687,
+        "sugars_100g": 2.33
+      },
+      "product_name": "Kurkure masala",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/628/103/602/4046/front_en.3.400.jpg"
+    },
+    {
+      "code": "8901491100519",
+      "brands": [
+        "Kurkure"
+      ],
+      "nutriments": {
+        "carbohydrates_100g": 57.3,
+        "energy-kcal_100g": 555,
+        "fat_100g": 33.6,
+        "proteins_100g": 6.4,
+        "salt_100g": 1.74,
+        "saturated-fat_100g": 15.1,
+        "sodium_100g": 0.694,
+        "sugars_100g": 1.4
+      },
+      "product_name": "Kurkure Masala Munch 20rs",
+      "categories": "Snacks, Salty snacks",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/890/149/110/0519/front_en.29.400.jpg"
+    },
+    {
+      "code": "5908028103084",
+      "brands": [
+        "kurkure green chutney rajasthani"
+      ],
+      "product_name": "kurkure"
+    },
+    {
+      "code": "8901491366229",
+      "brands": [
+        "Kurkure"
+      ],
+      "nutriments": {
+        "carbohydrates_100g": 58.7,
+        "energy-kcal_100g": 528,
+        "energy-kj_100g": 2211,
+        "fat_100g": 28.7,
+        "proteins_100g": 8.6,
+        "salt_100g": 2.195,
+        "saturated-fat_100g": 12.9,
+        "sodium_100g": 0.878,
+        "sugars_100g": 0.5
+      },
+      "product_name": "Kurkure Solid Masti Masala Twisteez Crisps",
+      "categories": "Namkeen",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/890/149/136/6229/front_en.15.400.jpg"
+    },
+    {
+      "code": "3964491366052",
+      "brands": [
+        "Kurkure 20rs"
+      ],
+      "product_name": "Kurkure YUMMY CHEESE PLAV"
+    },
+    {
+      "code": "8964002347292",
+      "nutriments": {
+        "carbohydrates_100g": 54.2000007629395,
+        "energy-kcal_100g": 510,
+        "fat_100g": 30.2000007629395,
+        "fiber_100g": 3,
+        "proteins_100g": 5.19999980926514,
+        "saturated-fat_100g": 13.8999996185303,
+        "sugars_100g": 4.80000019073486
+      },
+      "product_name": "Kurkure",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/896/400/234/7292/front_en.3.400.jpg"
+    },
+    {
+      "code": "0251921100519",
+      "product_name": "Kurkure",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/025/192/110/0519/front_en.3.400.jpg"
+    },
+    {
+      "code": "0710535945683",
+      "product_name": "kurkure",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/071/053/594/5683/front_en.3.400.jpg"
+    },
+    {
+      "code": "8964000102978",
+      "brands": [
+        "Pepsi cola international (Pvt) ltd"
+      ],
+      "nutriments": {
+        "energy-kcal_100g": 555,
+        "proteins_100g": 5,
+        "sugars_100g": 2,
+        "carbohydrates_100g": 55,
+        "fiber_100g": 2,
+        "fat_100g": 35,
+        "salt_100g": 1.75,
+        "saturated-fat_100g": 4,
+        "sodium_100g": 0.7
+      },
+      "product_name": "Kurkure",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/896/400/010/2978/front_en.14.400.jpg"
+    }
+  ],
+  "aggregations": null,
+  "facets": {},
+  "charts": {},
+  "page": 1,
+  "page_size": 12,
+  "page_count": 4,
+  "debug": {
+    "query": {
+      "query": {
+        "bool": {
+          "should": [
+            {
+              "match_phrase": {
+                "product_name.en": {
+                  "query": "kurkure",
+                  "boost": 2.0
+                }
+              }
+            },
+            {
+              "match_phrase": {
+                "generic_name.en": {
+                  "query": "kurkure",
+                  "boost": 2.0
+                }
+              }
+            },
+            {
+              "match_phrase": {
+                "categories.en": {
+                  "query": "kurkure",
+                  "boost": 2.0
+                }
+              }
+            },
+            {
+              "match_phrase": {
+                "labels.en": {
+                  "query": "kurkure",
+                  "boost": 2.0
+                }
+              }
+            },
+            {
+              "match_phrase": {
+                "brands": {
+                  "query": "kurkure",
+                  "boost": 2.0
+                }
+              }
+            },
+            {
+              "multi_match": {
+                "query": "kurkure",
+                "fields": [
+                  "product_name.en",
+                  "generic_name.en",
+                  "categories.en",
+                  "labels.en",
+                  "brands"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "size": 12,
+      "from": 0
+    }
+  },
+  "took": 5,
+  "timed_out": false,
+  "count": 41,
+  "is_count_exact": true,
+  "warnings": null
+}

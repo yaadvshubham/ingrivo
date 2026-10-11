@@ -1,0 +1,10 @@
+# Test queries for Phase 5 Product Search
+coca cola
+nutella
+pringles
+lays
+cadbury
+kurkure
+amul milk
+parle g
+nonexistentqueryxyz999

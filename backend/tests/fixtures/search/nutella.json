@@ -1,0 +1,274 @@
+{
+  "hits": [
+    {
+      "code": "0009800800049",
+      "brands": [
+        "Nutella"
+      ],
+      "nutriments": {
+        "energy-kcal_100g": 519.23,
+        "proteins_100g": 7.6899999999999995,
+        "sodium_100g": 0.23448000000000002,
+        "saturated-fat_100g": 9.62,
+        "salt_100g": 0.5862,
+        "sugars_100g": 44.23,
+        "carbohydrates_100g": 63.46,
+        "fat_100g": 25,
+        "fiber_100g": 3.8
+      },
+      "product_name": "Nutella & go! hazelnut spread + breadsticks",
+      "categories": "Snacks",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/000/980/080/0049/front_en.5.400.jpg"
+    },
+    {
+      "code": "0098008952506",
+      "brands": [
+        "Nutella"
+      ],
+      "nutriments": {
+        "fat_100g": 29.72972972973,
+        "proteins_100g": 5.4054054054054,
+        "sugars_100g": 56.756756756757,
+        "saturated-fat_100g": 10.810810810811,
+        "carbohydrates_100g": 59.459459459459,
+        "salt_100g": 0.10135135135135,
+        "energy-kcal_100g": 540.54054054054,
+        "sodium_100g": 0.04054054054054
+      },
+      "product_name": "Nutella",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/009/800/895/2506/front_en.3.400.jpg"
+    },
+    {
+      "code": "0613460834124",
+      "brands": [
+        "Nutella"
+      ],
+      "nutriments": {
+        "salt_100g": 0.10135135135135,
+        "carbohydrates_100g": 59.459459459459,
+        "saturated-fat_100g": 10.810810810811,
+        "sodium_100g": 0.04054054054054,
+        "energy-kcal_100g": 540.54054054054,
+        "sugars_100g": 56.756756756757,
+        "fiber_100g": 2.7027027027027,
+        "proteins_100g": 5.4054054054054,
+        "fat_100g": 29.72972972973
+      },
+      "product_name": "nutella",
+      "categories": "Breakfasts, Spreads, Sweet spreads, fr:Pâtes à tartiner, Chocolate spreads",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/061/346/083/4124/front_en.3.400.jpg"
+    },
+    {
+      "code": "12214181",
+      "brands": [
+        "Nutella"
+      ],
+      "product_name": "nutella"
+    },
+    {
+      "code": "94557336",
+      "brands": [
+        "Nutella"
+      ],
+      "product_name": "Nutella",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/94557336/front_en.3.400.jpg"
+    },
+    {
+      "code": "56587982",
+      "brands": [
+        "Nutella"
+      ],
+      "nutriments": {
+        "carbohydrates_100g": 59.459459459459,
+        "energy-kcal_100g": 540.54054054054,
+        "fat_100g": 29.72972972973,
+        "fiber_100g": 2.7027027027027,
+        "proteins_100g": 5.4054054054054,
+        "salt_100g": 0.10135135135135,
+        "saturated-fat_100g": 10.810810810811,
+        "sodium_100g": 0.04054054054054,
+        "sugars_100g": 56.756756756757
+      },
+      "product_name": "Nutella",
+      "categories": "Breakfasts, Spreads, Sweet spreads, fr:Pâtes à tartiner, Hazelnut spreads, Chocolate spreads, Cocoa and hazelnuts spreads",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/56587982/front_en.3.400.jpg"
+    },
+    {
+      "code": "00987533",
+      "brands": [
+        "Nutella"
+      ],
+      "nutriments": {
+        "sugars_100g": 56.756756756757,
+        "fiber_100g": 2.7027027027027,
+        "proteins_100g": 5.4054054054054,
+        "fat_100g": 29.72972972973,
+        "salt_100g": 0.10135135135135,
+        "saturated-fat_100g": 10.810810810811,
+        "carbohydrates_100g": 59.459459459459,
+        "sodium_100g": 0.04054054054054,
+        "energy-kcal_100g": 540.54054054054
+      },
+      "product_name": "Nutella",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/00987533/front_en.3.400.jpg"
+    },
+    {
+      "code": "8000500327388",
+      "brands": [
+        "Nutella"
+      ],
+      "nutriments": {
+        "sodium_100g": 0.0428,
+        "sugars_100g": 56.3,
+        "carbohydrates_100g": 57.5,
+        "salt_100g": 0.107,
+        "saturated-fat_100g": 10.6,
+        "proteins_100g": 6.3,
+        "fat_100g": 30.9,
+        "energy-kcal_100g": 539
+      },
+      "product_name": "Nutella",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/800/050/032/7388/front_en.3.400.jpg"
+    },
+    {
+      "code": "0009800000753",
+      "brands": [
+        "Nutella"
+      ],
+      "product_name": "Nutella",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/000/980/000/0753/front_en.6.400.jpg"
+    },
+    {
+      "code": "18377781",
+      "brands": [
+        "Nutella"
+      ],
+      "nutriments": {
+        "sugars_100g": 56.756756756757,
+        "fiber_100g": 2.7027027027027,
+        "proteins_100g": 5.4054054054054,
+        "fat_100g": 29.72972972973,
+        "sodium_100g": 0.04054054054054,
+        "energy-kcal_100g": 527.02702702703,
+        "salt_100g": 0.10135135135135,
+        "saturated-fat_100g": 10.810810810811,
+        "carbohydrates_100g": 59.459459459459
+      },
+      "product_name": "Nutella",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/18377781/front_en.3.400.jpg"
+    },
+    {
+      "code": "0852469006020",
+      "brands": [
+        "Nutella"
+      ],
+      "nutriments": {
+        "carbohydrates_100g": 59.459459459459,
+        "saturated-fat_100g": 10.810810810811,
+        "salt_100g": 0.10135135135135,
+        "energy-kcal_100g": 5.4054054054054,
+        "sodium_100g": 0.04054054054054,
+        "fat_100g": 29.72972972973,
+        "proteins_100g": 5.4054054054054,
+        "fiber_100g": 2.7027027027027,
+        "sugars_100g": 56.756756756757
+      },
+      "product_name": "Nutella",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/085/246/900/6020/front_en.3.400.jpg"
+    },
+    {
+      "code": "0009800895946",
+      "brands": [
+        "Nutella"
+      ],
+      "nutriments": {
+        "salt_100g": 0.10135135135135,
+        "carbohydrates_100g": 59.459459459459,
+        "saturated-fat_100g": 10.810810810811,
+        "energy-kcal_100g": 540.54054054054,
+        "sodium_100g": 0.04054054054054,
+        "fat_100g": 29.72972972973,
+        "sugars_100g": 56.756756756757,
+        "fiber_100g": 2.7027027027027,
+        "proteins_100g": 5.4054054054054
+      },
+      "product_name": "Nutella",
+      "image_front_url": "https://images.openfoodfacts.org/images/products/000/980/089/5946/front_en.3.400.jpg"
+    }
+  ],
+  "aggregations": null,
+  "facets": {},
+  "charts": {},
+  "page": 1,
+  "page_size": 12,
+  "page_count": 53,
+  "debug": {
+    "query": {
+      "query": {
+        "bool": {
+          "should": [
+            {
+              "match_phrase": {
+                "product_name.en": {
+                  "query": "nutella",
+                  "boost": 2.0
+                }
+              }
+            },
+            {
+              "match_phrase": {
+                "generic_name.en": {
+                  "query": "nutella",
+                  "boost": 2.0
+                }
+              }
+            },
+            {
+              "match_phrase": {
+                "categories.en": {
+                  "query": "nutella",
+                  "boost": 2.0
+                }
+              }
+            },
+            {
+              "match_phrase": {
+                "labels.en": {
+                  "query": "nutella",
+                  "boost": 2.0
+                }
+              }
+            },
+            {
+              "match_phrase": {
+                "brands": {
+                  "query": "nutella",
+                  "boost": 2.0
+                }
+              }
+            },
+            {
+              "multi_match": {
+                "query": "nutella",
+                "fields": [
+                  "product_name.en",
+                  "generic_name.en",
+                  "categories.en",
+                  "labels.en",
+                  "brands"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "size": 12,
+      "from": 0
+    }
+  },
+  "took": 5,
+  "timed_out": false,
+  "count": 631,
+  "is_count_exact": true,
+  "warnings": null
+}
