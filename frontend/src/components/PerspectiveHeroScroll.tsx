@@ -13,13 +13,7 @@ import { ScanBarcode, Search, Sparkles, ShieldCheck, Database, Cpu, ArrowDown } 
 import { cn } from "@/lib/utils";
 
 /**
- * Unified Premium Homepage Experience
- *
- * Flawless Two-Stage Flow:
- * - STAGE 1: Crystal-clear Hero with interactive Skiper 3 Spring Brand Capsule,
- *   crisp typography, primary call-to-actions, and trust anchors.
- * - STAGE 2: Seamless transition into Skiper 28 3D Perspective Scroll with pure
- *   momentum physics (Lenis lerp 0.06), zero visual collision, and rich editorial colors.
+ * Unified Premium Homepage Experience with Intense 3D Star Wars Style Spatial Perspective
  */
 export function PerspectiveHeroScroll() {
   const [mounted, setMounted] = useState(false);
@@ -29,24 +23,24 @@ export function PerspectiveHeroScroll() {
 
   useEffect(() => {
     setMounted(true);
-    // Smooth auto-expand animation on mount
     const timer = setTimeout(() => {
       setCapsuleExpanded(true);
     }, 400);
     return () => clearTimeout(timer);
   }, []);
 
-  // Skiper 28 Scroll Tracking attached precisely to the 3D scroll section
+  // Track scroll through the spatial track
   const { scrollYProgress } = useScroll({
     target: scrollSectionRef,
-    offset: ["start end", "end end"],
+    offset: ["start start", "end end"],
   });
 
-  // Authentic Skiper 28 Perspective Transform Matrix with smooth easing
-  const yMotionValue = useTransform(scrollYProgress, [0, 1], [480, 0]);
-  const rotateXValue = useTransform(scrollYProgress, [0, 1], [32, 8]);
-  const opacityValue = useTransform(scrollYProgress, [0, 0.2, 0.85, 1], [0.1, 1, 1, 0.6]);
-  const transform = useMotionTemplate`rotateX(${rotateXValue}deg) translateY(${yMotionValue}px) translateZ(10px)`;
+  // DRAMATIC 3D PERSPECTIVE VALUES:
+  // Starts receding deeply in distance with steep 45° angle, glides forward into view
+  const yMotionValue = useTransform(scrollYProgress, [0, 1], [650, -180]);
+  const rotateXValue = useTransform(scrollYProgress, [0, 1], [46, 28]);
+  const translateZValue = useTransform(scrollYProgress, [0, 1], [-80, 40]);
+  const transform = useMotionTemplate`rotateX(${rotateXValue}deg) translateY(${yMotionValue}px) translateZ(${translateZValue}px)`;
 
   const content = (
     <div className="w-full bg-[#FBF8F2] text-[#1B2A22] selection:bg-[#1E5B45] selection:text-white">
@@ -55,9 +49,8 @@ export function PerspectiveHeroScroll() {
          ───────────────────────────────────────────────────────────── */}
       <section
         ref={heroRef}
-        className="relative min-h-[90vh] flex flex-col items-center justify-between px-4 pt-10 pb-16 sm:px-6 md:pt-14 md:pb-20 max-w-5xl mx-auto text-center"
+        className="relative min-h-[92vh] flex flex-col items-center justify-between px-4 pt-10 pb-16 sm:px-6 md:pt-14 md:pb-20 max-w-5xl mx-auto text-center"
       >
-        {/* Subtle radial luxury pattern */}
         <div className="absolute inset-0 bg-[radial-gradient(#1E5B45_1px,transparent_1px)] [background-size:28px_28px] opacity-[0.05] pointer-events-none" />
 
         {/* Dynamic Expanding Brand Capsule (Skiper 3) */}
@@ -171,41 +164,58 @@ export function PerspectiveHeroScroll() {
         {/* Scroll Cue (Skiper 28 style) */}
         <div className="flex flex-col items-center gap-2 pt-12 pb-2 text-center text-[#1B2A22] z-10">
           <span className="relative text-[11px] font-bold tracking-widest uppercase opacity-40 after:absolute after:left-1/2 after:top-full after:h-10 after:w-px after:bg-gradient-to-b after:from-[#1B2A22]/40 after:to-transparent after:content-['']">
-            scroll down to explore
+            scroll down to explore the manifesto
           </span>
           <ArrowDown className="h-4 w-4 text-[#1E5B45] animate-bounce mt-4 opacity-70" />
         </div>
       </section>
 
       {/* ─────────────────────────────────────────────────────────────
-          STAGE 2: SKIPER 28 3D PERSPECTIVE TEXT SCROLL
-          Triggers smoothly only as you scroll past the hero!
+          STAGE 2: INTENSE 3D PERSPECTIVE SCROLL RIG
+          Deep 180px perspective camera with dramatic 46° spatial incline
          ───────────────────────────────────────────────────────────── */}
       <div
         ref={scrollSectionRef}
-        className="relative z-0 h-[220vh] w-full bg-gradient-to-b from-[#FBF8F2] via-[#EFECE4] to-[#FBF8F2] overflow-hidden"
+        className="relative z-0 h-[280vh] w-full bg-[#0D1612] text-white overflow-hidden border-t border-[#1E5B45]/30 shadow-2xl"
       >
+        {/* Spatial 3D Perspective Plane */}
         <div
-          className="sticky top-0 mx-auto flex h-screen items-center justify-center py-20 overflow-hidden pointer-events-none"
+          className="sticky top-0 mx-auto flex h-screen items-center justify-center overflow-hidden pointer-events-none"
           style={{
             transformStyle: "preserve-3d",
-            perspective: "220px",
+            perspective: "180px",
+            perspectiveOrigin: "50% 70%",
           }}
         >
           <motion.div
             style={{
               transformStyle: "preserve-3d",
               transform,
-              opacity: opacityValue,
             }}
-            className="w-full max-w-4xl text-center text-4xl sm:text-6xl md:text-7xl font-bold tracking-tighter leading-tight select-none px-6 bg-gradient-to-b from-[#1E5B45] via-[#2E8B63] to-[#C88214] bg-clip-text text-transparent drop-shadow-sm"
+            className="w-full max-w-4xl text-center space-y-6 font-black tracking-tight select-none px-6"
           >
-            DECODE EVERY INGREDIENT .. UNMASK FOOD LABELS .. ZERO MARKETING GIMMICKS ..
-            ZERO MORAL JUDGMENTS .. REAL EVIDENCE DIRECT FROM FOOD LABELS ..
-            TRANSPARENT .. UNBIASED .. EVIDENCE YOU CAN TRUST ..
-            KNOW WHAT YOU EAT .. UNDERSTAND WHAT YOU BUY ..
-            INGRIVO IS THE TRUTH ON PACKAGED FOOD.
-            <div className="absolute bottom-0 left-0 h-[50vh] w-full bg-gradient-to-b from-transparent to-[#FBF8F2]" />
+            {/* Carefully structured poetic lining */}
+            <p className="text-3xl sm:text-5xl md:text-6xl text-emerald-400/90 tracking-wider uppercase drop-shadow-[0_4px_12px_rgba(52,211,153,0.3)]">
+              No More Marketing Masks.
+            </p>
+            <p className="text-4xl sm:text-6xl md:text-7xl bg-gradient-to-r from-emerald-300 via-teal-200 to-amber-300 bg-clip-text text-transparent uppercase drop-shadow-[0_6px_16px_rgba(251,191,36,0.25)]">
+              Decode Every Single Ingredient.
+            </p>
+            <p className="text-3xl sm:text-5xl md:text-6xl text-emerald-300 tracking-wider uppercase">
+              Zero Propaganda. Zero Guilt.
+            </p>
+            <p className="text-4xl sm:text-6xl md:text-7xl bg-gradient-to-r from-amber-300 via-yellow-200 to-emerald-400 bg-clip-text text-transparent uppercase">
+              Pure Unfiltered Label Truth.
+            </p>
+            <p className="text-3xl sm:text-5xl md:text-6xl text-emerald-400/90 tracking-wider uppercase">
+              Evidence Direct From The Box.
+            </p>
+            <p className="text-5xl sm:text-7xl md:text-8xl text-white font-black tracking-tighter uppercase drop-shadow-[0_8px_24px_rgba(255,255,255,0.4)]">
+              INGRIVO.
+            </p>
+
+            {/* Cinematic depth fade */}
+            <div className="pointer-events-none absolute bottom-[-100px] left-0 h-[45vh] w-full bg-gradient-to-t from-[#0D1612] via-[#0D1612]/80 to-transparent" />
           </motion.div>
         </div>
       </div>
