@@ -33,37 +33,30 @@ const MANIFESTO_LINES = [
 ];
 
 /**
- * Individual Manifesto Line Component
- * Moves line-by-line with staggered 3D perspective physics.
- * Each line glides with its own individual vertical trajectory and tilt,
- * ensuring fluid line-by-line scrolling without ever being invisible.
+ * Line item with subtle relative parallax stagger.
+ * Creates an organic line-by-line kinetic wave as you scroll,
+ * while staying perfectly visible in the natural layout stream.
  */
-function LineItem({
+function ManifestoLineItem({
   text,
   index,
-  total,
   scrollYProgress,
 }: {
   text: string;
   index: number;
-  total: number;
   scrollYProgress: MotionValue<number>;
 }) {
-  // Staggered line-by-line Y progression:
-  // Each line has its own individual start and end trajectory
-  const startY = 460 + index * 45;
-  const endY = -180 - (total - 1 - index) * 35;
-  const y = useTransform(scrollYProgress, [0, 1], [startY, endY]);
-
-  const transform = useMotionTemplate`rotateX(28deg) translateY(${y}px) translateZ(10px)`;
+  // Staggered line-by-line kinetic motion:
+  // Each line glides with a small trailing parallax offset
+  const lineY = useTransform(scrollYProgress, [0, 1], [index * 22, -index * 16]);
 
   return (
     <motion.p
       style={{
         transformStyle: "preserve-3d",
-        transform,
+        y: lineY,
       }}
-      className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tighter text-[#1E5B45] leading-tight select-none"
+      className="leading-tight select-none"
     >
       {text}
     </motion.p>
@@ -74,14 +67,10 @@ function LineItem({
  * Editorial Luxury 3D Perspective Experience
  *
  * Senior Design Architecture:
- * - SECTION 1: Editorial Luxury Hero with Skiper 3 Spring Brand Capsule.
- *   Contains pristine brand identity, headline, CTAs, and trust metrics.
- *   No redundant "scroll to see" labels.
- *
+ * - SECTION 1: Pristine Editorial Luxury Hero with Skiper 3 Spring Brand Capsule.
  * - SECTION 2: Authentic Skiper 28 3D Perspective Scroll Canvas.
- *   Text moves LINE BY LINE through the 3D perspective field.
- *   All lines are clearly visible and readable in uniform rich #1E5B45 tone.
- *   Zero bleed-through into subsequent sections.
+ *   Text is always visible, glides smoothly in 3D perspective (rotateX: 30deg, perspective: 200px)
+ *   with kinetic line-by-line motion in uniform rich #1E5B45 forest emerald.
  */
 export function PerspectiveHeroScroll() {
   const [mounted, setMounted] = useState(false);
@@ -99,8 +88,13 @@ export function PerspectiveHeroScroll() {
     offset: ["start start", "end end"],
   });
 
-  // Soft exit fade only at the very end (90% to 98%) so it never leaks behind next section
-  const containerOpacity = useTransform(scrollYProgress, [0, 0.9, 0.98], [1, 1, 0]);
+  // Authentic Skiper 28 motion:
+  // Glides smoothly from lower perspective up through the vanishing plane
+  const yMotionValue = useTransform(scrollYProgress, [0, 1], [360, -280]);
+  const transform = useMotionTemplate`rotateX(30deg) translateY(${yMotionValue}px) translateZ(10px)`;
+
+  // Soft fade near the end so it never leaks behind subsequent sections
+  const canvasOpacity = useTransform(scrollYProgress, [0, 0.88, 0.98], [1, 1, 0]);
 
   const content = (
     <div className="relative w-full bg-[#FBF8F2] text-[#1B2A22]">
@@ -227,41 +221,43 @@ export function PerspectiveHeroScroll() {
       {/* ─────────────────────────────────────────────────────────────
           SECTION 2: AUTHENTIC SKIPER 28 3D PERSPECTIVE SCROLL CANVAS
           Dedicated 280vh runway. Clean exit before next section.
-          3D Perspective (perspective: 200px, rotateX: 28deg).
+          3D Perspective (perspective: 200px, rotateX: 30deg).
           Glides seamlessly on native #FBF8F2 cream background.
           Moves LINE BY LINE in uniform rich #1E5B45 tone.
          ───────────────────────────────────────────────────────────── */}
       <div
         ref={perspectiveContainerRef}
-        className="relative z-0 h-[280vh] w-full overflow-hidden bg-[#FBF8F2]"
+        className="relative z-0 h-[280vh] w-full bg-[#FBF8F2]"
       >
-        <motion.div
-          style={{ opacity: containerOpacity }}
-          className="sticky top-0 mx-auto flex h-screen w-full items-center justify-center overflow-hidden bg-transparent py-20"
+        <div
+          className="sticky top-0 mx-auto flex min-h-screen items-center justify-center bg-transparent py-20"
+          style={{
+            transformStyle: "preserve-3d",
+            perspective: "200px",
+          }}
         >
-          {/* Top and Bottom Atmospheric Fading Masks */}
-          <div className="pointer-events-none absolute top-0 left-0 z-10 h-32 w-full bg-gradient-to-b from-[#FBF8F2] to-transparent" />
-          <div className="pointer-events-none absolute bottom-0 left-0 z-10 h-36 w-full bg-gradient-to-t from-[#FBF8F2] to-transparent" />
-
-          {/* Line-by-Line 3D Perspective Plane */}
-          <div
-            className="relative flex flex-col items-center justify-center gap-6 sm:gap-8 w-full max-w-4xl px-6 text-center select-none"
+          {/* 3D Tilted Text Canvas */}
+          <motion.div
             style={{
               transformStyle: "preserve-3d",
-              perspective: "200px",
+              transform,
+              opacity: canvasOpacity,
             }}
+            className="w-full max-w-4xl text-center text-3xl sm:text-5xl md:text-6xl font-bold tracking-tighter text-[#1E5B45] select-none px-6 space-y-6 sm:space-y-8"
           >
             {MANIFESTO_LINES.map((line, idx) => (
-              <LineItem
+              <ManifestoLineItem
                 key={idx}
                 text={line}
                 index={idx}
-                total={MANIFESTO_LINES.length}
                 scrollYProgress={scrollYProgress}
               />
             ))}
-          </div>
-        </motion.div>
+
+            {/* Bottom Atmospheric Mask */}
+            <div className="pointer-events-none absolute bottom-0 left-0 h-[50vh] w-full bg-gradient-to-b from-transparent to-[#FBF8F2]" />
+          </motion.div>
+        </div>
       </div>
     </div>
   );
