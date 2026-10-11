@@ -56,6 +56,10 @@ export function useBarcodeScanner(options: UseBarcodeScannerOptions = {}) {
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
   const [candidateBarcode, setCandidateBarcode] = useState<string | null>(null);
   const [hasMultipleCameras, setHasMultipleCameras] = useState<boolean>(false);
+  const [zoomLevel, setZoomLevel] = useState<number>(1);
+  const [maxZoom, setMaxZoom] = useState<number>(1);
+  const [hasTorch, setHasTorch] = useState<boolean>(false);
+  const [torchOn, setTorchOn] = useState<boolean>(false);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -212,13 +216,15 @@ export function useBarcodeScanner(options: UseBarcodeScannerOptions = {}) {
 
       streamRef.current = stream;
 
-      // Enable continuous hardware autofocus and auto-exposure if supported by device
+      // Enable continuous hardware autofocus, auto-exposure, and detect hardware zoom & torch
       try {
         const videoTrack = stream.getVideoTracks()[0];
         if (videoTrack && videoTrack.getCapabilities) {
           const caps = videoTrack.getCapabilities() as {
             focusMode?: string[];
             exposureMode?: string[];
+            zoom?: { min: number; max: number; step: number };
+            torch?: boolean;
           };
           const advancedConstraints: Record<string, unknown> = {};
           if (caps.focusMode && caps.focusMode.includes("continuous")) {
@@ -226,6 +232,13 @@ export function useBarcodeScanner(options: UseBarcodeScannerOptions = {}) {
           }
           if (caps.exposureMode && caps.exposureMode.includes("continuous")) {
             advancedConstraints.exposureMode = "continuous";
+          }
+          if (caps.zoom) {
+            setMaxZoom(caps.zoom.max || 1);
+            setZoomLevel(1);
+          }
+          if (caps.torch) {
+            setHasTorch(true);
           }
           if (Object.keys(advancedConstraints).length > 0) {
             videoTrack.applyConstraints({ advanced: [advancedConstraints] } as MediaTrackConstraints).catch(() => {});
@@ -429,6 +442,43 @@ export function useBarcodeScanner(options: UseBarcodeScannerOptions = {}) {
     };
   }, [state, stopScanning]);
 
+  /**
+   * Apply hardware optical/digital zoom (e.g. 1.5x, 2x) for distant barcodes
+   */
+  const applyZoom = useCallback(async (level: number) => {
+    if (!streamRef.current) return;
+    try {
+      const track = streamRef.current.getVideoTracks()[0];
+      if (track && track.applyConstraints) {
+        await track.applyConstraints({
+          advanced: [{ zoom: level } as unknown as MediaTrackConstraintSet],
+        });
+        setZoomLevel(level);
+      }
+    } catch {
+      // Zoom failure is non-fatal
+    }
+  }, []);
+
+  /**
+   * Toggle hardware torch / flashlight to illuminate packaging in dim or glare-heavy rooms
+   */
+  const toggleTorch = useCallback(async () => {
+    if (!streamRef.current) return;
+    try {
+      const track = streamRef.current.getVideoTracks()[0];
+      if (track && track.applyConstraints) {
+        const next = !torchOn;
+        await track.applyConstraints({
+          advanced: [{ torch: next } as unknown as MediaTrackConstraintSet],
+        });
+        setTorchOn(next);
+      }
+    } catch {
+      // Torch toggle non-fatal
+    }
+  }, [torchOn]);
+
   return {
     state,
     errorMessage,
@@ -440,5 +490,11 @@ export function useBarcodeScanner(options: UseBarcodeScannerOptions = {}) {
     candidateBarcode,
     hasMultipleCameras,
     switchCamera,
+    zoomLevel,
+    maxZoom,
+    applyZoom,
+    hasTorch,
+    torchOn,
+    toggleTorch,
   };
 }

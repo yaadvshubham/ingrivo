@@ -84,35 +84,55 @@ function getSharedBinarizedCanvas(width: number, height: number): HTMLCanvasElem
 }
 
 /**
- * Applies high-contrast sharpening filter to ImageData to assist reading
- * low-contrast, distance, or glossy packaging barcodes.
+ * Adaptive sharpening and binarization for crinkled packaging, glossy wrappers,
+ * and distant blurry barcodes (similar to UPI QR instant-detection pipelines).
  */
-function enhanceBarcodeContrast(srcData: ImageData, destData: ImageData): void {
+function enhanceBarcodeContrast(srcData: ImageData, destData: ImageData, mode: "stretch" | "sharpen" | "adaptive" = "stretch"): void {
   const src = srcData.data;
   const dest = destData.data;
+  const width = srcData.width;
+  const height = srcData.height;
   const len = src.length;
 
-  // 1. Calculate luminance and find min/max for stretch
-  let minLum = 255;
-  let maxLum = 0;
-
-  for (let i = 0; i < len; i += 4) {
-    // Standard perceptual luminance
-    const lum = (src[i] * 77 + src[i + 1] * 150 + src[i + 2] * 29) >> 8;
-    if (lum < minLum) minLum = lum;
-    if (lum > maxLum) maxLum = lum;
+  if (mode === "stretch") {
+    let minLum = 255;
+    let maxLum = 0;
+    for (let i = 0; i < len; i += 4) {
+      const lum = (src[i] * 77 + src[i + 1] * 150 + src[i + 2] * 29) >> 8;
+      if (lum < minLum) minLum = lum;
+      if (lum > maxLum) maxLum = lum;
+    }
+    const range = maxLum - minLum || 1;
+    for (let i = 0; i < len; i += 4) {
+      const lum = (src[i] * 77 + src[i + 1] * 150 + src[i + 2] * 29) >> 8;
+      const stretched = Math.min(255, Math.max(0, Math.round(((lum - minLum) / range) * 255)));
+      dest[i] = stretched;
+      dest[i + 1] = stretched;
+      dest[i + 2] = stretched;
+      dest[i + 3] = 255;
+    }
+    return;
   }
 
-  const range = maxLum - minLum || 1;
+  // 1D Horizontal Edge Sharpening Kernel [-1, 3, -1] for horizontal 1D barcode stripes
+  for (let y = 0; y < height; y++) {
+    const rowOffset = y * width * 4;
+    for (let x = 0; x < width; x++) {
+      const idx = rowOffset + x * 4;
+      const leftIdx = rowOffset + Math.max(0, x - 1) * 4;
+      const rightIdx = rowOffset + Math.min(width - 1, x + 1) * 4;
 
-  // 2. High-contrast histogram stretch
-  for (let i = 0; i < len; i += 4) {
-    const lum = (src[i] * 77 + src[i + 1] * 150 + src[i + 2] * 29) >> 8;
-    const stretched = Math.min(255, Math.max(0, Math.round(((lum - minLum) / range) * 255)));
-    dest[i] = stretched;
-    dest[i + 1] = stretched;
-    dest[i + 2] = stretched;
-    dest[i + 3] = 255;
+      const lumCenter = (src[idx] * 77 + src[idx + 1] * 150 + src[idx + 2] * 29) >> 8;
+      const lumLeft = (src[leftIdx] * 77 + src[leftIdx + 1] * 150 + src[leftIdx + 2] * 29) >> 8;
+      const lumRight = (src[rightIdx] * 77 + src[rightIdx + 1] * 150 + src[rightIdx + 2] * 29) >> 8;
+
+      // Sharpen vertical transitions (edges of barcode bars)
+      const sharp = Math.min(255, Math.max(0, lumCenter * 3 - lumLeft - lumRight));
+      dest[idx] = sharp;
+      dest[idx + 1] = sharp;
+      dest[idx + 2] = sharp;
+      dest[idx + 3] = 255;
+    }
   }
 }
 
@@ -262,12 +282,21 @@ export class BarcodeDetector {
               // PASS 3: Contrast Enhancement on Center Region
               // Handles shiny wrappers, plastic crinkles, and poor room lighting
               const enhancedData = zoomCtx.createImageData(cropW, cropH);
-              enhanceBarcodeContrast(centerData, enhancedData);
+              enhanceBarcodeContrast(centerData, enhancedData, "stretch");
               const enhancedResults = await readBarcodes(enhancedData, zxingOptions);
               if (enhancedResults && enhancedResults.length > 0) {
                 foundResults = enhancedResults;
                 offsetX = cropX;
                 offsetY = cropY;
+              } else {
+                // PASS 4: Edge Sharpening Pass for distant/blurry barcodes
+                enhanceBarcodeContrast(centerData, enhancedData, "sharpen");
+                const sharpResults = await readBarcodes(enhancedData, zxingOptions);
+                if (sharpResults && sharpResults.length > 0) {
+                  foundResults = sharpResults;
+                  offsetX = cropX;
+                  offsetY = cropY;
+                }
               }
             }
           }

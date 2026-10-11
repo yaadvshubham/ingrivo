@@ -11,6 +11,8 @@ import {
   ShieldCheck,
   RefreshCw,
   VideoOff,
+  Flashlight,
+  ZoomIn,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,7 +36,15 @@ export default function ScanPage() {
     candidateBarcode,
     hasMultipleCameras,
     switchCamera,
+    zoomLevel,
+    maxZoom,
+    applyZoom,
+    hasTorch,
+    torchOn,
+    toggleTorch,
   } = useBarcodeScanner({
+    fps: 10,
+    confirmationWindowMs: 1200,
     onFound: (normalizedCode) => {
       router.push(`/product/bc-${normalizedCode}`);
     },
@@ -197,6 +207,46 @@ export default function ScanPage() {
                 {isVerifying
                   ? "Barcode detected! Verifying match..."
                   : "Scanning active. Searching for EAN/UPC barcode..."}
+              </div>
+
+              {/* Quick controls: Optical/Hardware Zoom and Flashlight */}
+              <div className="flex items-center justify-between gap-2 px-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-medium text-[#5E6B63] flex items-center gap-1">
+                    <ZoomIn className="h-3.5 w-3.5" />
+                    Zoom:
+                  </span>
+                  {[1, 1.5, 2].map((lvl) => (
+                    <button
+                      key={lvl}
+                      type="button"
+                      onClick={() => applyZoom(lvl)}
+                      className={`text-xs px-2.5 py-1 rounded-md font-semibold transition-colors border ${
+                        Math.abs(zoomLevel - lvl) < 0.1
+                          ? "bg-[#1E5B45] text-white border-[#1E5B45]"
+                          : "bg-white text-[#1B2A22] border-[#E4DEC3] hover:bg-[#FBF8F2]"
+                      }`}
+                    >
+                      {lvl}x
+                    </button>
+                  ))}
+                </div>
+
+                {hasTorch && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={toggleTorch}
+                    className={`text-xs h-7 px-2.5 border ${
+                      torchOn
+                        ? "bg-amber-100 text-amber-900 border-amber-300 font-semibold"
+                        : "border-[#E4DEC3] text-[#1B2A22]"
+                    }`}
+                  >
+                    <Flashlight className={`h-3.5 w-3.5 mr-1 ${torchOn ? "text-amber-600 fill-amber-500" : ""}`} />
+                    {torchOn ? "Flash On" : "Flashlight"}
+                  </Button>
+                )}
               </div>
 
               <div className="flex gap-2">
