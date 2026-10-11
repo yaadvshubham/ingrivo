@@ -34,3 +34,17 @@ This guide covers common issues and resolutions across development, camera barco
 ## 3. Manual Entry Fallback
 
 The manual barcode entry form on `/scan` is **always visible and functional**, regardless of camera permission state, hardware availability, or network status. Any valid 8-digit (EAN-8), 12-digit (UPC-A), or 13-digit (EAN-13) barcode can be entered directly.
+
+---
+
+## 4. Label Photo OCR Troubleshooting
+
+| Symptom | Likely Cause | Solution |
+| :--- | :--- | :--- |
+| **"Please upload JPEG, PNG, or WebP"** | Uploading an iPhone `.heic` or `.heif` raw camera container. | Convert or export the photo as JPEG or PNG before uploading, or take the photo directly via the camera intake option. |
+| **"OCR timed out after 60 seconds"** | Low-end mobile device CPU throttled during WebAssembly LSTM matrix calculations. | Click **"Enter manually"** on the error card to open the review screen immediately with empty fields, or retake a smaller, tighter crop of the nutrition panel. |
+| **OCR produces garbled characters or missing lines** | Photo was taken at an angle, package has severe cylindrical curve, or camera flash washed out the label. | Rotate the photo with the 90° rotation buttons, or retake following the photo tips (flat surface, diffuse lighting, fill the frame). |
+| **Hindi or bilingual text missing from ingredients** | On-device model is strictly English trained data (`@tesseract.js-data/eng`). | Hindi text is omitted by design to avoid hallucinated character sequences. Review and verify the English section or type missing items manually. |
+| **"This label result is only kept in this browser tab..."** | Opened `/product/lb-<uuid>` in a different browser window, after closing the tab, or refreshed in private browsing mode. | Label products are stored in ephemeral `sessionStorage` purely in your browser for privacy. Scan or photograph the label again to review a new session. |
+| **Assets fail to load or 404 on `/ocr/...`** | Self-hosted OCR files missing from `frontend/public/ocr/`. | Run `node scripts/copy-ocr-assets.mjs` or rebuild the project. Ingrivo self-hosts the worker, WebAssembly core, and language data locally so no third-party CDN is contacted. |
+

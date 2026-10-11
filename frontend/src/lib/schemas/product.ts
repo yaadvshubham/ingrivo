@@ -29,6 +29,7 @@ export const NutrientValuesSchema = z.object({
   energy_kcal: z.number().nullable(),
   energy_kj: z.number().nullable(),
   sugars: z.number().nullable(),
+  added_sugars: z.number().nullable().optional(), // Phase 6 extension: separate added sugars
   protein: z.number().nullable(),
   fat: z.number().nullable(),
   saturated_fat: z.number().nullable(),
@@ -56,9 +57,9 @@ export type AllergensData = z.infer<typeof AllergensDataSchema>;
 
 export const SourceDataSchema = z.object({
   name: z.string(),
-  api_version: z.string(),
-  product_url: z.string().nullable(),
-  last_modified: z.string().nullable(),
+  api_version: z.string().optional().nullable(),
+  product_url: z.string().nullable().optional(),
+  last_modified: z.string().nullable().optional(),
   retrieved_at: z.string(),
   license: z.string(),
 });
@@ -95,8 +96,8 @@ export const ProductSchema = z.object({
   nutrition: NutritionDataSchema,
   allergens: AllergensDataSchema,
 
-  source: SourceDataSchema,
+  source: SourceDataSchema.nullable().optional(),
   completeness: CompletenessDataSchema,
-  source_computed: SourceComputedDataSchema,
+  source_computed: SourceComputedDataSchema.optional(),
 });
 export type Product = z.infer<typeof ProductSchema>;

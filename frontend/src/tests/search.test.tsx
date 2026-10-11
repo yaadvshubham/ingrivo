@@ -211,7 +211,7 @@ describe("Phase 5 Product Search Tests", () => {
       expect(mockPush).toHaveBeenCalledWith("/search?q=coffee&page=2");
     });
 
-    it("renders empty state with suggestion and disabled OCR label button", async () => {
+    it("renders empty state with suggestion and enabled or disabled OCR label button", async () => {
       mockSearchParams = new URLSearchParams("q=xyznonexistent&page=1");
       vi.spyOn(apiClient, "searchProducts").mockResolvedValue(mockEmptyResponse);
 
@@ -223,9 +223,8 @@ describe("Phase 5 Product Search Tests", () => {
 
       expect(screen.getByText(/No results for “xyznonexistent”/i)).toBeInTheDocument();
       expect(screen.getByText(/Scan or enter barcode directly/i)).toBeInTheDocument();
-      // Disabled action for label photo
+      // Label photo action is present
       expect(screen.getByText(/Capture label photo \(OCR\)/i)).toBeInTheDocument();
-      expect(screen.getByText(/On-device OCR parsing planned for Phase 6/i)).toBeInTheDocument();
     });
 
     it("renders rate limited state with friendly message and retry button", async () => {

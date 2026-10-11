@@ -10,6 +10,7 @@ Ingrivo is an AI-powered packaged food and beverage intelligence web app. It com
 - **Phase 3 Completed:** Normalized Product Schema, Barcode Validation, Rate-Limited Open Food Facts Lookup, Manual Barcode Scanner UI, and Product Facts Page.
 - **Phase 4 Completed:** On-Device Camera Barcode Scanner (Ponyfill + Self-Hosted ZXing WASM, Secure Context Check, Strict Double-Read Confirmation, Media Stream Teardown), Catalog Coverage Diagnostic Script, and Coverage Report.
 - **Phase 5 Completed:** Product Search (Search-a-licious / Open Food Facts integration, Lucene query sanitization, token-bucket limiters, 1-hour caching, explicit form submit only, URL parameter persistence, multi-state UI with pagination and disabled action fallbacks).
+- **Phase 6 Completed:** On-Device Label OCR, Review & Parsing (Zero remote image upload, self-hosted Tesseract.js assets, magic-byte intake validation, EXIF orientation and downscaling, pure TypeScript rule-based parser with dual-column detection, OCR suspect flags, neutral sanity checks, sessionStorage-backed `lb-<uuid>` label products, `added_sugars` schema extension, shared completeness formula with Python).
 
 ---
 

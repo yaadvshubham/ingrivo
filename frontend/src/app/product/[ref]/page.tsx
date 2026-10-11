@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { getProduct, ApiError } from "@/lib/api-client";
 import { Product } from "@/lib/schemas/product";
+import { getLabelProduct } from "@/lib/label-store";
+import { isFeatureEnabled } from "@/lib/features";
 import { ProvenanceBadge } from "@/components/ProvenanceBadge";
 import { MissingChip } from "@/components/MissingChip";
 import { DataRow } from "@/components/DataRow";
@@ -29,17 +31,36 @@ export interface ProductDetailViewProps {
 }
 
 export function ProductDetailView({ refParam }: ProductDetailViewProps) {
-  // Validate ref format: bc-<digits>
   const isBarcodeRef = /^bc-\d+$/.test(refParam);
+  const isLabelRef = /^lb-[a-z0-9-]+$/i.test(refParam);
   const barcode = isBarcodeRef ? refParam.replace("bc-", "") : "";
 
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState<boolean>(Boolean(isBarcodeRef));
+  const [product, setProduct] = useState<Product | null>(() => {
+    if (isLabelRef && typeof window !== "undefined") {
+      return getLabelProduct(refParam);
+    }
+    return null;
+  });
+  const [loading, setLoading] = useState<boolean>(() => {
+    if (isLabelRef) return false;
+    return Boolean(isBarcodeRef);
+  });
   const [isSlow, setIsSlow] = useState<boolean>(false);
   const [error, setError] = useState<ApiError | null>(null);
+  const [labelExpired] = useState<boolean>(() => {
+    if (isLabelRef && typeof window !== "undefined") {
+      return !getLabelProduct(refParam);
+    }
+    return false;
+  });
   const [showOffComputed, setShowOffComputed] = useState<boolean>(false);
 
   useEffect(() => {
+    if (isLabelRef) {
+      // Checked at initialization
+      return;
+    }
+
     if (!isBarcodeRef) {
       return;
     }
@@ -77,10 +98,10 @@ export function ProductDetailView({ refParam }: ProductDetailViewProps) {
     return () => {
       isMounted = false;
     };
-  }, [barcode, isBarcodeRef]);
+  }, [barcode, isBarcodeRef, isLabelRef, refParam]);
 
   // 1. Invalid Reference Format
-  if (!isBarcodeRef) {
+  if (!isBarcodeRef && !isLabelRef) {
     return (
       <div className="max-w-xl mx-auto py-16 px-4 text-center space-y-6">
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-stone-100 text-[#5E6B63]">
@@ -88,12 +109,37 @@ export function ProductDetailView({ refParam }: ProductDetailViewProps) {
         </div>
         <h1 className="text-2xl font-bold text-[#1B2A22]">Invalid Product Reference</h1>
         <p className="text-sm text-[#5E6B63]">
-          Expected a product barcode reference format (<code>bc-&lt;barcode&gt;</code>).
+          Expected a product barcode (<code>bc-&lt;barcode&gt;</code>) or label reference (<code>lb-&lt;uuid&gt;</code>).
         </p>
         <div>
           <Link href="/scan" className={buttonVariants({ variant: "outline" })}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Go to barcode entry
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // 1b. Label Product Expired or Not Found in Session
+  if (isLabelRef && labelExpired) {
+    return (
+      <div className="max-w-xl mx-auto py-16 px-4 text-center space-y-6">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-800">
+          <AlertCircle className="h-6 w-6" aria-hidden="true" />
+        </div>
+        <h1 className="text-2xl font-bold text-[#1B2A22]">Label Data Unavailable</h1>
+        <p className="text-sm text-[#5E6B63] max-w-md mx-auto">
+          This label result is only kept in this browser tab and is no longer available.
+        </p>
+        <div className="flex justify-center gap-3">
+          <Link href="/label" className={buttonVariants({ variant: "default" })}>
+            <Camera className="h-4 w-4 mr-2" />
+            Scan label photo again
+          </Link>
+          <Link href="/scan" className={buttonVariants({ variant: "outline" })}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Go to barcode scanner
           </Link>
         </div>
       </div>
@@ -138,7 +184,7 @@ export function ProductDetailView({ refParam }: ProductDetailViewProps) {
     );
   }
 
-  // 3. Error States (Product Not Found, Rate-limited, Upstream Timeout, Generic)
+  // 3. Error States for Barcode Lookup
   if (error || !product) {
     const isNotFound = error?.code === "PRODUCT_NOT_FOUND" || error?.status === 404;
     const isRateLimited = error?.code === "UPSTREAM_RATE_LIMITED" || error?.code === "RATE_LIMITED";
@@ -178,18 +224,45 @@ export function ProductDetailView({ refParam }: ProductDetailViewProps) {
                   Available Alternatives
                 </p>
                 <div className="flex flex-col gap-2">
-                  <DisabledAction
-                    label="Search product by title"
-                    explanation="OFF Search integration planned for Phase 3"
-                    icon={<SearchIcon className="h-4 w-4" />}
-                    variant="secondary"
-                  />
-                  <DisabledAction
-                    label="Capture label photo (OCR)"
-                    explanation="On-device OCR parsing planned for Phase 4"
-                    icon={<Camera className="h-4 w-4" />}
-                    variant="outline"
-                  />
+                  {isFeatureEnabled("search") ? (
+                    <Link
+                      href="/search"
+                      className={buttonVariants({
+                        variant: "secondary",
+                        className: "justify-start gap-2 h-11",
+                      })}
+                    >
+                      <SearchIcon className="h-4 w-4 text-[#1E5B45]" />
+                      <span>Search product by title</span>
+                    </Link>
+                  ) : (
+                    <DisabledAction
+                      label="Search product by title"
+                      explanation="OFF Search integration planned for Phase 5"
+                      icon={<SearchIcon className="h-4 w-4" />}
+                      variant="secondary"
+                    />
+                  )}
+
+                  {isFeatureEnabled("label") ? (
+                    <Link
+                      href="/label"
+                      className={buttonVariants({
+                        variant: "outline",
+                        className: "justify-start gap-2 h-11",
+                      })}
+                    >
+                      <Camera className="h-4 w-4 text-[#1E5B45]" />
+                      <span>Capture label photo (OCR)</span>
+                    </Link>
+                  ) : (
+                    <DisabledAction
+                      label="Capture label photo (OCR)"
+                      explanation="On-device OCR parsing planned for Phase 6"
+                      icon={<Camera className="h-4 w-4" />}
+                      variant="outline"
+                    />
+                  )}
                 </div>
               </div>
             )}
@@ -215,7 +288,9 @@ export function ProductDetailView({ refParam }: ProductDetailViewProps) {
     );
   }
 
-  // 4. Normal Found Product View
+  // 4. Product Found View (Barcode or Label Product)
+  const isLabelProduct = product.kind === "label_product";
+
   const basisLabel =
     product.nutrition.basis === "per_100g"
       ? "per 100 g"
@@ -227,18 +302,38 @@ export function ProductDetailView({ refParam }: ProductDetailViewProps) {
 
   const isUnknownBasis = product.nutrition.basis === "unknown";
 
+  const getBadgeForField = (provenance: string) => {
+    if (provenance === "user_corrected") {
+      return <ProvenanceBadge variant="user_corrected" customLabel="edited by you" />;
+    }
+    if (isLabelProduct || provenance === "ocr") {
+      return <ProvenanceBadge variant="ocr" customLabel="From your label" />;
+    }
+    return <ProvenanceBadge variant="source" />;
+  };
+
   return (
     <div className="max-w-3xl mx-auto py-8 px-4 sm:px-6 space-y-8">
       {/* Back button */}
       <div>
         <Link
-          href="/scan"
+          href={isLabelProduct ? "/label" : "/scan"}
           className="inline-flex items-center gap-1.5 text-xs font-medium text-[#5E6B63] hover:text-[#1E5B45] transition-colors"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          Back to barcode entry
+          {isLabelProduct ? "Back to label scanning" : "Back to barcode entry"}
         </Link>
       </div>
+
+      {/* Label Product Banner Notice */}
+      {isLabelProduct && (
+        <div className="p-3.5 bg-sky-50 border border-sky-200 rounded-xl text-xs text-sky-900 font-medium flex items-center gap-2.5">
+          <Camera className="h-4 w-4 text-sky-700 shrink-0" />
+          <span>
+            Based on text you reviewed from a photo. Not uploaded or stored on any server.
+          </span>
+        </div>
+      )}
 
       {/* 1. Overview */}
       <Card className="border border-[#E4DEC3] bg-white shadow-xs">
@@ -261,12 +356,15 @@ export function ProductDetailView({ refParam }: ProductDetailViewProps) {
             )}
 
             <div className="space-y-2 flex-1">
-              <div className="flex items-center gap-2">
-                <ProvenanceBadge variant="source" />
+              <div className="flex items-center gap-2 flex-wrap">
+                {getBadgeForField(product.name_provenance)}
                 {product.brand && (
                   <span className="text-xs font-semibold uppercase tracking-wider text-[#5E6B63]">
                     {product.brand}
                   </span>
+                )}
+                {product.brand_provenance === "user_corrected" && (
+                  <ProvenanceBadge variant="user_corrected" customLabel="edited by you" />
                 )}
               </div>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1B2A22]">
@@ -300,7 +398,7 @@ export function ProductDetailView({ refParam }: ProductDetailViewProps) {
           <CardTitle className="text-lg font-bold text-[#1B2A22]">
             Ingredients
           </CardTitle>
-          <ProvenanceBadge variant={product.ingredients.provenance} />
+          {getBadgeForField(product.ingredients.provenance)}
         </CardHeader>
         <CardContent className="pt-4 space-y-3">
           {product.ingredients.raw_text ? (
@@ -309,7 +407,7 @@ export function ProductDetailView({ refParam }: ProductDetailViewProps) {
             </p>
           ) : (
             <div className="flex items-center gap-2">
-              <MissingChip label="No ingredients listed in source data" />
+              <MissingChip label="No ingredients listed in record" />
             </div>
           )}
           {product.ingredients.items.length > 0 && (
@@ -343,14 +441,14 @@ export function ProductDetailView({ refParam }: ProductDetailViewProps) {
               Basis: {basisLabel}
             </span>
           </div>
-          <ProvenanceBadge variant={product.nutrition.provenance} />
+          {getBadgeForField(product.nutrition.provenance)}
         </CardHeader>
         <CardContent className="pt-4 space-y-4">
           {isUnknownBasis && (
             <div className="flex items-center gap-2 p-2.5 rounded-md border border-amber-300 bg-amber-50 text-xs text-amber-900">
               <Info className="h-4 w-4 shrink-0 text-amber-700" />
               <span>
-                Note: Nutrition basis is not specified in the database. Amounts may be per 100g or per serving.
+                Note: Nutrition basis is not specified. Amounts may be per 100g or per serving.
               </span>
             </div>
           )}
@@ -367,55 +465,64 @@ export function ProductDetailView({ refParam }: ProductDetailViewProps) {
                     }`
                   : null
               }
-              provenance="source"
+              provenance={isLabelProduct ? "ocr" : "source"}
             />
             <DataRow
               label="Total Fat"
               value={product.nutrition.values.fat}
               unit="g"
-              provenance="source"
+              provenance={isLabelProduct ? "ocr" : "source"}
             />
             <DataRow
               label="Saturated Fat"
               value={product.nutrition.values.saturated_fat}
               unit="g"
-              provenance="source"
+              provenance={isLabelProduct ? "ocr" : "source"}
             />
             <DataRow
               label="Carbohydrates"
               value={product.nutrition.values.carbohydrates}
               unit="g"
-              provenance="source"
+              provenance={isLabelProduct ? "ocr" : "source"}
             />
             <DataRow
               label="Total Sugars"
               value={product.nutrition.values.sugars}
               unit="g"
-              provenance="source"
+              provenance={isLabelProduct ? "ocr" : "source"}
             />
+            {product.nutrition.values.added_sugars !== undefined &&
+              product.nutrition.values.added_sugars !== null && (
+                <DataRow
+                  label="Added Sugars"
+                  value={product.nutrition.values.added_sugars}
+                  unit="g"
+                  provenance={isLabelProduct ? "ocr" : "source"}
+                />
+              )}
             <DataRow
               label="Dietary Fibre"
               value={product.nutrition.values.fibre}
               unit="g"
-              provenance="source"
+              provenance={isLabelProduct ? "ocr" : "source"}
             />
             <DataRow
               label="Protein"
               value={product.nutrition.values.protein}
               unit="g"
-              provenance="source"
+              provenance={isLabelProduct ? "ocr" : "source"}
             />
             <DataRow
               label="Salt"
               value={product.nutrition.values.salt}
               unit="g"
-              provenance="source"
+              provenance={isLabelProduct ? "ocr" : "source"}
             />
             <DataRow
               label="Sodium"
               value={product.nutrition.values.sodium}
               unit="g"
-              provenance="source"
+              provenance={isLabelProduct ? "ocr" : "source"}
             />
           </div>
         </CardContent>
@@ -427,7 +534,7 @@ export function ProductDetailView({ refParam }: ProductDetailViewProps) {
           <CardTitle className="text-lg font-bold text-[#1B2A22]">
             Allergen Information
           </CardTitle>
-          <ProvenanceBadge variant={product.allergens.provenance} />
+          {getBadgeForField(product.allergens.provenance)}
         </CardHeader>
         <CardContent className="pt-4 space-y-3">
           {product.allergens.declared.length > 0 ? (
@@ -448,7 +555,7 @@ export function ProductDetailView({ refParam }: ProductDetailViewProps) {
             </div>
           ) : (
             <p className="text-xs text-[#5E6B63] bg-[#FBF8F2] p-3 rounded border border-[#E4DEC3]">
-              No allergens are listed in the source data. Always check the physical package for manufacturing alerts.
+              No allergens declared. Always inspect packaging for manufacturing alerts.
             </p>
           )}
 
@@ -476,7 +583,7 @@ export function ProductDetailView({ refParam }: ProductDetailViewProps) {
       <Card className="border border-[#E4DEC3] bg-white shadow-xs">
         <CardHeader className="pb-3 border-b border-[#E4DEC3]/60">
           <CardTitle className="text-lg font-bold text-[#1B2A22]">
-            Source Data Completeness
+            Data Completeness
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-4 space-y-3">
@@ -497,7 +604,7 @@ export function ProductDetailView({ refParam }: ProductDetailViewProps) {
           {product.completeness.missing.length > 0 ? (
             <div className="pt-2">
               <span className="text-xs font-semibold text-[#5E6B63] block mb-1">
-                Missing from source record ({product.completeness.missing.length}):
+                Missing from record ({product.completeness.missing.length}):
               </span>
               <div className="flex flex-wrap gap-1.5">
                 {product.completeness.missing.map((m, i) => (
@@ -512,80 +619,88 @@ export function ProductDetailView({ refParam }: ProductDetailViewProps) {
             </div>
           ) : (
             <p className="text-xs text-[#1E5B45]">
-              All core fields are documented in the source record.
+              All core fields are documented.
             </p>
           )}
         </CardContent>
       </Card>
 
-      {/* 6. Open Food Facts Computed Fields (Collapsed) */}
-      <Card className="border border-[#E4DEC3] bg-[#FBF8F2] shadow-xs">
-        <CardContent className="pt-4">
-          <button
-            type="button"
-            onClick={() => setShowOffComputed(!showOffComputed)}
-            className="flex items-center justify-between w-full text-left text-xs font-semibold text-[#5E6B63] hover:text-[#1B2A22]"
-            aria-expanded={showOffComputed}
-          >
-            <span>Computed by Open Food Facts, not by Ingrivo</span>
-            <ChevronDown
-              className={`h-4 w-4 transition-transform ${
-                showOffComputed ? "rotate-180" : ""
-              }`}
-            />
-          </button>
-
-          {showOffComputed && (
-            <div className="pt-4 mt-3 border-t border-[#E4DEC3] space-y-2 text-xs text-[#5E6B63]">
-              <p>
-                <strong>Nutri-Score: </strong>
-                {product.source_computed.nutriscore
-                  ? product.source_computed.nutriscore.toUpperCase()
-                  : "Not computed"}
-              </p>
-              <p>
-                <strong>NOVA Group: </strong>
-                {product.source_computed.nova_group !== null
-                  ? `Group ${product.source_computed.nova_group}`
-                  : "Not computed"}
-              </p>
-              {product.source_computed.additive_tags.length > 0 && (
-                <div>
-                  <strong>Additives tagged by OFF: </strong>
-                  {product.source_computed.additive_tags.join(", ")}
-                </div>
-              )}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* 7. Source Attribution & Legal Disclaimer */}
-      <div className="rounded-xl border border-[#E4DEC3] bg-[#EFECE4]/50 p-4 space-y-3 text-xs text-[#5E6B63]">
-        <div className="flex items-center justify-between">
-          <span className="font-semibold text-[#1B2A22]">Data Source Attribution</span>
-          {product.source.product_url && (
-            <a
-              href={product.source.product_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-[#1E5B45] hover:underline"
+      {/* 6. Open Food Facts Computed Fields (Collapsed) - Barcode products only */}
+      {!isLabelProduct && product.source_computed && (
+        <Card className="border border-[#E4DEC3] bg-[#FBF8F2] shadow-xs">
+          <CardContent className="pt-4">
+            <button
+              type="button"
+              onClick={() => setShowOffComputed(!showOffComputed)}
+              className="flex items-center justify-between w-full text-left text-xs font-semibold text-[#5E6B63] hover:text-[#1B2A22]"
+              aria-expanded={showOffComputed}
             >
-              View on Open Food Facts
-              <ExternalLink className="h-3 w-3" />
-            </a>
-          )}
+              <span>Computed by Open Food Facts, not by Ingrivo</span>
+              <ChevronDown
+                className={`h-4 w-4 transition-transform ${
+                  showOffComputed ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+
+            {showOffComputed && (
+              <div className="pt-4 mt-3 border-t border-[#E4DEC3] space-y-2 text-xs text-[#5E6B63]">
+                <p>
+                  <strong>Nutri-Score: </strong>
+                  {product.source_computed.nutriscore
+                    ? product.source_computed.nutriscore.toUpperCase()
+                    : "Not computed"}
+                </p>
+                <p>
+                  <strong>NOVA Group: </strong>
+                  {product.source_computed.nova_group !== null
+                    ? `Group ${product.source_computed.nova_group}`
+                    : "Not computed"}
+                </p>
+                {product.source_computed.additive_tags.length > 0 && (
+                  <div>
+                    <strong>Additives tagged by OFF: </strong>
+                    {product.source_computed.additive_tags.join(", ")}
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 7. Source Attribution (Barcode products only) OR Legal Disclaimer only (Label products) */}
+      {!isLabelProduct && product.source ? (
+        <div className="rounded-xl border border-[#E4DEC3] bg-[#EFECE4]/50 p-4 space-y-3 text-xs text-[#5E6B63]">
+          <div className="flex items-center justify-between">
+            <span className="font-semibold text-[#1B2A22]">Data Source Attribution</span>
+            {product.source.product_url && (
+              <a
+                href={product.source.product_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-[#1E5B45] hover:underline"
+              >
+                View on Open Food Facts
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            )}
+          </div>
+          <p className="leading-relaxed">
+            Product data retrieved from Open Food Facts under the Open Database License (ODbL).
+            Last modified in source: {product.source.last_modified || "Not recorded"}.
+            Product images are licensed under Creative Commons Attribution-ShareAlike (CC BY-SA).
+          </p>
+          <p className="leading-relaxed text-[#1B2A22]">
+            Open Food Facts is community-contributed; records may be incomplete or wrong. Always check physical package labels.
+          </p>
+          <Disclaimer />
         </div>
-        <p className="leading-relaxed">
-          Product data retrieved from Open Food Facts under the Open Database License (ODbL).
-          Last modified in source: {product.source.last_modified || "Not recorded"}.
-          Product images are licensed under Creative Commons Attribution-ShareAlike (CC BY-SA).
-        </p>
-        <p className="leading-relaxed text-[#1B2A22]">
-          Open Food Facts is community-contributed; records may be incomplete or wrong. Always check physical package labels.
-        </p>
-        <Disclaimer />
-      </div>
+      ) : (
+        <div className="rounded-xl border border-[#E4DEC3] bg-[#EFECE4]/50 p-4 space-y-3 text-xs text-[#5E6B63]">
+          <Disclaimer />
+        </div>
+      )}
     </div>
   );
 }

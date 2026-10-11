@@ -29,6 +29,7 @@ class NutrientValues(BaseModel):
     energy_kcal: Optional[float] = None
     energy_kj: Optional[float] = None
     sugars: Optional[float] = None
+    added_sugars: Optional[float] = None  # Phase 6 extension: separate added sugars
     protein: Optional[float] = None
     fat: Optional[float] = None
     saturated_fat: Optional[float] = None

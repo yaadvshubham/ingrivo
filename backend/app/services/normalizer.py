@@ -71,13 +71,19 @@ def normalize_off_product(raw_data: Dict[str, Any], api_version: str) -> Product
         return None
 
     energy_kcal = get_nutrient("energy-kcal")
-    energy_kj = get_nutrient("energy-kj") or get_nutrient("energy")
+    energy_kj = get_nutrient("energy-kj")
+    if energy_kj is None:
+        energy_kj = get_nutrient("energy")
     sugars = get_nutrient("sugars")
-    protein = get_nutrient("proteins") or get_nutrient("protein")
+    protein = get_nutrient("proteins")
+    if protein is None:
+        protein = get_nutrient("protein")
     fat = get_nutrient("fat")
     saturated_fat = get_nutrient("saturated-fat")
     carbohydrates = get_nutrient("carbohydrates")
-    fibre = get_nutrient("fiber") or get_nutrient("fibre")
+    fibre = get_nutrient("fiber")
+    if fibre is None:
+        fibre = get_nutrient("fibre")
     sodium = get_nutrient("sodium")
     salt = get_nutrient("salt")
     

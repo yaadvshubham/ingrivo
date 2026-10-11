@@ -6,6 +6,7 @@ export type ProvenanceVariant = "source" | "label" | "ocr" | "ai" | "derived" | 
 
 interface ProvenanceBadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   variant: ProvenanceVariant;
+  customLabel?: string;
   className?: string;
 }
 
@@ -75,7 +76,7 @@ const BADGE_CONFIG: Record<
  * Rule: Provenance colors must never be the only signal.
  * Each badge renders an icon AND a visible text label.
  */
-export function ProvenanceBadge({ variant, className, ...props }: ProvenanceBadgeProps) {
+export function ProvenanceBadge({ variant, customLabel, className, ...props }: ProvenanceBadgeProps) {
   const config = BADGE_CONFIG[variant] || BADGE_CONFIG.missing;
   const IconComponent = config.icon;
 
@@ -92,7 +93,7 @@ export function ProvenanceBadge({ variant, className, ...props }: ProvenanceBadg
       {...props}
     >
       <IconComponent className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-      <span>{config.label}</span>
+      <span>{customLabel || config.label}</span>
     </span>
   );
 }

@@ -18,6 +18,7 @@ import { searchProducts, ApiError } from "@/lib/api-client";
 import { SearchResponse } from "@/lib/schemas/search";
 import { ProductCard } from "@/components/product/ProductCard";
 import { DisabledAction } from "@/components/DisabledAction";
+import { isFeatureEnabled } from "@/lib/features";
 import { Input } from "@/components/ui/input";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -353,12 +354,22 @@ export function SearchContent() {
                   <span>Scan or enter barcode directly</span>
                 </Link>
 
-                <DisabledAction
-                  label="Capture label photo (OCR)"
-                  explanation="On-device OCR parsing planned for Phase 6"
-                  icon={<Camera className="h-4 w-4" />}
-                  variant="outline"
-                />
+                {isFeatureEnabled("label") ? (
+                  <Link
+                    href="/label"
+                    className={buttonVariants({ variant: "outline", className: "justify-start gap-2 h-11" })}
+                  >
+                    <Camera className="h-4 w-4 text-[#1E5B45]" />
+                    <span>Capture label photo (OCR)</span>
+                  </Link>
+                ) : (
+                  <DisabledAction
+                    label="Capture label photo (OCR)"
+                    explanation="On-device OCR parsing planned for Phase 6"
+                    icon={<Camera className="h-4 w-4" />}
+                    variant="outline"
+                  />
+                )}
               </div>
             </div>
           </CardContent>

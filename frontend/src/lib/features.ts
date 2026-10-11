@@ -18,7 +18,7 @@ export interface FeatureFlags {
 export const FEATURES: FeatureFlags = {
   scan: true, // Enabled in Phase 3 for manual barcode lookup
   search: true, // Enabled in Phase 5 for OFF search integration
-  label: false,
+  label: true, // Enabled in Phase 6 for on-device label OCR and review
   compare: false,
   history: false,
 };
