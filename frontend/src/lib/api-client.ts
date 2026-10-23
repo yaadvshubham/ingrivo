@@ -38,7 +38,7 @@ export async function getProduct(
   options: GetProductOptions = {}
 ): Promise<Product> {
   const { timeoutMs = 12000, onSlow, slowThresholdMs = 3500 } = options;
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://ingrivo-3.onrender.com";
   const url = `${baseUrl}/api/v1/products/barcode/${barcode}`;
 
   const controller = new AbortController();
@@ -136,7 +136,7 @@ export async function searchProducts(
   options: SearchProductsOptions = {}
 ): Promise<SearchResponse> {
   const { timeoutMs = 12000, onSlow, slowThresholdMs = 3500, signal: externalSignal } = options;
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://ingrivo-3.onrender.com";
   const url = `${baseUrl}/api/v1/products/search?q=${encodeURIComponent(query)}&page=${page}`;
 
   const controller = new AbortController();
@@ -231,7 +231,7 @@ export async function explainProduct(
   options: ExplainProductOptions = {}
 ): Promise<ExplainResponse> {
   const { timeoutMs = 30000, onSlow, slowThresholdMs = 3500 } = options;
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://ingrivo-3.onrender.com";
   const url = `${baseUrl}/api/v1/analysis/explain`;
 
   const controller = new AbortController();
@@ -319,7 +319,7 @@ export async function compareProducts(
   options: CompareProductsOptions = {}
 ): Promise<CompareResponse> {
   const { timeoutMs = 30000, onSlow, slowThresholdMs = 3500, signal: externalSignal } = options;
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://ingrivo-3.onrender.com";
   const url = `${baseUrl}/api/v1/compare`;
 
   const controller = new AbortController();
@@ -437,7 +437,7 @@ export async function chatWithProduct(
   options: ChatProductOptions = {}
 ): Promise<ChatResponse> {
   const { timeoutMs = 30000, onSlow, slowThresholdMs = 3500 } = options;
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://ingrivo-3.onrender.com";
   const url = `${baseUrl}/api/v1/analysis/chat`;
 
   const controller = new AbortController();

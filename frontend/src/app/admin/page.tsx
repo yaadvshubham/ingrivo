@@ -43,7 +43,7 @@ import {
 } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "https://ingrivo-3.onrender.com";
 
 interface UserRecord {
   id: string;

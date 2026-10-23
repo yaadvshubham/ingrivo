@@ -22,7 +22,7 @@ export default function StatusPage() {
     }, 4000);
 
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://ingrivo-3.onrender.com';
       const response = await fetch(`${baseUrl}/api/v1/health`, {
         signal: controller.signal,
       });
