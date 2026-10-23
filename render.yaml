@@ -12,4 +12,4 @@ services:
       - key: APP_ENV
         value: production
       - key: ALLOWED_ORIGINS
-        value: https://trypinfo.vercel.app,https://ingrivo.vercel.app,http://localhost:3000
+        value: https://trypinfo.vercel.app,https://pinfo.vercel.app,https://ingrivo.vercel.app,http://localhost:3000
