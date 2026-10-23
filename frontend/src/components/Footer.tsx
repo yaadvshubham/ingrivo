@@ -1,14 +1,17 @@
 import React from "react";
 import Link from "next/link";
 import { Disclaimer } from "@/components/Disclaimer";
+import { Logo } from "@/components/brand/Logo";
 
 export function Footer() {
   return (
     <footer className="w-full border-t border-[#E4DEC3] bg-[#EFECE4]/40 mt-auto">
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 space-y-4">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <p className="text-sm font-semibold text-[#1E5B45]">Ingrivo</p>
+          <div className="space-y-1.5">
+            <Link href="/" className="inline-block group">
+              <Logo size="sm" />
+            </Link>
             <p className="text-xs text-[#5E6B63]">
               Know what you eat. Understand what you buy.
             </p>

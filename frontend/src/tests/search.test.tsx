@@ -270,7 +270,7 @@ describe("Phase 5 Product Search Tests", () => {
             }, 10);
             setTimeout(() => {
               resolve(mockSearchResponse);
-            }, 50);
+            }, 1000);
           })
       );
 

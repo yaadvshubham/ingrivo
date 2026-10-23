@@ -5,6 +5,13 @@ import {
   ExplainResponseSchema,
   ExplainRequestSource,
 } from "./schemas/analysis";
+import {
+  CompareRequest,
+  CompareResponse,
+  CompareResponseSchema,
+} from "./schemas/compare";
+
+export type { ExplainRequestSource };
 
 export class ApiError extends Error {
   public code: string;
@@ -298,4 +305,185 @@ export async function explainProduct(
   }
 
   return parsed.data;
+}
+
+export interface CompareProductsOptions {
+  timeoutMs?: number;
+  onSlow?: () => void;
+  slowThresholdMs?: number;
+  signal?: AbortSignal;
+}
+
+export async function compareProducts(
+  request: CompareRequest,
+  options: CompareProductsOptions = {}
+): Promise<CompareResponse> {
+  const { timeoutMs = 30000, onSlow, slowThresholdMs = 3500, signal: externalSignal } = options;
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+  const url = `${baseUrl}/api/v1/compare`;
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  if (externalSignal) {
+    if (externalSignal.aborted) {
+      controller.abort();
+    } else {
+      externalSignal.addEventListener("abort", () => controller.abort(), { once: true });
+    }
+  }
+
+  let slowTimer: ReturnType<typeof setTimeout> | null = null;
+  if (onSlow) {
+    slowTimer = setTimeout(() => {
+      onSlow();
+    }, slowThresholdMs);
+  }
+
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        a: request.a,
+        b: request.b,
+        include_ai_explanation: Boolean(request.include_ai_explanation),
+        language: "en",
+      }),
+      cache: "no-store",
+      signal: controller.signal,
+    });
+  } catch (err: unknown) {
+    clearTimeout(timeoutId);
+    if (slowTimer) clearTimeout(slowTimer);
+
+    if (err instanceof Error && err.name === "AbortError") {
+      throw new ApiError(
+        "Request timed out while waiting for product comparison.",
+        "UPSTREAM_TIMEOUT",
+        504
+      );
+    }
+    throw new ApiError(
+      "Network connection error while contacting server.",
+      "NETWORK_ERROR",
+      503
+    );
+  } finally {
+    clearTimeout(timeoutId);
+    if (slowTimer) clearTimeout(slowTimer);
+  }
+
+  if (!response.ok) {
+    let errorCode = "UNKNOWN_ERROR";
+    let errorMessage = "An unknown error occurred while comparing products.";
+
+    try {
+      const data = await response.json();
+      if (data.error) {
+        errorCode = data.error.code || errorCode;
+        errorMessage = data.error.message || errorMessage;
+      }
+    } catch {
+      // Ignored
+    }
+    throw new ApiError(errorMessage, errorCode, response.status);
+  }
+
+  const rawData = await response.json();
+  const parsed = CompareResponseSchema.safeParse(rawData);
+
+  if (!parsed.success) {
+    console.error("Zod parse error for comparison:", parsed.error);
+    throw new ApiError(
+      "Failed to parse comparison response from server.",
+      "SCHEMA_ERROR",
+      502
+    );
+  }
+
+  return parsed.data;
+}
+
+// ---------------------------------------------------------------------------
+// Chat API
+// ---------------------------------------------------------------------------
+
+export type ChatLanguage = "hinglish" | "hindi" | "english";
+
+export interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export interface ChatResponse {
+  reply: string;
+  model: string;
+}
+
+export interface ChatProductOptions {
+  timeoutMs?: number;
+  onSlow?: () => void;
+  slowThresholdMs?: number;
+}
+
+export async function chatWithProduct(
+  source: ExplainRequestSource,
+  messages: ChatMessage[],
+  language: ChatLanguage = "hinglish",
+  options: ChatProductOptions = {}
+): Promise<ChatResponse> {
+  const { timeoutMs = 30000, onSlow, slowThresholdMs = 3500 } = options;
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+  const url = `${baseUrl}/api/v1/analysis/chat`;
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  let slowTimer: ReturnType<typeof setTimeout> | null = null;
+  if (onSlow) {
+    slowTimer = setTimeout(() => onSlow(), slowThresholdMs);
+  }
+
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ source, messages, language }),
+      cache: "no-store",
+      signal: controller.signal,
+    });
+  } catch (err: unknown) {
+    clearTimeout(timeoutId);
+    if (slowTimer) clearTimeout(slowTimer);
+    if (err instanceof Error && err.name === "AbortError") {
+      throw new ApiError("Chat request timed out.", "AI_UNAVAILABLE", 504);
+    }
+    throw new ApiError("Network error contacting server.", "NETWORK_ERROR", 503);
+  } finally {
+    clearTimeout(timeoutId);
+    if (slowTimer) clearTimeout(slowTimer);
+  }
+
+  if (!response.ok) {
+    let errorCode = "UNKNOWN_ERROR";
+    let errorMessage = "An unknown error occurred.";
+    try {
+      const data = await response.json();
+      if (data.error) {
+        errorCode = data.error.code || errorCode;
+        errorMessage = data.error.message || errorMessage;
+      }
+    } catch {
+      // Ignored
+    }
+    throw new ApiError(errorMessage, errorCode, response.status);
+  }
+
+  const rawData = await response.json();
+  return rawData as ChatResponse;
 }

@@ -39,6 +39,9 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { usePageTitle } from "@/hooks/usePageTitle";
+import { AuthGuard } from "@/components/auth/AuthGuard";
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
 
 type LabelFlowStep = "intake" | "processing" | "review";
 
@@ -52,7 +55,8 @@ interface FormNutrientItem {
   isCustom?: boolean;
 }
 
-export default function LabelPage() {
+function LabelContent() {
+  usePageTitle("Capture Label Photo");
   const router = useRouter();
 
   // Step state
@@ -535,21 +539,23 @@ export default function LabelPage() {
       {/* Screen 1: Image Intake */}
       {step === "intake" && (
         <div className="space-y-8 max-w-2xl mx-auto">
-          <div className="text-center space-y-2">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1B2A22]">
-              Scan Food Label Photo
-            </h1>
-            <p className="text-sm text-[#5E6B63] leading-relaxed">
-              Take a photo or upload an image of the nutrition facts or ingredient label.
-              All OCR processing runs securely on your device.
-            </p>
-          </div>
+          <ScrollReveal blur={10} yOffset={15} duration={600} className="space-y-4">
+            <div className="text-center space-y-2">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1B2A22]">
+                Scan Food Label Photo
+              </h1>
+              <p className="text-sm text-[#5E6B63] leading-relaxed">
+                Take a photo or upload an image of the nutrition facts or ingredient label.
+                All OCR processing runs securely on your device.
+              </p>
+            </div>
 
-          {/* Privacy text notice */}
-          <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-900 flex items-center gap-2.5">
-            <ShieldCheck className="h-4 w-4 text-[#1E5B45] shrink-0" />
-            <span>Your photo is read on your device. It isn&apos;t uploaded or stored.</span>
-          </div>
+            {/* Privacy text notice */}
+            <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-900 flex items-center gap-2.5">
+              <ShieldCheck className="h-4 w-4 text-[#1E5B45] shrink-0" />
+              <span>Your photo is read on your device. It isn&apos;t uploaded or stored.</span>
+            </div>
+          </ScrollReveal>
 
           {/* Intake Errors and Warnings */}
           {intakeError && (
@@ -567,234 +573,242 @@ export default function LabelPage() {
           )}
 
           {/* Image Selection Actions */}
-          {!imagePreviewUrl ? (
-            <Card className="border border-[#E4DEC3] bg-white shadow-xs">
-              <CardContent className="pt-8 pb-8 space-y-6 text-center">
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                  {/* Take Photo */}
-                  <input
-                    ref={cameraInputRef}
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
-                    capture="environment"
-                    className="hidden"
-                    onChange={handleFileSelect}
-                  />
-                  <Button
-                    type="button"
-                    variant="default"
-                    size="lg"
-                    className="w-full sm:w-auto h-12 px-6 gap-2"
-                    onClick={() => cameraInputRef.current?.click()}
-                  >
-                    <Camera className="h-5 w-5" />
-                    <span>Take photo with camera</span>
-                  </Button>
+          <ScrollReveal blur={12} yOffset={20} delay={100} duration={650}>
+            {!imagePreviewUrl ? (
+              <Card className="border border-[#E4DEC3] bg-white shadow-xs">
+                <CardContent className="pt-8 pb-8 space-y-6 text-center">
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    {/* Take Photo */}
+                    <input
+                      ref={cameraInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+                      capture="environment"
+                      className="hidden"
+                      onChange={handleFileSelect}
+                    />
+                    <Button
+                      type="button"
+                      variant="default"
+                      size="lg"
+                      className="w-full sm:w-auto h-12 px-6 gap-2"
+                      onClick={() => cameraInputRef.current?.click()}
+                    >
+                      <Camera className="h-5 w-5" />
+                      <span>Take photo with camera</span>
+                    </Button>
 
-                  {/* Upload Image */}
-                  <input
-                    ref={uploadInputRef}
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
-                    className="hidden"
-                    onChange={handleFileSelect}
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="lg"
-                    className="w-full sm:w-auto h-12 px-6 gap-2"
-                    onClick={() => uploadInputRef.current?.click()}
-                  >
-                    <Upload className="h-5 w-5" />
-                    <span>Upload image file</span>
-                  </Button>
-                </div>
-                <p className="text-xs text-[#5E6B63]">
-                  Accepts JPEG, PNG, and WebP (up to 10 MB).
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            /* Selected Photo Preview & Rotation */
-            <Card className="border border-[#E4DEC3] bg-white shadow-xs">
-              <CardHeader className="pb-3 border-b border-[#E4DEC3]/60 flex flex-row items-center justify-between">
-                <CardTitle className="text-base font-bold text-[#1B2A22]">
-                  Photo Preview
-                </CardTitle>
-                <div className="flex items-center gap-1">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="h-8 px-2.5 text-xs gap-1"
-                    onClick={() => handleRotate(-90)}
-                  >
-                    <RotateCcw className="h-3.5 w-3.5" />
-                    <span>Rotate Left</span>
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="h-8 px-2.5 text-xs gap-1"
-                    onClick={() => handleRotate(90)}
-                  >
-                    <RotateCw className="h-3.5 w-3.5" />
-                    <span>Rotate Right</span>
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-6 space-y-6">
-                <div className="relative max-h-96 w-full rounded-xl bg-stone-50 border border-[#E4DEC3] overflow-hidden flex items-center justify-center p-2">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={imagePreviewUrl}
-                    alt="Uploaded food package label"
-                    className="max-h-80 max-w-full object-contain rounded-lg"
-                  />
-                </div>
+                    {/* Upload Image */}
+                    <input
+                      ref={uploadInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+                      className="hidden"
+                      onChange={handleFileSelect}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="lg"
+                      className="w-full sm:w-auto h-12 px-6 gap-2"
+                      onClick={() => uploadInputRef.current?.click()}
+                    >
+                      <Upload className="h-5 w-5" />
+                      <span>Upload image file</span>
+                    </Button>
+                  </div>
+                  <p className="text-xs text-[#5E6B63]">
+                    Accepts JPEG, PNG, and WebP (up to 10 MB).
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              /* Selected Photo Preview & Rotation */
+              <Card className="border border-[#E4DEC3] bg-white shadow-xs">
+                <CardHeader className="pb-3 border-b border-[#E4DEC3]/60 flex flex-row items-center justify-between">
+                  <CardTitle className="text-base font-bold text-[#1B2A22]">
+                    Photo Preview
+                  </CardTitle>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-8 px-2.5 text-xs gap-1"
+                      onClick={() => handleRotate(-90)}
+                    >
+                      <RotateCcw className="h-3.5 w-3.5" />
+                      <span>Rotate Left</span>
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-8 px-2.5 text-xs gap-1"
+                      onClick={() => handleRotate(90)}
+                    >
+                      <RotateCw className="h-3.5 w-3.5" />
+                      <span>Rotate Right</span>
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-6 space-y-6">
+                  <div className="relative max-h-96 w-full rounded-xl bg-stone-50 border border-[#E4DEC3] overflow-hidden flex items-center justify-center p-2">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={imagePreviewUrl}
+                      alt="Uploaded food package label"
+                      className="max-h-80 max-w-full object-contain rounded-lg"
+                    />
+                  </div>
 
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-                  <Button
-                    type="button"
-                    variant="default"
-                    size="lg"
-                    className="w-full sm:w-auto h-12 px-8 gap-2"
-                    onClick={startOcrProcessing}
-                  >
-                    <Sparkles className="h-5 w-5" />
-                    <span>Read label text (OCR)</span>
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="lg"
-                    className="w-full sm:w-auto h-12"
-                    onClick={() => {
-                      if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
-                      setImagePreviewUrl(null);
-                      setActiveCanvas(null);
-                    }}
-                  >
-                    Choose another photo
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+                    <Button
+                      type="button"
+                      variant="default"
+                      size="lg"
+                      className="w-full sm:w-auto h-12 px-8 gap-2"
+                      onClick={startOcrProcessing}
+                    >
+                      <Sparkles className="h-5 w-5" />
+                      <span>Read label text (OCR)</span>
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="lg"
+                      className="w-full sm:w-auto h-12"
+                      onClick={() => {
+                        if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
+                        setImagePreviewUrl(null);
+                        setActiveCanvas(null);
+                      }}
+                    >
+                      Choose another photo
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </ScrollReveal>
 
           {/* Photo tips */}
-          <div className="rounded-xl border border-[#E4DEC3] bg-[#FBF8F2] p-5 space-y-3">
-            <div className="flex items-center gap-2 text-xs font-bold text-[#1B2A22]">
-              <Info className="h-4 w-4 text-[#1E5B45]" />
-              <span>Tips for accurate text extraction</span>
+          <ScrollReveal blur={10} yOffset={15} delay={180} duration={650}>
+            <div className="rounded-xl border border-[#E4DEC3] bg-[#FBF8F2] p-5 space-y-3">
+              <div className="flex items-center gap-2 text-xs font-bold text-[#1B2A22]">
+                <Info className="h-4 w-4 text-[#1E5B45]" />
+                <span>Tips for accurate text extraction</span>
+              </div>
+              <ul className="text-xs text-[#5E6B63] space-y-1.5 list-disc pl-5 leading-relaxed">
+                <li>Place package on a flat, well-lit surface.</li>
+                <li>Avoid flash glare or harsh shadows over nutrition tables.</li>
+                <li>Fill the frame with the ingredients list and nutrition facts panel.</li>
+                <li>Keep the camera steady and parallel to the label text.</li>
+              </ul>
             </div>
-            <ul className="text-xs text-[#5E6B63] space-y-1.5 list-disc pl-5 leading-relaxed">
-              <li>Place package on a flat, well-lit surface.</li>
-              <li>Avoid flash glare or harsh shadows over nutrition tables.</li>
-              <li>Fill the frame with the ingredients list and nutrition facts panel.</li>
-              <li>Keep the camera steady and parallel to the label text.</li>
-            </ul>
-          </div>
+          </ScrollReveal>
         </div>
       )}
 
       {/* Screen 2: OCR In-Progress & Error Recovery */}
       {step === "processing" && (
-        <div className="max-w-xl mx-auto py-12 space-y-6 text-center">
-          <Card className="border border-[#E4DEC3] bg-white shadow-xs">
-            <CardHeader className="space-y-2">
-              <CardTitle className="text-xl font-bold text-[#1B2A22]">
-                {ocrError ? "OCR Processing Failed" : "Reading Package Label"}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {!ocrError ? (
-                <>
-                  <div className="w-full bg-[#EFECE4] rounded-full h-3 overflow-hidden">
+        <ScrollReveal blur={12} yOffset={20} duration={600} className="max-w-xl mx-auto py-12">
+          <div className="space-y-6 text-center">
+            <Card className="border border-[#E4DEC3] bg-white shadow-xs">
+              <CardHeader className="space-y-2">
+                <CardTitle className="text-xl font-bold text-[#1B2A22]">
+                  {ocrError ? "OCR Processing Failed" : "Reading Package Label"}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {!ocrError ? (
+                  <>
+                    <div className="w-full bg-[#EFECE4] rounded-full h-3 overflow-hidden">
+                      <div
+                        className="bg-[#1E5B45] h-full transition-all duration-300"
+                        style={{ width: `${Math.max(5, ocrProgress)}%` }}
+                      />
+                    </div>
+
                     <div
-                      className="bg-[#1E5B45] h-full transition-all duration-300"
-                      style={{ width: `${Math.max(5, ocrProgress)}%` }}
-                    />
-                  </div>
+                      role="status"
+                      aria-live="polite"
+                      className="text-xs font-medium text-[#5E6B63] space-y-1"
+                    >
+                      <p className="text-sm font-semibold text-[#1B2A22]">
+                        {ocrProgress}% complete
+                      </p>
+                      <p>{ocrStatusText}</p>
+                    </div>
 
-                  <div
-                    role="status"
-                    aria-live="polite"
-                    className="text-xs font-medium text-[#5E6B63] space-y-1"
-                  >
-                    <p className="text-sm font-semibold text-[#1B2A22]">
-                      {ocrProgress}% complete
+                    <p className="text-xs text-[#5E6B63]">
+                      Running Tesseract OCR entirely in your browser using local WASM engines.
                     </p>
-                    <p>{ocrStatusText}</p>
-                  </div>
 
-                  <p className="text-xs text-[#5E6B63]">
-                    Running Tesseract OCR entirely in your browser using local WASM engines.
-                  </p>
+                    <div className="pt-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleCancelOcr}
+                        className="h-10 px-6"
+                      >
+                        Cancel OCR
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="space-y-6">
+                    <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-xs text-red-900 flex items-start gap-3 text-left">
+                      <AlertCircle className="h-4 w-4 text-red-600 shrink-0 mt-0.5" />
+                      <span>{ocrError}</span>
+                    </div>
 
-                  <div className="pt-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={handleCancelOcr}
-                      className="h-10 px-6"
-                    >
-                      Cancel OCR
-                    </Button>
-                  </div>
-                </>
-              ) : (
-                <div className="space-y-6">
-                  <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-xs text-red-900 flex items-start gap-3 text-left">
-                    <AlertCircle className="h-4 w-4 text-red-600 shrink-0 mt-0.5" />
-                    <span>{ocrError}</span>
-                  </div>
+                    <p className="text-xs text-[#5E6B63] leading-relaxed">
+                      You can try again with a clearer photo, or enter the product details manually
+                      in the review screen.
+                    </p>
 
-                  <p className="text-xs text-[#5E6B63] leading-relaxed">
-                    You can try again with a clearer photo, or enter the product details manually
-                    in the review screen.
-                  </p>
-
-                  <div className="flex flex-col sm:flex-row justify-center gap-3">
-                    <Button
-                      type="button"
-                      variant="default"
-                      onClick={handleManualEntryFallback}
-                    >
-                      Type details manually
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setStep("intake")}
-                    >
-                      Try another photo
-                    </Button>
+                    <div className="flex flex-col sm:flex-row justify-center gap-3">
+                      <Button
+                        type="button"
+                        variant="default"
+                        onClick={handleManualEntryFallback}
+                      >
+                        Type details manually
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setStep("intake")}
+                      >
+                        Try another photo
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </ScrollReveal>
       )}
 
       {/* Screen 3: Review & Edit Screen */}
       {step === "review" && (
         <div className="space-y-8">
-          <div className="border-b border-[#E4DEC3] pb-4">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1B2A22]">
-              Review Label Information
-            </h1>
-            <p className="text-sm text-[#5E6B63] mt-1">
-              Check OCR-extracted data against your physical package. Edit any fields that need correction.
-            </p>
-          </div>
+          <ScrollReveal blur={10} yOffset={15} duration={600}>
+            <div className="border-b border-[#E4DEC3] pb-4">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1B2A22]">
+                Review Label Information
+              </h1>
+              <p className="text-sm text-[#5E6B63] mt-1">
+                Check OCR-extracted data against your physical package. Edit any fields that need correction.
+              </p>
+            </div>
+          </ScrollReveal>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             {/* Left Column: Photo Preview (Desktop side-by-side, mobile stacked) */}
-            <div className="lg:col-span-5 space-y-4 lg:sticky lg:top-6">
+            <ScrollReveal blur={12} yOffset={20} delay={80} duration={700} className="lg:col-span-5 space-y-4 lg:sticky lg:top-6">
               <Card className="border border-[#E4DEC3] bg-white shadow-xs overflow-hidden">
                 <CardHeader className="py-3 px-4 bg-[#FBF8F2] border-b border-[#E4DEC3]/60 flex flex-row items-center justify-between">
                   <CardTitle className="text-xs font-bold text-[#1B2A22] uppercase tracking-wider">
@@ -842,10 +856,10 @@ export default function LabelPage() {
                   </ul>
                 </div>
               )}
-            </div>
+            </ScrollReveal>
 
             {/* Right Column: Review & Form Editing */}
-            <div className="lg:col-span-7 space-y-6">
+            <ScrollReveal blur={12} yOffset={20} delay={140} duration={700} className="lg:col-span-7 space-y-6">
               {/* Product Identity */}
               <Card className="border border-[#E4DEC3] bg-white shadow-xs">
                 <CardHeader className="pb-3 border-b border-[#E4DEC3]/60">
@@ -1192,10 +1206,21 @@ export default function LabelPage() {
                   </Button>
                 </CardContent>
               </Card>
-            </div>
+            </ScrollReveal>
           </div>
         </div>
       )}
     </div>
+  );
+}
+
+export default function LabelPage() {
+  return (
+    <AuthGuard
+      featureName="Label Scanner & OCR"
+      description="Sign in to capture packaging labels and extract ingredients & nutrition with on-device OCR."
+    >
+      <LabelContent />
+    </AuthGuard>
   );
 }

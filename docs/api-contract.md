@@ -179,3 +179,90 @@ Host: api.ingrivo.com
 }
 ```
 
+---
+
+## POST `/api/v1/compare`
+Compares two products with deterministic, honest math, neutral wording, and an optional verified AI narrative (Phase 8).
+
+### Request
+```http
+POST /api/v1/compare HTTP/1.1
+Host: api.ingrivo.com
+Content-Type: application/json
+
+{
+  "a": { "type": "barcode", "barcode": "5449000000996" },
+  "b": { "type": "barcode", "barcode": "3017620422003" },
+  "include_ai_explanation": false,
+  "language": "en"
+}
+```
+
+### Response `200 OK`
+```json
+{
+  "a": {
+    "ref": "bc-5449000000996",
+    "name": "Coca-Cola Original",
+    "brand": "Coca-Cola",
+    "image_url": "https://images.openfoodfacts.net/...",
+    "basis": "per_100ml",
+    "serving_size": null,
+    "completeness": { "score": 0.92, "missing": ["fibre"] }
+  },
+  "b": {
+    "ref": "bc-3017620422003",
+    "name": "Nutella",
+    "brand": "Ferrero",
+    "image_url": "https://images.openfoodfacts.net/...",
+    "basis": "per_100g",
+    "serving_size": "15g",
+    "completeness": { "score": 1.0, "missing": [] }
+  },
+  "nutrient_rows": [
+    {
+      "nutrient": "sugars",
+      "label": "Total Sugars",
+      "unit": "g",
+      "val_a": 10.6,
+      "provenance_a": "source",
+      "derivation_a": null,
+      "basis_a": "per_100ml",
+      "val_b": 56.3,
+      "provenance_b": "source",
+      "derivation_b": null,
+      "basis_b": "per_100g",
+      "comparable": false,
+      "incomparable_reason": "Different basis units (grams vs milliliters) cannot be compared directly without product density.",
+      "diff_absolute": null,
+      "diff_relative_percent": null,
+      "direction": "incomparable",
+      "notable": false,
+      "notable_reason": null
+    }
+  ],
+  "ingredients_diff": {
+    "shared": ["sugar"],
+    "only_a": ["carbonated water", "e150d", "phosphoric acid"],
+    "only_b": ["palm oil", "hazelnuts", "skimmed milk powder", "cocoa"],
+    "is_approximate": true,
+    "disclaimer": "Ingredients parsed and matched approximately. Synonyms and formulations may vary."
+  },
+  "allergens_diff": {
+    "shared": [],
+    "only_a": [],
+    "only_b": ["Milk", "Nuts", "Soybeans"],
+    "note_a": "None listed in source (does not guarantee allergen-free)",
+    "note_b": "Declared on label"
+  },
+  "ai": null,
+  "ai_status": "omitted"
+}
+```
+
+### Error Responses
+- `400 INVALID_BARCODE`: `{"error": {"code": "INVALID_BARCODE", "message": "...", "details": {"side": "a"}}}`
+- `404 PRODUCT_NOT_FOUND`: `{"error": {"code": "PRODUCT_NOT_FOUND", "message": "...", "details": {"side": "b"}}}`
+- `504 UPSTREAM_TIMEOUT`: `{"error": {"code": "UPSTREAM_TIMEOUT", "message": "...", "details": {"side": "a"}}}`
+- `429 UPSTREAM_RATE_LIMITED`: `{"error": {"code": "UPSTREAM_RATE_LIMITED", "message": "...", "details": {"side": "a"}}}`
+

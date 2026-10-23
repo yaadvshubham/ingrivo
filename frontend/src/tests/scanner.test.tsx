@@ -156,7 +156,7 @@ describe("Scanner & Scan Page Integration Tests", () => {
     expect(screen.getByText(/camera is in use/i)).toBeInTheDocument();
   });
 
-  it("requires TWO consecutive identical valid reads before navigating", async () => {
+  it("navigates immediately on valid barcode detection", async () => {
     render(<ScanPage />);
     const startBtn = screen.getByRole("button", { name: /start camera/i });
     fireEvent.click(startBtn);
@@ -180,17 +180,7 @@ describe("Scanner & Scan Page Integration Tests", () => {
       vi.advanceTimersByTime(150);
     });
 
-    // After 1st read, navigate should NOT have been called yet
-    expect(mockPush).not.toHaveBeenCalled();
-
-    // 2nd decode returns identical valid barcode within 1.5s
-    mockDetect.mockResolvedValueOnce([{ rawValue: "5449000000996" }]);
-
-    await act(async () => {
-      vi.advanceTimersByTime(150);
-    });
-
-    // Now navigation should occur to /product/bc-5449000000996
+    // Navigation should occur immediately to /product/bc-5449000000996
     expect(mockPush).toHaveBeenCalledWith("/product/bc-5449000000996");
     // And tracks must be stopped
     expect(mockTracks[0].stop).toHaveBeenCalled();
@@ -220,7 +210,7 @@ describe("Scanner & Scan Page Integration Tests", () => {
     expect(mockPush).not.toHaveBeenCalled();
   });
 
-  it("does not navigate if reads differ", async () => {
+  it("does not navigate if decoded text is not a valid barcode", async () => {
     render(<ScanPage />);
     fireEvent.click(screen.getByRole("button", { name: /start camera/i }));
 
@@ -233,14 +223,8 @@ describe("Scanner & Scan Page Integration Tests", () => {
       Object.defineProperty(video, "videoHeight", { value: 480, configurable: true });
     }
 
-    // First read: 5449000000996
-    mockDetect.mockResolvedValueOnce([{ rawValue: "5449000000996" }]);
-    await act(async () => {
-      vi.advanceTimersByTime(150);
-    });
-
-    // Second read: different valid barcode 3017620422003 (Nutella)
-    mockDetect.mockResolvedValueOnce([{ rawValue: "3017620422003" }]);
+    // Random non-barcode text
+    mockDetect.mockResolvedValueOnce([{ rawValue: "Hello World 123" }]);
     await act(async () => {
       vi.advanceTimersByTime(150);
     });

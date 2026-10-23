@@ -13,6 +13,12 @@ starlette==1.7.0           # ASGI toolkit (FastAPI dependency)
 httpx==0.28.1              # Async HTTP client for calling Open Food Facts
 google-genai==2.29.0       # Official Google GenAI Python SDK for structured Gemini responses
 
+# --- Auth, Security & Database ---
+bcrypt==5.0.0              # Password hashing for local accounts and admin
+PyJWT==2.15.1              # JWT token encoding and decoding
+firebase_admin==7.7.0      # Firebase Admin SDK for server-side auth verification
+cryptography==50.0.2       # Cryptographic primitives for JWT and Firebase
+
 # --- Testing ---
 pytest==9.1.1              # Test framework
 anyio==4.15.1              # Async test support (provides pytest plugin)

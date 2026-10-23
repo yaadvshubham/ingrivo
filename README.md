@@ -9,8 +9,9 @@ Ingrivo is an AI-powered packaged food and beverage intelligence web app. It com
 - **Phase 2 Completed:** Design System, App Shell, WCAG Contrast Tests, and Homepage.
 - **Phase 3 Completed:** Normalized Product Schema, Barcode Validation, Rate-Limited Open Food Facts Lookup, Manual Barcode Scanner UI, and Product Facts Page.
 - **Phase 4 Completed:** On-Device Camera Barcode Scanner (Ponyfill + Self-Hosted ZXing WASM, Secure Context Check, Strict Double-Read Confirmation, Media Stream Teardown), Catalog Coverage Diagnostic Script, and Coverage Report.
-- **Phase 5 Completed:** Product Search (Search-a-licious / Open Food Facts integration, Lucene query sanitization, token-bucket limiters, 1-hour caching, explicit form submit only, URL parameter persistence, multi-state UI with pagination and disabled action fallbacks).
-- **Phase 6 Completed:** On-Device Label OCR, Review & Parsing (Zero remote image upload, self-hosted Tesseract.js assets, magic-byte intake validation, EXIF orientation and downscaling, pure TypeScript rule-based parser with dual-column detection, OCR suspect flags, neutral sanity checks, sessionStorage-backed `lb-<uuid>` label products, `added_sugars` schema extension, shared completeness formula with Python).
+- **Phase 7 Completed:** Evidence-Constrained Gemini AI Explanations (Strict evidence packets, structured Pydantic / TypeScript schemas, 24-hour SHA-256 hashed backend caching, zero-eval grounding/tools, refusal handling, privacy safeguards, and automated safety evaluation suite).
+- **Phase 8 Completed:** Deterministic Product Comparison (Honest comparison schema, dual-product picker with search and manual barcode tabs, strictly non-comparable solid vs beverage gating, normalized basis alignment, table comparison with provenance, and neutral AI comparison narrative).
+- **Phase 9 Completed:** Local Scan History, Accessibility, Responsive Polish & Edge Cases (Browser-only `localStorage` store with 50-item LRU eviction, cross-tab synchronization, undo removal, offline resilience with `navigator.onLine`, WCAG AA accessibility audit with skip link, single `h1`, landmarks, visible focus, table semantics, touch targets >= 44px, `prefers-reduced-motion`, plain lazy `<img>` with `no-referrer`, collapsible ingredient lists, and zero `dangerouslySetInnerHTML`).
 
 ---
 

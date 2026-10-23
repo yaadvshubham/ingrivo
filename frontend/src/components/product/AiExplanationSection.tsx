@@ -18,16 +18,23 @@ import { explainProduct, ApiError } from "@/lib/api-client";
 
 interface AiExplanationSectionProps {
   product: Product;
+  initialExplanation?: ExplainResponse | null;
+  onExplanationGenerated?: (exp: ExplainResponse) => void;
 }
 
 type AiUiState = "idle" | "loading" | "success" | "rate_limited" | "unavailable" | "invalid_output" | "not_configured";
 
-export function AiExplanationSection({ product }: AiExplanationSectionProps) {
+export function AiExplanationSection({
+  product,
+  initialExplanation,
+  onExplanationGenerated,
+}: AiExplanationSectionProps) {
   const isLabelProduct = product.ref.startsWith("lb-");
   const storageKey = `ingrivo_explain_${product.ref}`;
 
-  // Session-cached explanation state
+  // Preloaded or session-cached explanation state
   const [explanation, setExplanation] = useState<ExplainResponse | null>(() => {
+    if (initialExplanation) return initialExplanation;
     if (typeof window !== "undefined") {
       try {
         const cached = sessionStorage.getItem(storageKey);
@@ -99,6 +106,7 @@ export function AiExplanationSection({ product }: AiExplanationSectionProps) {
       } catch {
         // Ignored
       }
+      onExplanationGenerated?.(result);
     } catch (err: unknown) {
       if (err instanceof ApiError) {
         if (err.code === "AI_NOT_CONFIGURED") {
@@ -400,7 +408,7 @@ export function AiExplanationSection({ product }: AiExplanationSectionProps) {
               <span>Explanation limit reached</span>
             </div>
             <p className="text-xs text-amber-800 max-w-md mx-auto">
-              You have reached the temporary limit (5 explanations per 10 minutes). The product facts above remain fully visible.
+              You have temporarily reached the request limit. Please wait a moment before requesting another explanation. The product facts above remain fully visible.
             </p>
             <Button
               type="button"

@@ -67,8 +67,12 @@ export type SourceData = z.infer<typeof SourceDataSchema>;
 
 export const CompletenessDataSchema = z.object({
   score: z.number(),
-  missing: z.array(z.string()),
-});
+  missing: z.array(z.string()).optional().default([]),
+  missing_fields: z.array(z.string()).optional(),
+}).transform((data) => ({
+  score: data.score,
+  missing: (data.missing && data.missing.length > 0) ? data.missing : (data.missing_fields ?? []),
+}));
 export type CompletenessData = z.infer<typeof CompletenessDataSchema>;
 
 export const SourceComputedDataSchema = z.object({
@@ -98,6 +102,6 @@ export const ProductSchema = z.object({
 
   source: SourceDataSchema.nullable().optional(),
   completeness: CompletenessDataSchema,
-  source_computed: SourceComputedDataSchema.optional(),
+  source_computed: SourceComputedDataSchema.nullable().optional(),
 });
 export type Product = z.infer<typeof ProductSchema>;

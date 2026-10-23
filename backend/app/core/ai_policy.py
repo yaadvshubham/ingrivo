@@ -45,7 +45,44 @@ PROHIBITED_PHRASES: list[ProhibitedPhrase] = [
     ProhibitedPhrase("carcinogenic poison", "Alarmist health claim."),
     ProhibitedPhrase("harmful chemical", "Chemophobic blanket statement."),
     ProhibitedPhrase("dangerous additive", "Unregulated additive fearmongering."),
-    ProhibitedPhrase("pure poison", "Extreme alarmist rhetoric."),
+    # Comparison ranking & verdict language (Phase 8)
+    ProhibitedPhrase("better", "Ranking comparison verdict; must use neutral higher/lower."),
+    ProhibitedPhrase("worse", "Ranking comparison verdict; must use neutral higher/lower."),
+    ProhibitedPhrase("healthier", "Subjective health ranking without clinical context."),
+    ProhibitedPhrase("unhealthy", "Moral/judgmental labeling of food items."),
+    ProhibitedPhrase("winner", "Gamification or competitive ranking of food products."),
+    ProhibitedPhrase("should choose", "Directive purchasing advice; non-prescriptive only."),
+    ProhibitedPhrase("prefer", "Prescriptive dietary preference advice."),
+    ProhibitedPhrase("superior", "Subjective product ranking."),
+    ProhibitedPhrase("inferior", "Subjective product ranking."),
+    ProhibitedPhrase("best choice", "Prescriptive purchasing advice."),
+    ProhibitedPhrase("worst choice", "Prescriptive purchasing advice."),
+    ProhibitedPhrase("healthiest", "Superlative health ranking."),
+    ProhibitedPhrase("least healthy", "Superlative health ranking."),
+    ProhibitedPhrase("more nutritious", "Subjective aggregate nutritional judgment."),
+    ProhibitedPhrase("less nutritious", "Subjective aggregate nutritional judgment."),
 ]
 
 PROHIBITED_PHRASE_STRINGS: set[str] = {p.phrase.lower() for p in PROHIBITED_PHRASES}
+
+COMPARE_PROHIBITED_PHRASES: list[ProhibitedPhrase] = [
+    ProhibitedPhrase("better", "Ranking comparison verdict."),
+    ProhibitedPhrase("worse", "Ranking comparison verdict."),
+    ProhibitedPhrase("healthier", "Subjective health ranking."),
+    ProhibitedPhrase("unhealthy", "Moral/judgmental labeling."),
+    ProhibitedPhrase("winner", "Competitive ranking."),
+    ProhibitedPhrase("should choose", "Directive advice."),
+    ProhibitedPhrase("prefer", "Prescriptive advice."),
+    ProhibitedPhrase("superior", "Subjective ranking."),
+    ProhibitedPhrase("inferior", "Subjective ranking."),
+    ProhibitedPhrase("best choice", "Prescriptive advice."),
+    ProhibitedPhrase("worst choice", "Prescriptive advice."),
+    ProhibitedPhrase("healthiest", "Superlative ranking."),
+    ProhibitedPhrase("least healthy", "Superlative ranking."),
+    ProhibitedPhrase("more nutritious", "Subjective judgment."),
+    ProhibitedPhrase("less nutritious", "Subjective judgment."),
+]
+
+COMPARE_PROHIBITED_STRINGS: set[str] = PROHIBITED_PHRASE_STRINGS.union(
+    {p.phrase.lower() for p in COMPARE_PROHIBITED_PHRASES}
+)

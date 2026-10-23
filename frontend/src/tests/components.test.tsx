@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import React from "react";
 import { ProvenanceBadge, ProvenanceVariant } from "@/components/ProvenanceBadge";
 import { MissingChip } from "@/components/MissingChip";
@@ -8,6 +8,17 @@ import { DisabledAction } from "@/components/DisabledAction";
 import { SampleBanner } from "@/components/SampleBanner";
 import { Header } from "@/components/Header";
 import HomePage from "@/app/page";
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    prefetch: vi.fn(),
+    back: vi.fn(),
+  }),
+  usePathname: () => "/",
+  useSearchParams: () => new URLSearchParams(),
+}));
 
 describe("Phase 2 Component & Accessibility Tests", () => {
   describe("ProvenanceBadge", () => {

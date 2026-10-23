@@ -21,6 +21,12 @@ logger = logging.getLogger("ingrivo")
 async def lifespan(app: FastAPI):
     """Application lifespan handler."""
     logger.info("Ingrivo backend starting (env=%s)", settings.APP_ENV)
+    try:
+        from app.db.database import init_db
+        init_db()
+        logger.info("Ingrivo SQLite database initialized successfully.")
+    except Exception as e:
+        logger.error("Failed to initialize database: %s", e)
     yield
     logger.info("Ingrivo backend shutting down")
 
@@ -28,7 +34,8 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Ingrivo API",
     version=APP_VERSION,
-    docs_url="/docs" if settings.APP_ENV == "development" else None,
+    docs_url="/docs" if settings.is_docs_enabled else None,
+    openapi_url="/openapi.json" if settings.is_docs_enabled else None,
     redoc_url=None,
     lifespan=lifespan,
 )
@@ -40,7 +47,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.allowed_origins_list,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allow_headers=["*"],
     expose_headers=["X-Request-ID"],
 )
@@ -52,6 +59,46 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
 )
+
+
+# ---------------------------------------------------------------------------
+# Middleware — Security Headers & Error Cache-Control
+# ---------------------------------------------------------------------------
+@app.middleware("http")
+async def security_headers_middleware(request: Request, call_next):
+    """Attach standard security headers and error Cache-Control to all API responses."""
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    if response.status_code >= 400:
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
+    return response
+
+
+# ---------------------------------------------------------------------------
+# Middleware — Request Body Size Limit
+# ---------------------------------------------------------------------------
+@app.middleware("http")
+async def request_size_limit_middleware(request: Request, call_next):
+    """Enforce body size limit for POST, PUT, and PATCH bodies."""
+    if request.method in ("POST", "PUT", "PATCH"):
+        content_length = request.headers.get("content-length")
+        if content_length:
+            try:
+                length = int(content_length)
+                if length > settings.MAX_REQUEST_BODY_BYTES:
+                    request_id = getattr(request.state, "request_id", str(uuid.uuid4()))
+                    return JSONResponse(
+                        status_code=status.HTTP_413_CONTENT_TOO_LARGE,
+                        content=error_envelope(
+                            code="PAYLOAD_TOO_LARGE",
+                            message=f"Request payload exceeds the maximum allowed limit of {settings.MAX_REQUEST_BODY_BYTES} bytes.",
+                            request_id=request_id,
+                        ),
+                    )
+            except ValueError:
+                pass
+    return await call_next(request)
 
 
 # ---------------------------------------------------------------------------
@@ -150,7 +197,7 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
     )
 
 
-from app.routers import health, products, analysis
+from app.routers import health, products, analysis, compare, auth, userdata, admin
 
 # ---------------------------------------------------------------------------
 # Routers
@@ -158,3 +205,7 @@ from app.routers import health, products, analysis
 app.include_router(health.router)
 app.include_router(products.router)
 app.include_router(analysis.router)
+app.include_router(compare.router)
+app.include_router(auth.router)
+app.include_router(userdata.router)
+app.include_router(admin.router)

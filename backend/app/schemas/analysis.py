@@ -1,4 +1,4 @@
-"""Pydantic schemas for Phase 7 AI Explanations."""
+"""Pydantic schemas for Phase 7 AI Explanations and AI Chat."""
 
 from datetime import datetime
 from typing import Literal
@@ -21,7 +21,24 @@ class LabelSource(BaseModel):
 
 class ExplainRequest(BaseModel):
     source: BarcodeSource | LabelSource
-    language: Literal["en"] = "en"
+    language: Literal["en", "hi", "hinglish"] = "en"
+
+
+class ChatMessage(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str
+
+
+class ProductChatRequest(BaseModel):
+    source: BarcodeSource | LabelSource
+    messages: list[ChatMessage]
+    language: Literal["en", "hi", "hinglish"] = "en"
+
+
+class ProductChatResponse(BaseModel):
+    reply: str
+    language: str
+    model: str
 
 
 # --- Response Sub-Models (Structured Gemini Output) ---
@@ -77,3 +94,4 @@ class ExplainResponse(BaseModel):
     missing_info: list[str]
     caveats: list[str]
     validation: ValidationMeta
+    language: str = "en"

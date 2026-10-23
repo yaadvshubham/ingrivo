@@ -1,0 +1,37 @@
+<svg width="512" height="512" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="ingrivoBgGrad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1E5B45" />
+      <stop offset="100%" stop-color="#0F3325" />
+    </linearGradient>
+    <linearGradient id="ingrivoLeafGrad" x1="28" y1="20" x2="72" y2="78" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#34D399" />
+      <stop offset="60%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+    <linearGradient id="ingrivoGoldGrad" x1="60" y1="16" x2="84" y2="40" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FBBF24" />
+      <stop offset="100%" stop-color="#D97706" />
+    </linearGradient>
+  </defs>
+
+  <!-- Squircle Container -->
+  <rect x="2" y="2" width="96" height="96" rx="26" fill="url(#ingrivoBgGrad)" stroke="#2E8B63" stroke-width="1.5" stroke-opacity="0.35" />
+
+  <!-- Contour lines -->
+  <path d="M20 78 C 36 68, 64 68, 80 78" stroke="#34D399" stroke-width="1.5" stroke-opacity="0.18" stroke-linecap="round" />
+  <path d="M24 84 C 38 76, 62 76, 76 84" stroke="#34D399" stroke-width="1.2" stroke-opacity="0.12" stroke-linecap="round" />
+
+  <!-- Botanical Sprout -->
+  <path d="M32 68 C 30 50, 42 36, 52 28 C 50 44, 42 62, 32 68 Z" fill="url(#ingrivoLeafGrad)" />
+  <path d="M52 28 C 66 34, 72 50, 68 68 C 58 64, 52 46, 52 28 Z" fill="#2E8B63" opacity="0.9" />
+
+  <!-- Central 'I' Stem Pillar -->
+  <rect x="45" y="38" width="10" height="36" rx="5" fill="#FFFFFF" />
+  <path d="M50 32 L50 68" stroke="#E6F4EA" stroke-width="2.5" stroke-linecap="round" />
+
+  <!-- The Vitality Spark -->
+  <path d="M50 15 C 50 18, 52 20, 55 20 C 52 20, 50 22, 50 25 C 50 22, 48 20, 45 20 C 48 20, 50 18, 50 15 Z" fill="url(#ingrivoGoldGrad)" />
+  <circle cx="50" cy="20" r="2.2" fill="#FEF3C7" />
+  <circle cx="71" cy="25" r="3" fill="#34D399" opacity="0.8" />
+</svg>

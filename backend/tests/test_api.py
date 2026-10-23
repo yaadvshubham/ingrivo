@@ -115,3 +115,33 @@ async def test_cors_rejects_unconfigured_origin(client: AsyncClient):
     # The origin should NOT be reflected back
     allow_origin = response.headers.get("access-control-allow-origin")
     assert allow_origin != "http://evil-site.com"
+
+
+@pytest.mark.anyio
+async def test_google_auth_with_email_and_profile(client: AsyncClient):
+    """Google auth endpoint creates session with valid email and name."""
+    response = await client.post(
+        "/api/v1/auth/google",
+        json={
+            "email": "testuser@gmail.com",
+            "name": "Test User",
+            "photo_url": "https://lh3.googleusercontent.com/test-photo",
+        },
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is True
+    assert "access_token" in data
+    assert data["user"]["email"] == "testuser@gmail.com"
+    assert data["user"]["name"] == "Test User"
+    assert data["user"]["photo_url"] == "https://lh3.googleusercontent.com/test-photo"
+
+
+@pytest.mark.anyio
+async def test_google_auth_missing_credentials_fails(client: AsyncClient):
+    """Google auth without email or token fails gracefully with 400."""
+    response = await client.post(
+        "/api/v1/auth/google",
+        json={"name": "No Email Person"},
+    )
+    assert response.status_code == 400

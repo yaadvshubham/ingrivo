@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     # General
     APP_ENV: str = "development"
     ALLOWED_ORIGINS: str = "http://localhost:3000"
+    DOCS_ENABLED: bool | None = None
+    MAX_REQUEST_BODY_BYTES: int = 1_048_576  # 1 MB default limit for request bodies
 
     # Open Food Facts
     OFF_BASE_URL: str = "https://world.openfoodfacts.org"
@@ -33,8 +35,8 @@ class Settings(BaseSettings):
     GEMINI_MODEL: str = "gemini-2.5-flash"
     GEMINI_TIMEOUT_SECONDS: int = 20
     GEMINI_MAX_OUTPUT_TOKENS: int = 1500
-    GEMINI_MAX_CALLS_PER_DAY: int = 100
-    EXPLAIN_RATE_LIMIT: int = 5
+    GEMINI_MAX_CALLS_PER_DAY: int = 2000
+    EXPLAIN_RATE_LIMIT: int = 60
     MAX_EVIDENCE_CHARS: int = 4000
 
     @property
@@ -43,11 +45,50 @@ class Settings(BaseSettings):
         return [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",") if origin.strip()]
 
     @property
+    def is_docs_enabled(self) -> bool:
+        """Control FastAPI interactive documentation visibility.
+        
+        Defaults to False when APP_ENV is production, True otherwise.
+        Explicitly overridden if DOCS_ENABLED is set.
+        """
+        if self.DOCS_ENABLED is not None:
+            return self.DOCS_ENABLED
+        return self.APP_ENV.lower() != "production"
+
+    # SMTP Settings for real OTP and password reset emails
+    SMTP_HOST: str = ""
+    SMTP_PORT: int = 587
+    SMTP_USER: str = ""
+    SMTP_PASSWORD: str = ""
+    SMTP_FROM_EMAIL: str = ""
+    SMTP_FROM_NAME: str = "Ingrivo Food Intelligence"
+    SMTP_USE_SSL: bool = False
+
+    # Firebase Admin & JWT Settings
+    FIREBASE_PROJECT_ID: str = ""
+    FIREBASE_CREDENTIALS_PATH: str = ""
+    JWT_SECRET_KEY: str = "ingrivo-secret-jwt-key-development-2026-safe-auth"
+
+    # Google OAuth 2.0 Settings
+    GOOGLE_CLIENT_ID: str = "812544756607-rmvt2fd0evqh5qeh99rkaji6d9t5rurh.apps.googleusercontent.com"
+    GOOGLE_CLIENT_SECRET: str = ""
+
+    @property
+    def smtp_configured(self) -> bool:
+        """Check if SMTP credentials are configured for sending real emails."""
+        return bool(self.SMTP_HOST and self.SMTP_USER and self.SMTP_PASSWORD)
+
+    @property
+    def firebase_admin_configured(self) -> bool:
+        """Check if Firebase Admin SDK is configured."""
+        return bool(self.FIREBASE_PROJECT_ID or self.FIREBASE_CREDENTIALS_PATH)
+
+    @property
     def gemini_configured(self) -> bool:
         """Check if Gemini API key and model are both set."""
         return bool(self.GEMINI_API_KEY and self.GEMINI_MODEL)
 
-    model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
+    model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 
 
 settings = Settings()

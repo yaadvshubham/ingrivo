@@ -10,6 +10,8 @@ export default defineConfig({
     alias: {
       '@': path.resolve(import.meta.dirname, './src')
     },
+    include: ['src/**/*.test.{ts,tsx}'],
+    exclude: ['e2e/**', 'node_modules/**'],
     pool: 'threads',
     testTimeout: 15000,
   }

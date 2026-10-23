@@ -36,3 +36,66 @@ export function normalizeBarcode(barcode: string): string {
   }
   return code;
 }
+
+/**
+ * Extracts a valid barcode number from raw scanned text, QR code URLs,
+ * GS1 digital links, or Open Food Facts web addresses.
+ */
+export function extractBarcodeFromText(input: string): string | null {
+  if (typeof input !== "string") return null;
+  const trimmed = input.trim();
+  if (!trimmed) return null;
+
+  // 1. Direct valid barcode string (EAN-8, UPC-A, EAN-13)
+  if (isValidBarcode(trimmed)) {
+    return trimmed;
+  }
+
+  // 2. Open Food Facts product URL: /product/(\d{8,14})
+  const offMatch = trimmed.match(/\/product\/(?:bc-)?(\d{8,14})/i);
+  if (offMatch) {
+    const raw = offMatch[1];
+    if (isValidBarcode(raw)) return raw;
+    if (raw.length === 14 && raw.startsWith("0")) {
+      const ean13 = raw.slice(1);
+      if (isValidBarcode(ean13)) return ean13;
+    }
+  }
+
+  // 3. GS1 Digital Link standard: /01/(\d{8,14})
+  const gs1Match = trimmed.match(/\/01\/(\d{8,14})/);
+  if (gs1Match) {
+    const raw = gs1Match[1];
+    if (isValidBarcode(raw)) return raw;
+    if (raw.length === 14 && raw.startsWith("0")) {
+      const ean13 = raw.slice(1);
+      if (isValidBarcode(ean13)) return ean13;
+    }
+  }
+
+  // 4. URL query parameters (e.g. ?barcode=... or ?gtin=... or ?code=...)
+  const queryMatch = trimmed.match(/[?&](?:barcode|gtin|code|bc)=([0-9]{8,14})/i);
+  if (queryMatch) {
+    const raw = queryMatch[1];
+    if (isValidBarcode(raw)) return raw;
+    if (raw.length === 14 && raw.startsWith("0")) {
+      const ean13 = raw.slice(1);
+      if (isValidBarcode(ean13)) return ean13;
+    }
+  }
+
+  // 5. Look for any standalone numeric token that passes check-digit validation
+  const tokens = trimmed.match(/\b\d{8,14}\b/g);
+  if (tokens) {
+    for (const token of tokens) {
+      if (isValidBarcode(token)) return token;
+      if (token.length === 14 && token.startsWith("0")) {
+        const ean13 = token.slice(1);
+        if (isValidBarcode(ean13)) return ean13;
+      }
+    }
+  }
+
+  return null;
+}
+

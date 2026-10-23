@@ -2,8 +2,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { usePageTitle } from '@/hooks/usePageTitle';
+import { ScrollReveal } from '@/components/ui/ScrollReveal';
 
 export default function StatusPage() {
+  usePageTitle('System Status');
   const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'slow'>('loading');
   const [data, setData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
@@ -47,8 +50,9 @@ export default function StatusPage() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gray-50">
-      <div className="max-w-md w-full bg-white rounded-lg shadow-md p-6">
+    <div className="min-h-[70vh] flex flex-col items-center justify-center p-4">
+      <ScrollReveal blur={10} yOffset={20}>
+        <div className="max-w-md w-full bg-white rounded-2xl border border-[#E4DEC3] shadow-xs p-6 space-y-4">
         <h1 className="text-2xl font-bold mb-4 text-center">Diagnostic: Backend Status</h1>
         
         <div className="mb-6 h-32 flex items-center justify-center border rounded bg-gray-50">
@@ -85,6 +89,7 @@ export default function StatusPage() {
           {status === 'loading' || status === 'slow' ? 'Checking...' : 'Retry Connection'}
         </button>
       </div>
-    </div>
+    </ScrollReveal>
+  </div>
   );
 }

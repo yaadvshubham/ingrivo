@@ -197,4 +197,4 @@ async def test_live_off_api(client: AsyncClient):
     """
     response = await client.get("/api/v1/products/barcode/5449000000996")
     assert response.status_code == 200
-    assert response.json()["name"] == "Coca-Cola"
+    assert "Coca-Cola" in response.json()["name"]

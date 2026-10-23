@@ -21,8 +21,8 @@ export const FEATURES: FeatureFlags = {
   scan: true, // Enabled in Phase 3 for manual barcode lookup
   search: true, // Enabled in Phase 5 for OFF search integration
   label: true, // Enabled in Phase 6 for on-device label OCR and review
-  compare: false,
-  history: false,
+  compare: true, // Enabled in Phase 8 for Product Comparison
+  history: true, // Enabled in Phase 9 for Local History
   ai: true, // Enabled in Phase 7 for Gemini educational explanations
 };
 

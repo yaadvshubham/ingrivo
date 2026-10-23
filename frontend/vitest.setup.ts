@@ -1,6 +1,5 @@
 import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
-import { afterEach } from 'vitest';
 
 if (typeof HTMLCanvasElement !== 'undefined') {
   HTMLCanvasElement.prototype.getContext = function (contextType: string) {
@@ -72,6 +71,28 @@ if (typeof globalThis.ImageData === 'undefined') {
   globalThis.ImageData = MockImageData as unknown as typeof ImageData;
 }
 
+import { afterEach, beforeEach } from 'vitest';
+
+beforeEach(() => {
+  if (typeof window !== 'undefined') {
+    try {
+      window.localStorage?.clear();
+      window.sessionStorage?.clear();
+    } catch {
+      // ignore
+    }
+  }
+});
+
 afterEach(() => {
   cleanup();
+  if (typeof window !== 'undefined') {
+    try {
+      window.localStorage?.clear();
+      window.sessionStorage?.clear();
+    } catch {
+      // ignore
+    }
+  }
 });
+

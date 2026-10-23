@@ -23,6 +23,9 @@ import { Input } from "@/components/ui/input";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
+import { usePageTitle } from "@/hooks/usePageTitle";
+import { AuthGuard } from "@/components/auth/AuthGuard";
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
 
 export function SearchContent() {
   const router = useRouter();
@@ -30,6 +33,7 @@ export function SearchContent() {
   const [, startTransition] = useTransition();
 
   const urlQuery = searchParams.get("q") || "";
+  usePageTitle(urlQuery ? `Search: ${urlQuery}` : "Search Catalog");
   const pageParam = parseInt(searchParams.get("page") || "1", 10);
   const currentPage = isNaN(pageParam) || pageParam < 1 ? 1 : Math.min(pageParam, 5);
 
@@ -141,68 +145,70 @@ export function SearchContent() {
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 space-y-8">
       {/* Search Header & Form */}
-      <div className="space-y-4">
-        <div className="space-y-1">
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1B2A22]">
-            Search Packaged Foods
-          </h1>
-          <p className="text-sm text-[#5E6B63]">
-            Look up nutrition facts, ingredients, and allergen declarations by brand or product name.
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-2" noValidate>
-          <div className="flex flex-col sm:flex-row gap-2">
-            <div className="relative flex-1">
-              <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#5E6B63]" aria-hidden="true" />
-              <Input
-                type="text"
-                id="search-query-input"
-                data-testid="search-input"
-                value={inputVal}
-                onChange={(e) => {
-                  setInputVal(e.target.value);
-                  if (validationError) setValidationError(null);
-                }}
-                placeholder="Search by title or brand (e.g. Parle-G, Maggi, Amul butter)..."
-                className="pl-10 h-11 bg-white border-[#E4DEC3] focus-visible:ring-[#1E5B45] text-sm"
-              />
-            </div>
-            <Button
-              type="submit"
-              data-testid="search-submit-btn"
-              disabled={loading}
-              className="h-11 px-6 bg-[#1E5B45] hover:bg-[#1E5B45]/90 text-white font-medium"
-            >
-              {loading ? (
-                <>
-                  <Clock className="h-4 w-4 mr-2 animate-spin" />
-                  Searching...
-                </>
-              ) : (
-                <>
-                  <SearchIcon className="h-4 w-4 mr-2" />
-                  Search
-                </>
-              )}
-            </Button>
+      <ScrollReveal blur={10} yOffset={20}>
+        <div className="space-y-4">
+          <div className="space-y-1">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1B2A22]">
+              Search Packaged Foods
+            </h1>
+            <p className="text-sm text-[#5E6B63]">
+              Look up nutrition facts, ingredients, and allergen declarations by brand or product name.
+            </p>
           </div>
 
-          {validationError && (
-            <p data-testid="search-validation-error" className="text-xs text-red-600 font-medium">
-              {validationError}
-            </p>
-          )}
-        </form>
+          <form onSubmit={handleSubmit} className="space-y-2" noValidate>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <div className="relative flex-1">
+                <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#5E6B63]" aria-hidden="true" />
+                <Input
+                  type="text"
+                  id="search-query-input"
+                  data-testid="search-input"
+                  value={inputVal}
+                  onChange={(e) => {
+                    setInputVal(e.target.value);
+                    if (validationError) setValidationError(null);
+                  }}
+                  placeholder="Search by title or brand (e.g. Parle-G, Maggi, Amul butter)..."
+                  className="pl-10 h-11 bg-white border-[#E4DEC3] focus-visible:ring-[#1E5B45] text-sm"
+                />
+              </div>
+              <Button
+                type="submit"
+                data-testid="search-submit-btn"
+                disabled={loading}
+                className="h-11 px-6 bg-[#1E5B45] hover:bg-[#1E5B45]/90 text-white font-medium"
+              >
+                {loading ? (
+                  <>
+                    <Clock className="h-4 w-4 mr-2 animate-spin" />
+                    Searching...
+                  </>
+                ) : (
+                  <>
+                    <SearchIcon className="h-4 w-4 mr-2" />
+                    Search
+                  </>
+                )}
+              </Button>
+            </div>
 
-        {/* Database Disclaimer Note */}
-        <div className="flex items-start gap-2.5 p-3 rounded-lg border border-[#E4DEC3] bg-[#FBF8F2] text-xs text-[#5E6B63]">
-          <Info className="h-4 w-4 shrink-0 text-[#1E5B45] mt-0.5" aria-hidden="true" />
-          <p>
-            Results come from Open Food Facts, a community database. Coverage of Indian products may be incomplete.
-          </p>
+            {validationError && (
+              <p data-testid="search-validation-error" className="text-xs text-red-600 font-medium">
+                {validationError}
+              </p>
+            )}
+          </form>
+
+          {/* Database Disclaimer Note */}
+          <div className="flex items-start gap-2.5 p-3 rounded-lg border border-[#E4DEC3] bg-[#FBF8F2] text-xs text-[#5E6B63]">
+            <Info className="h-4 w-4 shrink-0 text-[#1E5B45] mt-0.5" aria-hidden="true" />
+            <p>
+              Results come from Open Food Facts, a community database. Coverage of Indian products may be incomplete.
+            </p>
+          </div>
         </div>
-      </div>
+      </ScrollReveal>
 
       {/* Slow Server Indicator */}
       {activeLoading && isSlow && (
@@ -378,55 +384,57 @@ export function SearchContent() {
 
       {/* State 6: Search Results */}
       {!activeLoading && !activeError && activeData && activeData.results.length > 0 && (
-        <div data-testid="search-results-container" className="space-y-6">
-          <div className="flex items-center justify-between text-xs text-[#5E6B63] border-b border-[#E4DEC3] pb-3">
-            <span>
-              Showing {activeData.results.length} result{activeData.results.length === 1 ? "" : "s"} for &ldquo;
-              <strong className="text-[#1B2A22]">{activeData.query}</strong>&rdquo;
-              {activeData.total !== null && activeData.total !== undefined && ` (approx. ${activeData.total} total)`}
-            </span>
-            <span>
-              Page {activeData.page} of {maxPage}
-            </span>
+        <ScrollReveal blur={10} yOffset={24}>
+          <div data-testid="search-results-container" className="space-y-6">
+            <div className="flex items-center justify-between text-xs text-[#5E6B63] border-b border-[#E4DEC3] pb-3">
+              <span>
+                Showing {activeData.results.length} result{activeData.results.length === 1 ? "" : "s"} for &ldquo;
+                <strong className="text-[#1B2A22]">{activeData.query}</strong>&rdquo;
+                {activeData.total !== null && activeData.total !== undefined && ` (approx. ${activeData.total} total)`}
+              </span>
+              <span>
+                Page {activeData.page} of {maxPage}
+              </span>
+            </div>
+
+            <div className="space-y-4">
+              {activeData.results.map((product) => (
+                <ProductCard key={product.ref} product={product} />
+              ))}
+            </div>
+
+            {/* Pagination */}
+            <div className="flex items-center justify-between pt-4 border-t border-[#E4DEC3]">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={currentPage <= 1 || loading}
+                onClick={() => handlePageChange(currentPage - 1)}
+                data-testid="pagination-prev-btn"
+                className="gap-1 text-xs"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Previous
+              </Button>
+
+              <span className="text-xs text-[#5E6B63] font-medium">
+                Page {currentPage} of {maxPage}
+              </span>
+
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={currentPage >= maxPage || loading}
+                onClick={() => handlePageChange(currentPage + 1)}
+                data-testid="pagination-next-btn"
+                className="gap-1 text-xs"
+              >
+                Next
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
-
-          <div className="space-y-4">
-            {activeData.results.map((product) => (
-              <ProductCard key={product.ref} product={product} />
-            ))}
-          </div>
-
-          {/* Pagination */}
-          <div className="flex items-center justify-between pt-4 border-t border-[#E4DEC3]">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={currentPage <= 1 || loading}
-              onClick={() => handlePageChange(currentPage - 1)}
-              data-testid="pagination-prev-btn"
-              className="gap-1 text-xs"
-            >
-              <ChevronLeft className="h-4 w-4" />
-              Previous
-            </Button>
-
-            <span className="text-xs text-[#5E6B63] font-medium">
-              Page {currentPage} of {maxPage}
-            </span>
-
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={currentPage >= maxPage || loading}
-              onClick={() => handlePageChange(currentPage + 1)}
-              data-testid="pagination-next-btn"
-              className="gap-1 text-xs"
-            >
-              Next
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+        </ScrollReveal>
       )}
     </div>
   );
@@ -442,7 +450,12 @@ export default function SearchPage() {
         </div>
       }
     >
-      <SearchContent />
+      <AuthGuard
+        featureName="Product Catalog Search"
+        description="Sign in to search 3,000,000+ packaged foods, inspect nutrition facts, and check ingredient transparency."
+      >
+        <SearchContent />
+      </AuthGuard>
     </Suspense>
   );
 }

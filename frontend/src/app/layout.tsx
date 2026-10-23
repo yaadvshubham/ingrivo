@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Suspense } from "react";
+import Script from "next/script";
 import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { AuthProvider } from "@/context/AuthContext";
+import { AIChatBot } from "@/components/AIChatBot";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -23,22 +26,30 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} h-full antialiased`}>
+    <html lang="en" data-scroll-behavior="smooth" className={`${inter.variable} h-full antialiased`}>
+      <head>
+        <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" />
+      </head>
       <body className="min-h-full flex flex-col bg-[#FBF8F2] text-[#1B2A22]">
-        {/* Accessible skip link */}
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-[#1E5B45] focus:text-white focus:rounded-md focus:shadow-md focus:outline-none"
-        >
-          Skip to main content
-        </a>
-        <Suspense fallback={<div className="h-16 w-full bg-[#FBF8F2]" />}>
-          <Header />
-        </Suspense>
-        <main id="main-content" tabIndex={-1} className="flex-1 focus:outline-none">
-          {children}
-        </main>
-        <Footer />
+        <AuthProvider>
+          {/* Accessible skip link */}
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-[#1E5B45] focus:text-white focus:rounded-md focus:shadow-md focus:outline-none"
+          >
+            Skip to main content
+          </a>
+          <Suspense fallback={<div className="h-16 w-full bg-[#FBF8F2]" />}>
+            <Header />
+          </Suspense>
+          <main id="main-content" tabIndex={-1} className="flex-1 focus:outline-none">
+            {children}
+          </main>
+          <Footer />
+          <Suspense fallback={null}>
+            <AIChatBot />
+          </Suspense>
+        </AuthProvider>
       </body>
     </html>
   );

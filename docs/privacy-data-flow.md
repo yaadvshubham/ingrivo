@@ -44,3 +44,21 @@ When you explicitly click **"Explain this product"**:
 - **Excluded**: Evidence text, ingredient text, user queries, and AI model completions are **strictly excluded** from backend logs.
 - **Included**: Request ID, HTTP status code, latency (ms), and token counts only.
 - **No Secret Leakage**: The `GEMINI_API_KEY` is loaded only in backend environment variables. The `/health` endpoint exposes only a boolean `gemini_configured: true/false`.
+
+---
+
+## 5. Third-Party Product Images & Referrer Privacy (Phase 9)
+- **Direct Image Loading**: Product packaging photos originating from Open Food Facts are loaded directly by the user's browser from third-party image hosts (e.g. `images.openfoodfacts.org`).
+- **No Proxy Quota Consumption**: We do not proxy images through an image-optimization server, avoiding consumption of hosting provider bandwidth and optimization quotas.
+- **Referrer Protection**: All third-party images use `referrerPolicy="no-referrer"` on standard HTML `<img>` elements. This prevents your browser from transmitting Ingrivo route URLs, query parameters, or browsing context to the external image host.
+- **Lazy Loading**: Images include `loading="lazy"` to defer loading until scrolled into viewport, reducing user mobile data usage.
+
+---
+
+## 6. Browser-Only Local Scan History (Phase 9)
+- **Storage Location**: Saved strictly in browser `localStorage` under key `ingrivo.history.v1`.
+- **Zero Cloud Transmission**: History records are **never transmitted to any backend server** or external analytical tool.
+- **Data Stored**: Text-only product metadata (ref, title, brand, timestamp, normalized snapshot, and optional Gemini explanation).
+- **Excluded**: Photos, camera frames, and binary image data are **never saved** to `localStorage`.
+- **Retention & Control**: Capped at 50 items with LRU eviction. Users can delete individual items or wipe all records via the `/history` screen. Clearing browser site data deletes all history permanently.
+

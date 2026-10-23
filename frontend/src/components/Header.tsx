@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import { isFeatureEnabled, FeatureFlags } from "@/lib/features";
 import { cn } from "@/lib/utils";
+import { UserNavButton } from "@/components/auth/UserNavButton";
+import { Logo } from "@/components/brand/Logo";
 
 interface NavItemConfig {
   label: string;
@@ -40,24 +42,21 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-[#E4DEC3] bg-[#FBF8F2]/95 backdrop-blur-xs">
+    <header className="sticky top-0 z-40 w-full border-b border-[#E4DEC3]/80 bg-[#FBF8F2]/90 backdrop-blur-md transition-all">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-        {/* Wordmark */}
+        {/* Wordmark & Brand Logo */}
         <Link
           href="/"
-          className="flex items-center gap-2.5 text-xl font-bold tracking-tight text-[#1E5B45] hover:opacity-90 transition-opacity"
+          className="hover:opacity-90 transition-all group"
           aria-label="Ingrivo - Home"
         >
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#1E5B45] text-white font-black text-lg">
-            I
-          </span>
-          <span className="font-heading">Ingrivo</span>
+          <Logo size="md" />
         </Link>
 
         {/* Desktop Navigation */}
         <nav
           aria-label="Main Navigation"
-          className="hidden md:flex items-center gap-1.5"
+          className="hidden md:flex items-center gap-1 bg-[#EFECE4]/50 p-1 rounded-xl border border-[#E4DEC3]/60"
         >
           {NAV_ITEMS.map((item) => {
             const isEnabled = item.featureFlag ? isFeatureEnabled(item.featureFlag) : true;
@@ -72,11 +71,11 @@ export function Header() {
                 >
                   <span
                     aria-disabled="true"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-[#5E6B63] opacity-75 cursor-not-allowed select-none rounded-md"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#5E6B63] opacity-75 cursor-not-allowed select-none rounded-lg"
                   >
-                    <Icon className="h-4 w-4" aria-hidden="true" />
+                    <Icon className="h-3.5 w-3.5" aria-hidden="true" />
                     <span>{item.label}</span>
-                    <span className="text-[10px] font-semibold bg-stone-200 text-stone-700 px-1.5 py-0.2 rounded uppercase">
+                    <span className="text-[9px] font-semibold bg-stone-200 text-stone-700 px-1 py-0.2 rounded uppercase">
                       Soon
                     </span>
                   </span>
@@ -89,36 +88,41 @@ export function Header() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md transition-colors",
+                  "inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-150",
                   isActive
-                    ? "bg-[#1E5B45] text-white"
-                    : "text-[#1B2A22] hover:bg-[#EFECE4] hover:text-[#1E5B45]"
+                    ? "bg-[#1E5B45] text-white shadow-xs"
+                    : "text-[#1B2A22] hover:bg-white/80 hover:text-[#1E5B45]"
                 )}
                 aria-current={isActive ? "page" : undefined}
               >
-                <Icon className="h-4 w-4" aria-hidden="true" />
+                <Icon className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>{item.label}</span>
               </Link>
             );
           })}
         </nav>
 
-        {/* Mobile menu button */}
-        <div className="flex md:hidden">
-          <button
-            type="button"
-            aria-expanded={mobileMenuOpen}
-            aria-controls="mobile-navigation"
-            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="inline-flex items-center justify-center rounded-md p-2 text-[#1B2A22] hover:bg-[#EFECE4] focus:outline-none focus:ring-2 focus:ring-[#1E5B45]"
-          >
-            {mobileMenuOpen ? (
-              <X className="h-6 w-6" aria-hidden="true" />
-            ) : (
-              <Menu className="h-6 w-6" aria-hidden="true" />
-            )}
-          </button>
+        {/* Header Right Action: User Profile & Mobile Toggle */}
+        <div className="flex items-center gap-1.5 sm:gap-2.5">
+          <UserNavButton />
+
+          {/* Mobile menu button */}
+          <div className="flex md:hidden">
+            <button
+              type="button"
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-navigation"
+              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="inline-flex items-center justify-center rounded-lg p-1.5 sm:p-2 text-[#1B2A22] hover:bg-[#EFECE4] focus:outline-none focus:ring-2 focus:ring-[#1E5B45] transition-colors"
+            >
+              {mobileMenuOpen ? (
+                <X className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
+              ) : (
+                <Menu className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -128,7 +132,7 @@ export function Header() {
           id="mobile-navigation"
           role="navigation"
           aria-label="Mobile Navigation"
-          className="md:hidden border-b border-[#E4DEC3] bg-[#FBF8F2] px-4 pt-2 pb-4 space-y-1"
+          className="md:hidden border-b border-[#E4DEC3] bg-[#FBF8F2]/98 backdrop-blur-md px-4 pt-2 pb-5 space-y-1 shadow-lg animate-in slide-in-from-top-2 duration-200"
         >
           {NAV_ITEMS.map((item) => {
             const isEnabled = item.featureFlag ? isFeatureEnabled(item.featureFlag) : true;
@@ -139,10 +143,10 @@ export function Header() {
               return (
                 <div
                   key={item.href}
-                  className="flex items-center justify-between px-3 py-2 text-sm font-medium text-[#5E6B63] opacity-75 rounded-md"
+                  className="flex items-center justify-between px-3 py-2 text-sm font-medium text-[#5E6B63] opacity-75 rounded-lg"
                   aria-disabled="true"
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2.5">
                     <Icon className="h-4 w-4" aria-hidden="true" />
                     <span>{item.label}</span>
                   </div>
@@ -160,9 +164,9 @@ export function Header() {
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
                 className={cn(
-                  "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors",
+                  "flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors",
                   isActive
-                    ? "bg-[#1E5B45] text-white"
+                    ? "bg-[#1E5B45] text-white shadow-xs"
                     : "text-[#1B2A22] hover:bg-[#EFECE4]"
                 )}
                 aria-current={isActive ? "page" : undefined}

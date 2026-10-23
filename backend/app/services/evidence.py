@@ -44,21 +44,24 @@ def build_evidence_from_product(product: Product) -> EvidencePacket:
     else:
         missing.append("brand")
 
-    if product.ingredients_text:
+    raw_ingredients = product.ingredients.raw_text or (", ".join(product.ingredients.items) if product.ingredients.items else None)
+    if raw_ingredients:
         available_paths.append("ingredients")
     else:
         missing.append("ingredients")
 
-    if product.nutrition_basis and product.nutrition_basis != "unknown":
+    basis = product.nutrition.basis.value if product.nutrition.basis and product.nutrition.basis.value != "unknown" else None
+    if basis:
         available_paths.append("nutrition_basis")
     else:
         missing.append("nutrition_basis")
 
-    if product.serving_size:
+    serving_size = product.nutrition.serving_size
+    if serving_size:
         available_paths.append("serving_size")
 
     # Check key nutrients
-    nutrient_dict = product.nutrition.model_dump()
+    nutrient_dict = product.nutrition.values.model_dump()
     for k, v in nutrient_dict.items():
         if v is not None:
             nutrients[k] = v
@@ -66,18 +69,24 @@ def build_evidence_from_product(product: Product) -> EvidencePacket:
         else:
             missing.append(f"nutrition.{k}")
 
-    prov_dict = product.provenance.model_dump()
+    prov_dict = {
+        "name": product.name_provenance.value,
+        "brand": product.brand_provenance.value,
+        "ingredients": product.ingredients.provenance.value,
+        "nutrition": product.nutrition.provenance.value,
+        "allergens": product.allergens.provenance.value,
+    }
 
     return EvidencePacket(
         name=product.name,
         brand=product.brand,
-        basis=product.nutrition_basis if product.nutrition_basis != "unknown" else "Not Stated",
-        serving_size=product.serving_size,
-        ingredients_text=product.ingredients_text,
+        basis=basis if basis else "Not Stated",
+        serving_size=serving_size,
+        ingredients_text=raw_ingredients,
         nutrition=nutrients,
         declared_allergens=product.allergens.declared,
         traces_allergens=product.allergens.traces,
-        provenance_flags={k: v for k, v in prov_dict.items() if v},
+        provenance_flags={k: v for k, v in prov_dict.items() if v and v != "missing"},
         missing_fields=missing,
         available_field_paths=available_paths,
     )

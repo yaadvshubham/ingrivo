@@ -31,15 +31,15 @@ export function DataRow({
     <div
       data-testid="data-row"
       className={cn(
-        "flex flex-col sm:flex-row sm:items-center justify-between py-2.5 px-3 border-b border-[#E4DEC3]/60 last:border-b-0 gap-1.5 sm:gap-4",
+        "flex flex-row items-center justify-between py-2 sm:py-2.5 px-2.5 sm:px-3 border-b border-[#E4DEC3]/60 last:border-b-0 gap-2 sm:gap-4",
         className
       )}
     >
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-medium text-[#1B2A22]">{label}</span>
+      <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 pr-2">
+        <span className="text-xs sm:text-sm font-medium text-[#1B2A22] truncate">{label}</span>
         {provenance && <ProvenanceBadge variant={provenance} />}
       </div>
-      <div className="text-sm font-normal text-[#1B2A22]">
+      <div className="text-xs sm:text-sm font-semibold sm:font-normal text-[#1B2A22] text-right shrink-0">
         {isMissing ? (
           <MissingChip />
         ) : (

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { isValidBarcode, normalizeBarcode } from "@/lib/barcode";
+import { isValidBarcode, normalizeBarcode, extractBarcodeFromText } from "@/lib/barcode";
 import { BarcodeDetector, initZXingLocally } from "@/lib/detector";
 
 export type ScannerState =
@@ -18,44 +18,72 @@ export type ScannerState =
 
 export interface UseBarcodeScannerOptions {
   onFound?: (code: string) => void;
-  fps?: number; // Target decode rate: 5 to 10 fps
+  fps?: number; // Target decode rate: default 30 fps for super-fast scan
   confirmationWindowMs?: number; // Consecutive identical read window (~1.5s)
+  consecutiveReads?: number; // 1 for instant snap detection (default), 2 for double-check
 }
 
 /**
- * Plays a pleasant soft audio chime on barcode confirmation.
- * Uses Web Audio API oscillator synthesis - no external audio files required.
+ * Plays a high-fidelity two-tone confirmation chime and haptic feedback
+ * on successful barcode/QR verification.
+ * Modeled after POS / UPI payment confirmation sounds (C6 1046Hz -> E6 1318Hz).
  */
 function playScanChime() {
   try {
+    // 1. Tactile haptic vibration for mobile devices (UPI snap feel)
+    if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
+      navigator.vibrate([40, 25, 50]);
+    }
+
+    // 2. Dual-tone synthesizer chime
     const AudioCtx =
       window.AudioContext ||
       (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     if (!AudioCtx) return;
     const ctx = new AudioCtx();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(880, ctx.currentTime); // A5 note
-    gain.gain.setValueAtTime(0.12, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.12);
+    const now = ctx.currentTime;
+
+    // First tone (C6 - 1046.5 Hz)
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.type = "sine";
+    osc1.frequency.setValueAtTime(1046.5, now);
+    gain1.gain.setValueAtTime(0.12, now);
+    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    osc1.start(now);
+    osc1.stop(now + 0.08);
+
+    // Second tone (E6 - 1318.5 Hz)
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.type = "sine";
+    osc2.frequency.setValueAtTime(1318.5, now + 0.07);
+    gain2.gain.setValueAtTime(0.15, now + 0.07);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.20);
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    osc2.start(now + 0.07);
+    osc2.stop(now + 0.20);
   } catch {
-    // AudioContext may be restricted by user agent
+    // AudioContext may be restricted by user agent policy
   }
 }
 
 export function useBarcodeScanner(options: UseBarcodeScannerOptions = {}) {
-  const { onFound, fps = 8, confirmationWindowMs = 1500 } = options;
+  const { onFound, fps = 30, confirmationWindowMs = 1500, consecutiveReads = 1 } = options;
 
   const [state, setState] = useState<ScannerState>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
   const [candidateBarcode, setCandidateBarcode] = useState<string | null>(null);
   const [hasMultipleCameras, setHasMultipleCameras] = useState<boolean>(false);
+  const [hasTorch, setHasTorch] = useState<boolean>(false);
+  const [isTorchOn, setIsTorchOn] = useState<boolean>(false);
+  const [hasZoom, setHasZoom] = useState<boolean>(false);
+  const [zoomLevel, setZoomLevel] = useState<number>(1);
+  const [detectedBox, setDetectedBox] = useState<DOMRectReadOnly | null>(null);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -95,6 +123,8 @@ export function useBarcodeScanner(options: UseBarcodeScannerOptions = {}) {
 
     setIsVerifying(false);
     setCandidateBarcode(null);
+    setDetectedBox(null);
+    setIsTorchOn(false);
   }, []);
 
   /**
@@ -139,6 +169,42 @@ export function useBarcodeScanner(options: UseBarcodeScannerOptions = {}) {
   }, [state]);
 
   /**
+   * Toggle camera flashlight/torch on supported mobile devices
+   */
+  const toggleTorch = useCallback(async () => {
+    const track = streamRef.current?.getVideoTracks()[0];
+    if (!track) return;
+    try {
+      const nextState = !isTorchOn;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (track as any).applyConstraints({
+        advanced: [{ torch: nextState }],
+      });
+      setIsTorchOn(nextState);
+    } catch (err) {
+      console.warn("Error toggling torch:", err);
+    }
+  }, [isTorchOn]);
+
+  /**
+   * Toggle 1x / 2x camera digital/optical zoom
+   */
+  const toggleZoom = useCallback(async () => {
+    const track = streamRef.current?.getVideoTracks()[0];
+    if (!track) return;
+    try {
+      const nextZoom = zoomLevel === 1 ? 2 : 1;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (track as any).applyConstraints({
+        advanced: [{ zoom: nextZoom }],
+      });
+      setZoomLevel(nextZoom);
+    } catch (err) {
+      console.warn("Error toggling zoom:", err);
+    }
+  }, [zoomLevel]);
+
+  /**
    * Starts camera scanning. Checks security context, requests permission with constraints,
    * configures local WASM detector, and starts frame decode loop.
    */
@@ -169,10 +235,10 @@ export function useBarcodeScanner(options: UseBarcodeScannerOptions = {}) {
     lastScanRef.current = null;
     setIsVerifying(false);
     setCandidateBarcode(null);
+    setDetectedBox(null);
 
     try {
-      // Primary constraints: full HD resolution preferred with continuous autofocus
-      // High resolution is essential for small barcodes to be resolved clearly from distance!
+      // Primary constraints: full HD preferred with continuous autofocus & exposure
       const constraints: MediaStreamConstraints = {
         audio: false,
         video: {
@@ -212,14 +278,24 @@ export function useBarcodeScanner(options: UseBarcodeScannerOptions = {}) {
 
       streamRef.current = stream;
 
-      // Enable continuous hardware autofocus and auto-exposure if supported by device
+      // Enable continuous hardware autofocus, auto-exposure, and detect torch/zoom
       try {
         const videoTrack = stream.getVideoTracks()[0];
         if (videoTrack && videoTrack.getCapabilities) {
           const caps = videoTrack.getCapabilities() as {
             focusMode?: string[];
             exposureMode?: string[];
+            torch?: boolean;
+            zoom?: { min: number; max: number; step: number };
           };
+
+          if (caps.torch) {
+            setHasTorch(true);
+          }
+          if (caps.zoom && caps.zoom.max > 1) {
+            setHasZoom(true);
+          }
+
           const advancedConstraints: Record<string, unknown> = {};
           if (caps.focusMode && caps.focusMode.includes("continuous")) {
             advancedConstraints.focusMode = "continuous";
@@ -259,10 +335,10 @@ export function useBarcodeScanner(options: UseBarcodeScannerOptions = {}) {
       // Initialize self-hosted WASM module
       initZXingLocally();
 
-      // Configure BarcodeDetector ponyfill restricted strictly to retail formats
+      // Configure BarcodeDetector ponyfill supporting retail barcodes and QR codes
       try {
         detectorRef.current = new BarcodeDetector({
-          formats: ["ean_13", "ean_8", "upc_a", "upc_e"],
+          formats: ["ean_13", "ean_8", "upc_a", "upc_e", "qr_code", "code_128", "code_39"],
         });
       } catch (detErr) {
         console.error("Failed to initialize BarcodeDetector:", detErr);
@@ -274,8 +350,9 @@ export function useBarcodeScanner(options: UseBarcodeScannerOptions = {}) {
 
       setState("scanning");
 
-      // Start decode loop: ~5 to 10 times per second (1000 / fps)
-      const intervalMs = Math.round(1000 / Math.max(1, Math.min(fps, 10)));
+      // High-performance decode cadence: target 25-30 FPS (interval ~35-40ms)
+      const targetFps = Math.max(1, Math.min(fps, 30));
+      const intervalMs = Math.round(1000 / targetFps);
       let isDetecting = false;
 
       intervalRef.current = setInterval(async () => {
@@ -283,7 +360,7 @@ export function useBarcodeScanner(options: UseBarcodeScannerOptions = {}) {
           return;
         }
 
-        // Ensure video is ready to be decoded
+        // Ensure video has received frames and has non-zero geometry
         if (
           videoRef.current.readyState < 2 ||
           videoRef.current.videoWidth === 0 ||
@@ -300,34 +377,60 @@ export function useBarcodeScanner(options: UseBarcodeScannerOptions = {}) {
               const rawVal = (result.rawValue || "").trim();
               if (!rawVal) continue;
 
-              // Check digit validation
-              if (!isValidBarcode(rawVal)) {
+              // Check if raw value is a valid barcode, or if it can be extracted from a QR code/URL
+              let validCode: string | null = null;
+              if (isValidBarcode(rawVal)) {
+                validCode = rawVal;
+              } else {
+                validCode = extractBarcodeFromText(rawVal);
+              }
+
+              if (!validCode) {
                 continue;
+              }
+
+              // Update visual detected box
+              if (result.boundingBox) {
+                setDetectedBox(result.boundingBox);
+              }
+
+              // Instant snap detection when consecutiveReads <= 1
+              if (consecutiveReads <= 1) {
+                playScanChime();
+                setIsVerifying(true);
+                setCandidateBarcode(validCode);
+                stopTracks();
+                setState("found");
+                const normalized = normalizeBarcode(validCode);
+                if (onFound) {
+                  onFound(normalized);
+                }
+                return;
               }
 
               const now = Date.now();
               const last = lastScanRef.current;
 
-              // Two consecutive identical valid reads within ~1.5 seconds required
+              // Two consecutive identical valid reads within confirmation window
               if (
                 last &&
-                last.code === rawVal &&
+                last.code === validCode &&
                 now - last.time <= confirmationWindowMs
               ) {
-                // Success: Barcode confirmed
+                // Success: Barcode confirmed! Instant chime & haptic trigger
                 playScanChime();
                 stopTracks();
                 setState("found");
-                const normalized = normalizeBarcode(rawVal);
+                const normalized = normalizeBarcode(validCode);
                 if (onFound) {
                   onFound(normalized);
                 }
                 return;
               } else {
-                // First valid read recorded - show visual confirmation state
-                lastScanRef.current = { code: rawVal, time: now };
+                // First valid read recorded - show instant visual confirmation state
+                lastScanRef.current = { code: validCode, time: now };
                 setIsVerifying(true);
-                setCandidateBarcode(rawVal);
+                setCandidateBarcode(validCode);
               }
             }
           } else {
@@ -335,6 +438,7 @@ export function useBarcodeScanner(options: UseBarcodeScannerOptions = {}) {
             if (lastScanRef.current && Date.now() - lastScanRef.current.time > confirmationWindowMs) {
               setIsVerifying(false);
               setCandidateBarcode(null);
+              setDetectedBox(null);
             }
           }
         } catch (decErr) {
@@ -440,5 +544,12 @@ export function useBarcodeScanner(options: UseBarcodeScannerOptions = {}) {
     candidateBarcode,
     hasMultipleCameras,
     switchCamera,
+    hasTorch,
+    isTorchOn,
+    toggleTorch,
+    hasZoom,
+    zoomLevel,
+    toggleZoom,
+    detectedBox,
   };
 }

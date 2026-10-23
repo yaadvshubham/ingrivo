@@ -69,12 +69,228 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    @apply font-sans;
+    scroll-behavior: smooth;
+  }
   body {
     @apply bg-background text-foreground;
     font-size: 16px;
     line-height: 1.6;
+    scroll-behavior: smooth;
   }
-  html {
-    @apply font-sans;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
+}
+
+/* Ensure minimum 44px touch targets on touch devices */
+@media (pointer: coarse) {
+  button:not(.no-touch-target),
+  a:not(.no-touch-target),
+  input[type="button"],
+  input[type="submit"],
+  [role="button"] {
+    min-height: 44px;
+  }
+}
+
+/* UPI-style Scanner Viewfinder Animations */
+@keyframes laserSweep {
+  0% {
+    top: 6%;
+    opacity: 0.7;
+  }
+  50% {
+    top: 92%;
+    opacity: 1;
+  }
+  100% {
+    top: 6%;
+    opacity: 0.7;
+  }
+}
+
+.animate-laser-sweep {
+  animation: laserSweep 2s ease-in-out infinite;
+}
+
+@keyframes scanGlowPulse {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(30, 91, 69, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(46, 139, 99, 0.8);
+  }
+}
+
+.animate-scan-glow {
+  animation: scanGlowPulse 1.8s ease-in-out infinite;
+}
+
+/* Rich Modern UI Utilities & Animations */
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-float-slow {
+  animation: floatSlow 4s ease-in-out infinite;
+}
+
+@keyframes shimmerGlow {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmerGlow 2.5s infinite;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(228, 222, 195, 0.8);
+}
+
+.glass-card-hover {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px -6px rgba(30, 91, 69, 0.12), 0 4px 12px -2px rgba(27, 42, 34, 0.06);
+  border-color: rgba(30, 91, 69, 0.35);
+}
+
+.gradient-text-emerald {
+  background: linear-gradient(135deg, #164634 0%, #1E5B45 50%, #2E8B63 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.ambient-dot-grid {
+  background-image: radial-gradient(rgba(30, 91, 69, 0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* ==========================================================================
+   Pixel-Perfect Auth Input Field Group (Zero Text / Icon Collision)
+   ========================================================================== */
+.auth-input-container {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 12px 14px !important;
+  background-color: #ffffff !important;
+  border: 1.5px solid #D5CEB8 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.auth-input-container:focus-within {
+  border-color: #1E5B45 !important;
+  box-shadow: 0 0 0 3px rgba(30, 91, 69, 0.15) !important;
+}
+
+.auth-input-container .auth-input-icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  color: #8F9E95 !important;
+  width: 18px !important;
+  height: 18px !important;
+}
+
+.auth-input-container input.auth-input-element {
+  flex: 1 1 0% !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  font-size: 14px !important;
+  line-height: 20px !important;
+  color: #1B2A22 !important;
+  box-shadow: none !important;
+}
+
+.auth-input-container input.auth-input-element::placeholder {
+  color: #94A3B8 !important;
+  opacity: 1 !important;
+}
+
+/* ==========================================================================
+   Smooth Micro-Interactions & Hover Physics
+   ========================================================================== */
+.smooth-lift {
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.28s ease;
+}
+
+.smooth-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px -8px rgba(30, 91, 69, 0.15), 0 4px 12px -2px rgba(27, 42, 34, 0.08);
+}
+
+.animate-pulse-subtle {
+  animation: pulseSubtle 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulseSubtle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.88;
+    transform: scale(1.02);
+  }
+}
+
+/* Custom sleek scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F5F2EA;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #C8C1A9;
+  border-radius: 9999px;
+  border: 2px solid #F5F2EA;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #1E5B45;
 }

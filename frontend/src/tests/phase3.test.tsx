@@ -1,11 +1,12 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import React from "react";
 import { ProductSchema, Product } from "@/lib/schemas/product";
 import { isValidBarcode, normalizeBarcode } from "@/lib/barcode";
 import ScanPage from "@/app/scan/page";
 import { ProductDetailView } from "@/app/product/[ref]/page";
 import * as apiClient from "@/lib/api-client";
+import { clearHistory } from "@/lib/history-store";
+
 
 // Sample fixture based on real Coca-Cola fixture (5449000000996)
 const mockNormalizedProduct: Product = {
@@ -148,6 +149,13 @@ describe("Phase 3 Frontend Tests", () => {
   });
 
   describe("Product Detail Page States", () => {
+    beforeEach(() => {
+      clearHistory();
+      window.localStorage.clear();
+      window.sessionStorage.clear();
+      vi.restoreAllMocks();
+    });
+
     it("renders found product facts with missing chips for null fields", async () => {
       vi.spyOn(apiClient, "getProduct").mockResolvedValue(mockNormalizedProduct);
       render(<ProductDetailView refParam="bc-5449000000996" />);
@@ -180,7 +188,7 @@ describe("Phase 3 Frontend Tests", () => {
       vi.spyOn(apiClient, "getProduct").mockRejectedValue(
         new apiClient.ApiError("Too many requests", "UPSTREAM_RATE_LIMITED", 503)
       );
-      render(<ProductDetailView refParam="bc-5449000000996" />);
+      render(<ProductDetailView refParam="bc-7622300710260" />);
 
       await waitFor(() => {
         expect(screen.getByText(/rate limit reached/i)).toBeInTheDocument();

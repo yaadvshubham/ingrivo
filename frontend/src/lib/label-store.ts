@@ -52,3 +52,29 @@ export function clearLabelProduct(ref: string): void {
     console.warn("Failed to clear label product from sessionStorage:", err);
   }
 }
+
+/**
+ * Lists all reviewed label products saved in this session.
+ */
+export function listAllLabelProducts(): Product[] {
+  if (typeof window === "undefined" || !window.sessionStorage) return [];
+  const results: Product[] = [];
+  try {
+    for (let i = 0; i < window.sessionStorage.length; i++) {
+      const key = window.sessionStorage.key(i);
+      if (key && key.startsWith(STORAGE_PREFIX)) {
+        const raw = window.sessionStorage.getItem(key);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          const validated = ProductSchema.safeParse(parsed);
+          if (validated.success) {
+            results.push(validated.data);
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.warn("Failed to list label products from sessionStorage:", err);
+  }
+  return results;
+}

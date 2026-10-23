@@ -313,3 +313,155 @@ def test_eval_mode_a_all_golden_samples_pass_validator():
     for case in GOLDEN_PACKETS:
         res = validate_explanation(case["sample_output"], case["packet"])
         assert res.is_valid, f"Golden case {case['id']} failed validation: {res.errors}"
+
+
+# --- 4 Comparison Golden Cases (Phase 8) ---
+
+from app.schemas.compare import CompareAiStructuredData, CompareAiDifference
+from app.schemas.product import (
+    Product,
+    NutritionData,
+    NutrientValues,
+    NutritionBasis,
+    IngredientsData,
+    AllergensData,
+    SourceData,
+    CompletenessData,
+    Provenance,
+)
+from app.services.compare import (
+    build_deterministic_comparison,
+    serialize_comparison_packet,
+    validate_compare_narrative,
+)
+
+
+def _eval_product(ref, name, basis, energy, sugars, fat, protein, fibre, salt, sodium, ings, allergens):
+    return Product(
+        ref=ref,
+        name=name,
+        brand="Demo",
+        ingredients=IngredientsData(raw_text=ings, items=[], provenance=Provenance.source),
+        nutrition=NutritionData(
+            basis=basis,
+            values=NutrientValues(
+                energy_kcal=energy,
+                sugars=sugars,
+                fat=fat,
+                protein=protein,
+                fibre=fibre,
+                salt=salt,
+                sodium=sodium,
+            ),
+            provenance=Provenance.source,
+        ),
+        allergens=AllergensData(declared=allergens, traces=[], provenance=Provenance.source),
+        source=SourceData(api_version="v2", retrieved_at="2026-10-12T00:00:00Z"),
+        completeness=CompletenessData(score=1.0, missing=[]),
+    )
+
+
+COMPARE_GOLDEN_CASES: list[dict[str, Any]] = [
+    {
+        "id": "cmp_1_complete_pair",
+        "name": "Whole Wheat Bread vs White Bread",
+        "prod_a": _eval_product(
+            "cmp-1a", "Whole Wheat Bread", NutritionBasis.per_100g,
+            245.0, 3.5, 2.1, 9.2, 6.8, 0.9, 0.36,
+            "Whole wheat flour, water, yeast, salt.", ["Wheat"],
+        ),
+        "prod_b": _eval_product(
+            "cmp-1b", "White Bread", NutritionBasis.per_100g,
+            265.0, 4.0, 1.5, 8.0, 2.4, 1.1, 0.44,
+            "Enriched wheat flour, water, yeast, salt.", ["Wheat"],
+        ),
+        "sample_output": CompareAiStructuredData(
+            summary="Whole Wheat Bread provides 245.0 kcal per 100 g, while White Bread contains 265.0 kcal.",
+            differences=[
+                CompareAiDifference(
+                    text="White Bread is higher in energy by 20.0 kcal (+8.2%).",
+                    evidence_refs=["nutrient_rows.energy_kcal"],
+                ),
+            ],
+            limitations=["Both products are evaluated on a per 100 g basis."],
+        ),
+    },
+    {
+        "id": "cmp_2_one_side_missing",
+        "name": "Plain Crackers (missing sugars) vs Sweet Biscuit",
+        "prod_a": _eval_product(
+            "cmp-2a", "Plain Crackers", NutritionBasis.per_100g,
+            410.0, None, 8.0, 7.5, 3.0, 1.2, 0.48,
+            "Wheat flour, palm oil, salt.", ["Wheat"],
+        ),
+        "prod_b": _eval_product(
+            "cmp-2b", "Sweet Biscuit", NutritionBasis.per_100g,
+            460.0, 22.0, 15.0, 6.0, 1.5, 0.5, 0.2,
+            "Wheat flour, sugar, butter, salt.", ["Wheat", "Milk"],
+        ),
+        "sample_output": CompareAiStructuredData(
+            summary="Comparison between Plain Crackers and Sweet Biscuit per 100 g.",
+            differences=[
+                CompareAiDifference(
+                    text="Sweet Biscuit contains higher total fat by 7.0 g (+87.5%).",
+                    evidence_refs=["nutrient_rows.fat"],
+                ),
+            ],
+            limitations=["Total sugars is not available for Plain Crackers."],
+        ),
+    },
+    {
+        "id": "cmp_3_g_vs_ml_incomparable",
+        "name": "Granola Bar (g) vs Orange Juice (ml)",
+        "prod_a": _eval_product(
+            "cmp-3a", "Granola Bar", NutritionBasis.per_100g,
+            430.0, 18.0, 14.0, 8.0, 5.0, 0.4, 0.16,
+            "Oats, honey, seeds.", ["Oats"],
+        ),
+        "prod_b": _eval_product(
+            "cmp-3b", "Orange Juice", NutritionBasis.per_100ml,
+            45.0, 9.0, 0.2, 0.7, 0.4, 0.01, 0.004,
+            "Orange juice from concentrate.", [],
+        ),
+        "sample_output": CompareAiStructuredData(
+            summary="Granola Bar is evaluated per 100 g while Orange Juice is evaluated per 100 ml.",
+            differences=[],
+            limitations=["Different basis units (grams vs milliliters) cannot be compared directly without product density."],
+        ),
+    },
+    {
+        "id": "cmp_4_near_identical",
+        "name": "Brand A Oats vs Brand B Oats",
+        "prod_a": _eval_product(
+            "cmp-4a", "Brand A Rolled Oats", NutritionBasis.per_100g,
+            375.0, 1.0, 7.0, 12.5, 10.0, 0.02, 0.008,
+            "100% whole grain rolled oats.", ["Oats"],
+        ),
+        "prod_b": _eval_product(
+            "cmp-4b", "Brand B Rolled Oats", NutritionBasis.per_100g,
+            375.0, 1.0, 7.0, 12.5, 10.0, 0.02, 0.008,
+            "100% rolled oats.", ["Oats"],
+        ),
+        "sample_output": CompareAiStructuredData(
+            summary="Brand A Rolled Oats and Brand B Rolled Oats have identical nutrient profiles per 100 g.",
+            differences=[
+                CompareAiDifference(
+                    text="Both products have the same amount of 12.5 g protein per 100 g.",
+                    evidence_refs=["nutrient_rows.protein"],
+                ),
+            ],
+            limitations=[],
+        ),
+    },
+]
+
+
+def test_eval_mode_a_compare_cases():
+    """Mode A: Validates the 4 comparison golden sample outputs."""
+    for case in COMPARE_GOLDEN_CASES:
+        summary_a, summary_b, rows, ing_diff, allergen_diff = build_deterministic_comparison(
+            case["prod_a"], case["prod_b"]
+        )
+        packet = serialize_comparison_packet(summary_a, summary_b, rows, ing_diff, allergen_diff)
+        res = validate_compare_narrative(case["sample_output"], packet, rows)
+        assert res.is_valid, f"Compare golden case {case['id']} failed validation: {res.errors}"

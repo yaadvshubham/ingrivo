@@ -15,11 +15,17 @@ export function initZXingLocally(): void {
     return;
   }
 
+  const wasmUrl =
+    typeof window !== "undefined" && window.location?.origin
+      ? `${window.location.origin}/wasm/zxing_reader.wasm`
+      : "/wasm/zxing_reader.wasm";
+
   prepareZXingModule({
+    fireImmediately: true,
     overrides: {
       locateFile: (path: string, prefix: string) => {
         if (path.endsWith(".wasm")) {
-          return "/wasm/zxing_reader.wasm";
+          return wasmUrl;
         }
         return prefix + path;
       },
@@ -53,11 +59,13 @@ const SUPPORTED_RETAIL_FORMATS = [
   "code_128",
   "code_39",
   "itf",
+  "qr_code",
+  "data_matrix",
 ];
 
-// Reusable canvas to prevent GC pressure during high-frequency decode loops
+// Reusable canvases to prevent GC spikes during high-frequency decode loops
 let sharedCanvas: HTMLCanvasElement | null = null;
-let sharedBinarizedCanvas: HTMLCanvasElement | null = null;
+let sharedRoiCanvas: HTMLCanvasElement | null = null;
 
 function getSharedCanvas(width: number, height: number): HTMLCanvasElement | null {
   if (typeof document === "undefined") return null;
@@ -71,77 +79,111 @@ function getSharedCanvas(width: number, height: number): HTMLCanvasElement | nul
   return sharedCanvas;
 }
 
-function getSharedBinarizedCanvas(width: number, height: number): HTMLCanvasElement | null {
+function getSharedRoiCanvas(width: number, height: number): HTMLCanvasElement | null {
   if (typeof document === "undefined") return null;
-  if (!sharedBinarizedCanvas) {
-    sharedBinarizedCanvas = document.createElement("canvas");
+  if (!sharedRoiCanvas) {
+    sharedRoiCanvas = document.createElement("canvas");
   }
-  if (sharedBinarizedCanvas.width !== width || sharedBinarizedCanvas.height !== height) {
-    sharedBinarizedCanvas.width = width;
-    sharedBinarizedCanvas.height = height;
+  if (sharedRoiCanvas.width !== width || sharedRoiCanvas.height !== height) {
+    sharedRoiCanvas.width = width;
+    sharedRoiCanvas.height = height;
   }
-  return sharedBinarizedCanvas;
+  return sharedRoiCanvas;
+}
+
+// Singleton cache for browser native hardware GPU BarcodeDetector
+let nativeDetectorInstance: {
+  detect: (source: CanvasImageSource | ImageData | Blob) => Promise<DetectedBarcode[]>;
+} | null = null;
+let nativeDetectorTested = false;
+
+async function getNativeDetector(): Promise<typeof nativeDetectorInstance | null> {
+  if (typeof window === "undefined" || !("BarcodeDetector" in window)) {
+    return null;
+  }
+  if (nativeDetectorTested) {
+    return nativeDetectorInstance;
+  }
+  nativeDetectorTested = true;
+
+  try {
+    const WindowDetector = (window as unknown as { BarcodeDetector: typeof BarcodeDetector }).BarcodeDetector;
+    if (!WindowDetector || WindowDetector === BarcodeDetector) {
+      return null;
+    }
+
+    const supported: string[] = typeof (WindowDetector as unknown as { getSupportedFormats?: () => Promise<string[]> }).getSupportedFormats === "function"
+      ? await (WindowDetector as unknown as { getSupportedFormats: () => Promise<string[]> }).getSupportedFormats()
+      : [];
+
+    const desiredFormats = ["ean_13", "ean_8", "upc_a", "upc_e", "qr_code", "code_128", "code_39", "itf"];
+    const activeFormats = supported.length > 0 ? desiredFormats.filter((f) => supported.includes(f)) : desiredFormats;
+
+    if (activeFormats.length > 0) {
+      nativeDetectorInstance = new (WindowDetector as unknown as new (opts: { formats: string[] }) => {
+        detect: (source: CanvasImageSource | ImageData | Blob) => Promise<DetectedBarcode[]>;
+      })({
+        formats: activeFormats,
+      });
+    }
+  } catch {
+    nativeDetectorInstance = null;
+  }
+
+  return nativeDetectorInstance;
 }
 
 /**
- * Applies high-contrast sharpening filter to ImageData to assist reading
- * low-contrast, distance, or glossy packaging barcodes.
- */
-function enhanceBarcodeContrast(srcData: ImageData, destData: ImageData): void {
-  const src = srcData.data;
-  const dest = destData.data;
-  const len = src.length;
-
-  // 1. Calculate luminance and find min/max for stretch
-  let minLum = 255;
-  let maxLum = 0;
-
-  for (let i = 0; i < len; i += 4) {
-    // Standard perceptual luminance
-    const lum = (src[i] * 77 + src[i + 1] * 150 + src[i + 2] * 29) >> 8;
-    if (lum < minLum) minLum = lum;
-    if (lum > maxLum) maxLum = lum;
-  }
-
-  const range = maxLum - minLum || 1;
-
-  // 2. High-contrast histogram stretch
-  for (let i = 0; i < len; i += 4) {
-    const lum = (src[i] * 77 + src[i + 1] * 150 + src[i + 2] * 29) >> 8;
-    const stretched = Math.min(255, Math.max(0, Math.round(((lum - minLum) / range) * 255)));
-    dest[i] = stretched;
-    dest[i + 1] = stretched;
-    dest[i + 2] = stretched;
-    dest[i + 3] = 255;
-  }
-}
-
-/**
- * High-performance BarcodeDetector engine.
+ * Ultra-fast Barcode & QR Detector engine.
  *
- * Designed for instant detection from distance and noisy camera feeds (UPI QR speed):
- * - Native hardware GPU BarcodeDetector evaluated first if available in browser
- * - Full-frame high-resolution scan first so distance/offset scans trigger immediately
- * - Center ROI crop with 2x zoom scaling for far-away barcodes
- * - Contrast-stretched pass for poor lighting or packaging glare
- * - Maximum sensitivity ZXing WebAssembly settings
+ * Engineered for sub-30ms instant snap scanning:
+ * 1. Native hardware GPU Shape Detection API evaluated first
+ * 2. Full resolution preservation up to 1280px (keeps 1D barcode lines sharp, not blurred)
+ * 3. Multi-pass decoding:
+ *    - Pass 1: LocalAverage binarizer for standard packaging
+ *    - Pass 2: GlobalHistogram binarizer for shiny / reflective wrappers (Parle-G, chips, foil)
+ *    - Pass 3: Dynamic range contrast enhancement for dim webcam feeds
  */
 export class BarcodeDetector {
   private targetFormats: ReadInputBarcodeFormat[];
 
   constructor(options: BarcodeDetectorOptions = {}) {
-    const rawFormats = options.formats || ["ean_13", "ean_8", "upc_a", "upc_e"];
-    this.targetFormats = rawFormats.map((f) => {
+    const rawFormats = options.formats || [
+      "ean_13",
+      "ean_8",
+      "upc_a",
+      "upc_e",
+      "qr_code",
+      "code_128",
+      "code_39",
+    ];
+
+    const mapped: ReadInputBarcodeFormat[] = [];
+    rawFormats.forEach((f) => {
       const clean = f.replace(/[-_]/g, "").toUpperCase();
-      if (clean === "EAN13") return "EAN13";
-      if (clean === "EAN8") return "EAN8";
-      if (clean === "UPCA") return "UPCA";
-      if (clean === "UPCE") return "UPCE";
-      if (clean === "CODE128") return "Code128";
-      if (clean === "CODE39") return "Code39";
-      if (clean === "ITF") return "ITF";
-      return "AllRetail";
+      if (clean.includes("EAN") || clean.includes("UPC")) {
+        if (!mapped.includes("EANUPC")) mapped.push("EANUPC");
+        if ((clean === "EAN13" || clean === "EAN") && !mapped.includes("EAN13")) mapped.push("EAN13");
+        if (clean === "EAN8" && !mapped.includes("EAN8")) mapped.push("EAN8");
+        if (clean === "UPCA" && !mapped.includes("UPCA")) mapped.push("UPCA");
+        if (clean === "UPCE" && !mapped.includes("UPCE")) mapped.push("UPCE");
+      } else if (clean.includes("QR")) {
+        if (!mapped.includes("QRCode")) mapped.push("QRCode");
+      } else if (clean === "CODE128") {
+        if (!mapped.includes("Code128")) mapped.push("Code128");
+      } else if (clean === "CODE39") {
+        if (!mapped.includes("Code39")) mapped.push("Code39");
+      } else if (clean === "ITF") {
+        if (!mapped.includes("ITF")) mapped.push("ITF");
+      } else if (clean === "DATAMATRIX") {
+        if (!mapped.includes("DataMatrix")) mapped.push("DataMatrix");
+      }
     });
+
+    if (!mapped.includes("EANUPC")) mapped.push("EANUPC");
+    if (!mapped.includes("EAN13")) mapped.push("EAN13");
+    if (!mapped.includes("UPCA")) mapped.push("UPCA");
+    this.targetFormats = mapped;
 
     if (typeof window !== "undefined") {
       initZXingLocally();
@@ -155,125 +197,177 @@ export class BarcodeDetector {
   async detect(imageSource: CanvasImageSource | ImageData | Blob): Promise<DetectedBarcode[]> {
     if (!imageSource) return [];
 
-    // 1. FAST PATH: Native browser GPU Shape Detection API (if supported by browser hardware)
-    if (typeof window !== "undefined" && "BarcodeDetector" in window) {
-      try {
-        const NativeDetector = (window as unknown as { BarcodeDetector: typeof BarcodeDetector }).BarcodeDetector;
-        if (NativeDetector !== BarcodeDetector) {
-          const native = new NativeDetector({
-            formats: ["ean_13", "ean_8", "upc_a", "upc_e"],
-          });
-          const nativeHits = await native.detect(imageSource);
-          if (nativeHits && nativeHits.length > 0) {
-            return nativeHits;
-          }
+    // TIER 1: Native hardware GPU Shape Detection API (Zero-copy, ~3-8ms)
+    try {
+      const native = await getNativeDetector();
+      if (native) {
+        const hits = await native.detect(imageSource);
+        if (hits && hits.length > 0) {
+          return hits;
         }
-      } catch {
-        // Fall back to WebAssembly
       }
+    } catch {
+      // Gracefully fall back to WebAssembly
     }
 
     if (typeof document === "undefined") {
       return [];
     }
 
-    let width = 0;
-    let height = 0;
+    // Determine source dimensions
+    let origWidth = 0;
+    let origHeight = 0;
 
     if (imageSource instanceof HTMLVideoElement) {
-      width = imageSource.videoWidth;
-      height = imageSource.videoHeight;
+      origWidth = imageSource.videoWidth;
+      origHeight = imageSource.videoHeight;
     } else if (imageSource instanceof HTMLCanvasElement || imageSource instanceof ImageBitmap) {
-      width = imageSource.width;
-      height = imageSource.height;
+      origWidth = imageSource.width;
+      origHeight = imageSource.height;
     } else if (imageSource instanceof ImageData) {
-      width = imageSource.width;
-      height = imageSource.height;
+      origWidth = imageSource.width;
+      origHeight = imageSource.height;
     }
 
-    if (width === 0 || height === 0) {
+    if (origWidth === 0 || origHeight === 0) {
       return [];
     }
 
-    const canvas = getSharedCanvas(width, height);
+    // TIER 2: High-Resolution Preservation
+    // Only downscale if larger than 1280px to preserve barcode stripe thickness
+    const MAX_DIMENSION = 1280;
+    let scaledWidth = origWidth;
+    let scaledHeight = origHeight;
+
+    if (scaledWidth > MAX_DIMENSION || scaledHeight > MAX_DIMENSION) {
+      if (scaledWidth >= scaledHeight) {
+        scaledHeight = Math.round((scaledHeight * MAX_DIMENSION) / scaledWidth);
+        scaledWidth = MAX_DIMENSION;
+      } else {
+        scaledWidth = Math.round((scaledWidth * MAX_DIMENSION) / scaledHeight);
+        scaledHeight = MAX_DIMENSION;
+      }
+    }
+
+    const scaleX = origWidth / scaledWidth;
+    const scaleY = origHeight / scaledHeight;
+
+    const canvas = getSharedCanvas(scaledWidth, scaledHeight);
     if (!canvas) return [];
 
     const ctx = canvas.getContext("2d", { willReadFrequently: true });
     if (!ctx) return [];
 
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+
     if (imageSource instanceof ImageData) {
       ctx.putImageData(imageSource, 0, 0);
     } else {
-      ctx.drawImage(imageSource as CanvasImageSource, 0, 0, width, height);
+      ctx.drawImage(imageSource as CanvasImageSource, 0, 0, scaledWidth, scaledHeight);
     }
-
-    const zxingOptions = {
-      tryHarder: true,
-      tryRotate: true,
-      tryInvert: true,
-      tryDownscale: true,
-      binarizer: "LocalAverage" as const,
-      maxNumberOfSymbols: 1,
-      formats: this.targetFormats.length > 0 ? this.targetFormats : undefined,
-    };
 
     let foundResults = null;
     let offsetX = 0;
     let offsetY = 0;
 
-    // PASS 1: Full-Frame Standard Scan
-    // Scans the entire camera field of view immediately, regardless of where the barcode is held
+    const fullData = ctx.getImageData(0, 0, scaledWidth, scaledHeight);
+
+    // Pass 1: Full-frame scan with LocalAverage binarizer, rotation, inversion, and denoise
     try {
-      const fullData = ctx.getImageData(0, 0, width, height);
-      const fullResults = await readBarcodes(fullData, zxingOptions);
-      if (fullResults && fullResults.length > 0) {
-        foundResults = fullResults;
-        offsetX = 0;
-        offsetY = 0;
+      const results = await readBarcodes(fullData, {
+        tryHarder: true,
+        tryRotate: true,
+        tryInvert: true,
+        tryDownscale: true,
+        tryDenoise: true,
+        binarizer: "LocalAverage",
+        maxNumberOfSymbols: 1,
+        formats: this.targetFormats.length > 0 ? this.targetFormats : undefined,
+      });
+
+      if (results && results.length > 0) {
+        foundResults = results;
       }
-    } catch (fullErr) {
-      console.warn("Full frame decode error:", fullErr);
+    } catch (err) {
+      // Continue to Pass 2
     }
 
-    // PASS 2: Center Region of Interest (ROI) with 2x Virtual Zoom
-    // If the barcode is far away, the stripes are thin. Scaling up the center 2x
-    // dramatically improves decode accuracy for distant barcodes!
+    // Pass 2: GlobalHistogram binarizer (critical for glossy/reflective plastic wrappers like Parle-G)
     if (!foundResults || foundResults.length === 0) {
       try {
-        const cropX = Math.floor(width * 0.15);
-        const cropY = Math.floor(height * 0.2);
-        const cropW = Math.floor(width * 0.7);
-        const cropH = Math.floor(height * 0.6);
+        const results = await readBarcodes(fullData, {
+          tryHarder: true,
+          tryRotate: true,
+          tryInvert: true,
+          tryDownscale: true,
+          tryDenoise: true,
+          binarizer: "GlobalHistogram",
+          maxNumberOfSymbols: 1,
+          formats: this.targetFormats.length > 0 ? this.targetFormats : undefined,
+        });
 
-        const zoomCanvas = getSharedBinarizedCanvas(cropW, cropH);
-        if (zoomCanvas) {
-          const zoomCtx = zoomCanvas.getContext("2d", { willReadFrequently: true });
-          if (zoomCtx) {
-            // Draw cropped center region
-            zoomCtx.drawImage(canvas, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
-            const centerData = zoomCtx.getImageData(0, 0, cropW, cropH);
+        if (results && results.length > 0) {
+          foundResults = results;
+        }
+      } catch (err) {
+        // Continue to Pass 3
+      }
+    }
 
-            const centerResults = await readBarcodes(centerData, zxingOptions);
-            if (centerResults && centerResults.length > 0) {
-              foundResults = centerResults;
-              offsetX = cropX;
-              offsetY = cropY;
-            } else {
-              // PASS 3: Contrast Enhancement on Center Region
-              // Handles shiny wrappers, plastic crinkles, and poor room lighting
-              const enhancedData = zoomCtx.createImageData(cropW, cropH);
-              enhanceBarcodeContrast(centerData, enhancedData);
-              const enhancedResults = await readBarcodes(enhancedData, zxingOptions);
-              if (enhancedResults && enhancedResults.length > 0) {
-                foundResults = enhancedResults;
-                offsetX = cropX;
-                offsetY = cropY;
+    // Pass 3: Contrast-stretched pass for dim/low-contrast webcam feeds
+    if (!foundResults || foundResults.length === 0) {
+      try {
+        const roiX = Math.floor(scaledWidth * 0.05);
+        const roiY = Math.floor(scaledHeight * 0.05);
+        const roiW = Math.floor(scaledWidth * 0.90);
+        const roiH = Math.floor(scaledHeight * 0.90);
+        const roiCanvas = getSharedRoiCanvas(roiW, roiH);
+        if (roiCanvas) {
+          const roiCtx = roiCanvas.getContext("2d", { willReadFrequently: true });
+          if (roiCtx) {
+            roiCtx.drawImage(canvas, roiX, roiY, roiW, roiH, 0, 0, roiW, roiH);
+            const roiData = roiCtx.getImageData(0, 0, roiW, roiH);
+            const d = roiData.data;
+
+            // Find min & max luminance
+            let minL = 255;
+            let maxL = 0;
+            for (let i = 0; i < d.length; i += 16) {
+              const l = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+              if (l < minL) minL = l;
+              if (l > maxL) maxL = l;
+            }
+
+            const range = maxL - minL;
+            if (range > 20 && range < 225) {
+              const factor = 255 / range;
+              for (let i = 0; i < d.length; i += 4) {
+                const gray = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+                const stretched = Math.min(255, Math.max(0, (gray - minL) * factor));
+                d[i] = stretched;
+                d[i + 1] = stretched;
+                d[i + 2] = stretched;
+              }
+              const stretchedResults = await readBarcodes(roiData, {
+                tryHarder: true,
+                tryRotate: true,
+                tryInvert: true,
+                tryDownscale: true,
+                tryDenoise: true,
+                maxNumberOfSymbols: 1,
+                formats: this.targetFormats.length > 0 ? this.targetFormats : undefined,
+              });
+              if (stretchedResults && stretchedResults.length > 0) {
+                foundResults = stretchedResults;
+                offsetX = roiX;
+                offsetY = roiY;
               }
             }
           }
         }
-      } catch (cropErr) {
-        console.warn("ROI zoom decode error:", cropErr);
+      } catch {
+        // Ignored
       }
     }
 
@@ -281,22 +375,32 @@ export class BarcodeDetector {
       return [];
     }
 
+    // Map coordinates back to original video dimensions
     return foundResults.map((res) => {
       const pos = res.position;
-      const l = Math.min(pos.topLeft.x, pos.topRight.x, pos.bottomLeft.x, pos.bottomRight.x) + offsetX;
-      const t = Math.min(pos.topLeft.y, pos.topRight.y, pos.bottomLeft.y, pos.bottomRight.y) + offsetY;
-      const r = Math.max(pos.topLeft.x, pos.topRight.x, pos.bottomLeft.x, pos.bottomRight.x) + offsetX;
-      const b = Math.max(pos.topLeft.y, pos.topRight.y, pos.bottomLeft.y, pos.bottomRight.y) + offsetY;
+      const rx1 = (pos.topLeft.x + offsetX) * scaleX;
+      const ry1 = (pos.topLeft.y + offsetY) * scaleY;
+      const rx2 = (pos.topRight.x + offsetX) * scaleX;
+      const ry2 = (pos.topRight.y + offsetY) * scaleY;
+      const rx3 = (pos.bottomRight.x + offsetX) * scaleX;
+      const ry3 = (pos.bottomRight.y + offsetY) * scaleY;
+      const rx4 = (pos.bottomLeft.x + offsetX) * scaleX;
+      const ry4 = (pos.bottomLeft.y + offsetY) * scaleY;
+
+      const l = Math.min(rx1, rx2, rx3, rx4);
+      const t = Math.min(ry1, ry2, ry3, ry4);
+      const r = Math.max(rx1, rx2, rx3, rx4);
+      const b = Math.max(ry1, ry2, ry3, ry4);
 
       return {
         rawValue: res.text,
         format: (res.format || "ean_13").toLowerCase(),
         boundingBox: new DOMRectReadOnly(l, t, Math.max(0, r - l), Math.max(0, b - t)),
         cornerPoints: [
-          { x: pos.topLeft.x + offsetX, y: pos.topLeft.y + offsetY },
-          { x: pos.topRight.x + offsetX, y: pos.topRight.y + offsetY },
-          { x: pos.bottomRight.x + offsetX, y: pos.bottomRight.y + offsetY },
-          { x: pos.bottomLeft.x + offsetX, y: pos.bottomLeft.y + offsetY },
+          { x: rx1, y: ry1 },
+          { x: rx2, y: ry2 },
+          { x: rx3, y: ry3 },
+          { x: rx4, y: ry4 },
         ],
       };
     });

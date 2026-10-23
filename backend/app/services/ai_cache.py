@@ -43,9 +43,9 @@ class DailyQuotaTracker:
 
 
 class ClientRateLimiter:
-    """Token-bucket per-client limiter (default: 5 calls / 10 minutes = 600s)."""
+    """Token-bucket per-client limiter (generous: 60 calls / 60 seconds)."""
 
-    def __init__(self, max_tokens: int = 5, fill_seconds: int = 600):
+    def __init__(self, max_tokens: int = 60, fill_seconds: int = 60):
         self.max_tokens = max_tokens
         self.fill_rate = max_tokens / fill_seconds
         self.buckets: dict[str, tuple[float, float]] = {}  # ip -> (tokens, last_time)
@@ -61,7 +61,7 @@ class ClientRateLimiter:
         if tokens < 1.0:
             raise AppError(
                 code="RATE_LIMITED",
-                message="AI explanation rate limit reached (5 requests per 10 minutes). Please wait before requesting another explanation.",
+                message="AI request limit reached. Please wait a few moments before requesting another response.",
                 status_code=429,
             )
 
@@ -107,5 +107,6 @@ class ExplanationCache:
 
 # Global singletons
 daily_quota = DailyQuotaTracker(daily_limit=settings.GEMINI_MAX_CALLS_PER_DAY)
-client_limiter = ClientRateLimiter(max_tokens=settings.EXPLAIN_RATE_LIMIT, fill_seconds=600)
+client_limiter = ClientRateLimiter(max_tokens=settings.EXPLAIN_RATE_LIMIT, fill_seconds=60)
+chat_limiter = ClientRateLimiter(max_tokens=60, fill_seconds=60)
 explanation_cache = ExplanationCache()
