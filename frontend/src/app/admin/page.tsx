@@ -95,6 +95,9 @@ interface AdminStats {
   super_admin: string;
   system_status: string;
   recent_logs: any[];
+  storage_engine?: string;
+  engine_type?: string;
+  is_postgres?: boolean;
 }
 
 interface ActivityLog {
@@ -720,14 +723,19 @@ export default function AdminPage() {
               <div className="p-5 rounded-2xl bg-[#141e19] border border-[#23352c] relative overflow-hidden group hover:border-emerald-500/40 transition-all">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-stone-400 uppercase tracking-wider">Storage Engine</span>
-                  <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400">
+                  <div className={`p-2 rounded-xl ${stats?.is_postgres ? 'bg-emerald-500/10 text-emerald-400' : 'bg-blue-500/10 text-blue-400'}`}>
                     <Database className="w-4 h-4" />
                   </div>
                 </div>
                 <div className="mt-3 text-2xl font-black text-white">
-                  {stats?.db_size_bytes ? `${(stats.db_size_bytes / 1024).toFixed(1)} KB` : "WAL Active"}
+                  {stats?.is_postgres ? "Cloud PostgreSQL" : (stats?.db_size_bytes ? `${(stats.db_size_bytes / 1024).toFixed(1)} KB` : "WAL Active")}
                 </div>
-                <div className="mt-1 text-[11px] text-emerald-400 font-mono">SQLite WAL Mode (Persistent)</div>
+                <div className="mt-1 text-[11px] font-mono flex items-center gap-1.5">
+                  <span className={`w-2 h-2 rounded-full ${stats?.is_postgres ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
+                  <span className={stats?.is_postgres ? 'text-emerald-400' : 'text-amber-400'}>
+                    {stats?.is_postgres ? "Zero-Loss Cloud Engine" : "SQLite WAL (Auto-Recovery)"}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -1302,16 +1310,51 @@ export default function AdminPage() {
                 </div>
               </div>
 
+              {/* Cloud PostgreSQL vs SQLite Status Banner */}
+              {!stats?.is_postgres && (
+                <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <Database className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="text-sm font-bold text-amber-300">Production Persistence Advisory (Render Free Tier)</h4>
+                      <p className="text-xs text-stone-300 mt-0.5 leading-relaxed">
+                        Render free web containers sleep after 15 min of inactivity and reset disk files. We have configured <span className="font-mono text-amber-200">render.yaml</span> with a free PostgreSQL database. When connected, all signed-up user accounts, credentials, and scans remain 100% permanent forever with zero data loss.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="shrink-0 px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 text-xs font-mono font-bold">
+                    DATABASE_URL ready
+                  </div>
+                </div>
+              )}
+
+              {stats?.is_postgres && (
+                <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
+                    <div>
+                      <h4 className="text-sm font-bold text-emerald-300">Cloud PostgreSQL Active (100% Permanent Zero-Data-Loss)</h4>
+                      <p className="text-xs text-stone-300 mt-0.5">
+                        All user accounts, credentials, sessions, and activity logs are persisted permanently in external cloud storage and will never be deleted on container sleep or deployment.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="shrink-0 px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 text-xs font-mono font-bold">
+                    CONNECTED
+                  </div>
+                </div>
+              )}
+
               {/* Status Indicator Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="p-4 rounded-2xl bg-black/40 border border-stone-800 space-y-1">
                   <span className="text-[10px] uppercase tracking-wider font-bold text-stone-400">Database Engine</span>
                   <div className="text-white font-bold text-sm flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    <span>SQLite 3 (WAL Mode)</span>
+                    <span className={`w-2 h-2 rounded-full ${stats?.is_postgres ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
+                    <span>{stats?.is_postgres ? "Cloud PostgreSQL" : "SQLite 3 (WAL Mode)"}</span>
                   </div>
                   <p className="text-[11px] text-stone-400 font-mono">
-                    {diagnostics?.db_size_bytes ? `${(diagnostics.db_size_bytes / 1024).toFixed(1)} KB` : `${((stats?.db_size_bytes || 0) / 1024).toFixed(1)} KB`}
+                    {stats?.is_postgres ? "Persistent Cloud Cluster" : (diagnostics?.db_size_bytes ? `${(diagnostics.db_size_bytes / 1024).toFixed(1)} KB` : `${((stats?.db_size_bytes || 0) / 1024).toFixed(1)} KB`)}
                   </p>
                 </div>
 
@@ -1328,9 +1371,9 @@ export default function AdminPage() {
                   <span className="text-[10px] uppercase tracking-wider font-bold text-stone-400">Disk Mount Status</span>
                   <div className="text-stone-200 font-bold text-sm flex items-center gap-1.5">
                     <Database className="w-4 h-4 text-blue-400" />
-                    <span>{diagnostics?.is_persistent_mount ? "Persistent Disk Mounted" : "Git Baseline + Ephemeral WAL"}</span>
+                    <span>{stats?.is_postgres ? "Cloud Host (Render / Neon)" : (diagnostics?.is_persistent_mount ? "Persistent Disk Mounted" : "Git Baseline + Ephemeral WAL")}</span>
                   </div>
-                  <p className="text-[11px] text-stone-400">Automatic recovery on cold starts</p>
+                  <p className="text-[11px] text-stone-400">{stats?.is_postgres ? "No container wipe effect" : "Automatic recovery on cold starts"}</p>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-black/40 border border-stone-800 space-y-1">
@@ -1346,9 +1389,9 @@ export default function AdminPage() {
               {/* Technical Details */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
                 <div className="p-4 rounded-2xl bg-black/40 border border-stone-800 space-y-2">
-                  <span className="text-[11px] font-bold text-stone-400 uppercase tracking-wider block">Database File Location</span>
-                  <div className="font-mono text-xs text-emerald-300 break-all">{diagnostics?.db_path || stats?.db_path || "backend/data/pinfo.db"}</div>
-                  <p className="text-[11px] text-stone-400">Configured to write in persistent Render data directory or local fallback.</p>
+                  <span className="text-[11px] font-bold text-stone-400 uppercase tracking-wider block">Database Connection URI / Path</span>
+                  <div className="font-mono text-xs text-emerald-300 break-all">{stats?.db_path || diagnostics?.db_path || "backend/data/pinfo.db"}</div>
+                  <p className="text-[11px] text-stone-400">{stats?.is_postgres ? "Connected to persistent Cloud PostgreSQL cluster." : "Configured to write in persistent Render data directory or local fallback."}</p>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-black/40 border border-stone-800 space-y-2">

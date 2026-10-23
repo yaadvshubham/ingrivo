@@ -1,29 +1,30 @@
 {
   "version": 1,
-  "exported_at": "2026-10-23T21:03:35.570502+00:00",
+  "storage_engine": "SQLite",
+  "exported_at": "2026-10-23T21:41:07.356810+00:00",
   "users": [
     {
-      "id": "usr_admin_01",
+      "id": "usr_23d5ba3795d346",
       "google_sub": null,
-      "email": "yaadvshubham01@gmail.com",
+      "email": "testuser@gmail.com",
       "phone": null,
       "email_verified": 1,
-      "name": "Shubham Yadav (Super Admin)",
-      "picture": "https://example.com/photo.jpg",
-      "hashed_password": "$2b$12$/rd9icu8i94r.Ag8w2SWluTh.NEVU8olkX316znbx6Q8ruscie8XC",
-      "plain_password": "@jaishankar2931",
-      "role": "admin",
+      "name": "Test User",
+      "picture": "https://lh3.googleusercontent.com/test-photo",
+      "hashed_password": null,
+      "plain_password": null,
+      "role": "user",
       "status": "active",
-      "dietary_preferences": "[\"clean_label\", \"high_protein\"]",
-      "allergens": "[]",
-      "health_goals": "[\"Weight Management\", \"Avoid Ultra-Processed\"]",
-      "scans_count": 48,
-      "last_login": "2026-10-23T20:03:25.599577+00:00",
-      "created_at": "2026-10-23T14:02:40.975079+00:00",
-      "updated_at": "2026-10-23T21:03:35.286883+00:00",
-      "last_ip": null,
-      "last_device": null,
-      "registration_method": "email",
+      "dietary_preferences": null,
+      "allergens": null,
+      "health_goals": null,
+      "scans_count": 0,
+      "last_login": "2026-10-23T21:40:13.803116+00:00",
+      "created_at": "2026-10-23T21:40:13.803116+00:00",
+      "updated_at": "2026-10-23T21:40:13.803116+00:00",
+      "last_ip": "127.0.0.1",
+      "last_device": "Web Browser",
+      "registration_method": "google",
       "session_count": 1
     },
     {
@@ -49,10 +50,178 @@
       "last_device": null,
       "registration_method": "email",
       "session_count": 1
+    },
+    {
+      "id": "usr_admin_01",
+      "google_sub": null,
+      "email": "yaadvshubham01@gmail.com",
+      "phone": null,
+      "email_verified": 1,
+      "name": "Shubham Yadav (Super Admin)",
+      "picture": "https://example.com/photo.jpg",
+      "hashed_password": "$2b$12$2fltc.CSYy.UPqSk0n1TheZX8QPYBk5sOBajSstNYEbmdxzDVp2Zy",
+      "plain_password": "@jaishankar2931",
+      "role": "admin",
+      "status": "active",
+      "dietary_preferences": "[\"clean_label\", \"high_protein\"]",
+      "allergens": "[]",
+      "health_goals": "[\"Weight Management\", \"Avoid Ultra-Processed\"]",
+      "scans_count": 48,
+      "last_login": "2026-10-23T21:41:07.094155+00:00",
+      "created_at": "2026-10-23T14:02:40.975079+00:00",
+      "updated_at": "2026-10-23T21:41:07.094155+00:00",
+      "last_ip": "testclient",
+      "last_device": "Web Browser",
+      "registration_method": "email",
+      "session_count": 11
     }
   ],
   "scans": [],
   "logs": [
+    {
+      "id": 160,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_DELETE",
+      "details": "Deleted user ID usr_e858e290327d40",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T21:41:06.834048+00:00",
+      "device_info": null
+    },
+    {
+      "id": 159,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_UPDATE",
+      "details": "Updated user ID usr_e858e290327d40: ['name', 'status']",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T21:41:06.800888+00:00",
+      "device_info": null
+    },
+    {
+      "id": 158,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_CREATE",
+      "details": "Created user test.user.6c327a@example.com with role=user",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T21:41:06.771666+00:00",
+      "device_info": null
+    },
+    {
+      "id": 156,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Super Admin Login (Web Browser)",
+      "ip_address": "testclient",
+      "timestamp": "2026-10-23T21:41:06.528328+00:00",
+      "device_info": null
+    },
+    {
+      "id": 155,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Super Admin Login (Web Browser)",
+      "ip_address": "testclient",
+      "timestamp": "2026-10-23T21:41:06.008564+00:00",
+      "device_info": null
+    },
+    {
+      "id": 152,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "GOOGLE_LOGIN",
+      "details": "Google OAuth Sign-in (Web Browser)",
+      "ip_address": "testclient",
+      "timestamp": "2026-10-23T21:41:04.421061+00:00",
+      "device_info": null
+    },
+    {
+      "id": 151,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Super Admin Login (Web Browser)",
+      "ip_address": "testclient",
+      "timestamp": "2026-10-23T21:41:04.120045+00:00",
+      "device_info": null
+    },
+    {
+      "id": 150,
+      "user_email": "testuser@gmail.com",
+      "action": "GOOGLE_LOGIN",
+      "details": "Google OAuth Sign-in (Web Browser)",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T21:40:13.851750+00:00",
+      "device_info": null
+    },
+    {
+      "id": 149,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Super Admin Login (Web Browser)",
+      "ip_address": "testclient",
+      "timestamp": "2026-10-23T21:40:13.689679+00:00",
+      "device_info": null
+    },
+    {
+      "id": 148,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_DELETE",
+      "details": "Deleted user ID usr_e1b7caa4a9b84d",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T21:40:13.151488+00:00",
+      "device_info": null
+    },
+    {
+      "id": 147,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_UPDATE",
+      "details": "Updated user ID usr_e1b7caa4a9b84d: ['name', 'status']",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T21:40:13.127847+00:00",
+      "device_info": null
+    },
+    {
+      "id": 146,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_CREATE",
+      "details": "Created user test.user.6ce3b8@example.com with role=user",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T21:40:13.103996+00:00",
+      "device_info": null
+    },
+    {
+      "id": 144,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Super Admin Login (Web Browser)",
+      "ip_address": "testclient",
+      "timestamp": "2026-10-23T21:40:12.862605+00:00",
+      "device_info": null
+    },
+    {
+      "id": 143,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Super Admin Login (Web Browser)",
+      "ip_address": "testclient",
+      "timestamp": "2026-10-23T21:40:12.370267+00:00",
+      "device_info": null
+    },
+    {
+      "id": 140,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "GOOGLE_LOGIN",
+      "details": "Google OAuth Sign-in (Web Browser)",
+      "ip_address": "testclient",
+      "timestamp": "2026-10-23T21:40:10.776135+00:00",
+      "device_info": null
+    },
+    {
+      "id": 139,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Super Admin Login (Web Browser)",
+      "ip_address": "testclient",
+      "timestamp": "2026-10-23T21:40:10.461003+00:00",
+      "device_info": null
+    },
     {
       "id": 137,
       "user_email": "yaadvshubham01@gmail.com",

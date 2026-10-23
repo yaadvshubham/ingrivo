@@ -13,3 +13,13 @@ services:
         value: production
       - key: ALLOWED_ORIGINS
         value: https://trypinfo.vercel.app,https://pinfo.vercel.app,https://ingrivo.vercel.app,http://localhost:3000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: pinfo-db
+          property: connectionString
+
+databases:
+  - name: pinfo-db
+    plan: free
+    databaseName: pinfo
+    user: pinfo

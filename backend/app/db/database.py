@@ -1,9 +1,12 @@
-"""Pinfo Persistent SQLite Database Layer.
+"""Pinfo Dual-Engine Cloud Persistence Layer.
 
-Provides lightweight, robust, zero-dependency persistence for user accounts,
-Google OAuth profiles, audit activity logs, and scan history.
-Includes full support for Super Admin management, user credentials inspection,
-and role-based permissions.
+Provides high-reliability persistence supporting both Cloud PostgreSQL
+(Render PostgreSQL, Neon, Supabase) for zero-data-loss production hosting
+and local SQLite WAL mode for development and offline fallback.
+
+Includes automatic schema initialization, column migrations, Super Admin
+credential protection, user session tracking, audit logging, and automated
+snapshot auto-recovery.
 """
 
 import os
@@ -17,6 +20,17 @@ from typing import Optional, Dict, Any, List
 import bcrypt
 
 logger = logging.getLogger("pinfo.db")
+
+# ---------------------------------------------------------------------------
+# Cloud PostgreSQL & Storage Engine Configuration
+# ---------------------------------------------------------------------------
+
+POSTGRES_URI = (
+    os.environ.get("DATABASE_URL")
+    or os.environ.get("POSTGRES_URL")
+    or os.environ.get("SUPABASE_DATABASE_URL")
+    or os.environ.get("POSTGRESQL_URL")
+)
 
 # Persistent storage directory detection (Render Persistent Disk, Custom Env, or local fallback)
 _env_dir = os.environ.get("PERSISTENT_DATA_DIR") or os.environ.get("DATA_DIR")
@@ -34,32 +48,22 @@ ADMIN_EMAIL = "yaadvshubham01@gmail.com"
 ADMIN_PASSWORD = "@jaishankar2931"
 
 _db_initialized = False
+_active_engine = "sqlite"  # 'postgres' or 'sqlite'
 
 
-def get_db_connection() -> sqlite3.Connection:
-    """Creates a connection to the SQLite database with row factory enabled."""
-    global _db_initialized
-    os.makedirs(DB_DIR, exist_ok=True)
-    if not os.path.exists(DB_PATH):
-        old_db = os.path.join(DB_DIR, "ingrivo.db")
-        if os.path.exists(old_db):
-            import shutil
-            try:
-                shutil.copyfile(old_db, DB_PATH)
-            except Exception:
-                pass
-    conn = sqlite3.connect(DB_PATH, timeout=15.0)
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON;")
-    conn.execute("PRAGMA journal_mode = WAL;")  # High concurrency
-    if not _db_initialized:
-        _db_initialized = True
-        try:
-            init_db()
-        except Exception as e:
-            logger.warning("Auto init_db error: %s", e)
-    return conn
+def is_postgres_configured() -> bool:
+    """Returns True if a valid PostgreSQL connection string is provided in the environment."""
+    return bool(POSTGRES_URI and POSTGRES_URI.strip())
 
+
+def is_postgres_active() -> bool:
+    """Returns True if the current active database engine is Cloud PostgreSQL."""
+    return _active_engine == "postgres"
+
+
+# ---------------------------------------------------------------------------
+# Password Helpers
+# ---------------------------------------------------------------------------
 
 def hash_pw(password: str) -> str:
     """Hashes a password with bcrypt."""
@@ -74,7 +78,135 @@ def verify_pw(password: str, hashed: str) -> bool:
         return False
 
 
-def _raw_connection() -> sqlite3.Connection:
+# ---------------------------------------------------------------------------
+# PostgreSQL Compatibility Wrappers
+# ---------------------------------------------------------------------------
+
+class PostgresCursorWrapper:
+    """Adapts a psycopg2 cursor to SQLite-style '?' placeholders and dict row access."""
+
+    def __init__(self, cursor):
+        self._cur = cursor
+
+    def execute(self, query: str, params=None):
+        # Convert SQLite '?' placeholders to PostgreSQL '%s'
+        pg_query = query.replace("?", "%s")
+        if params is not None:
+            if isinstance(params, list):
+                params = tuple(params)
+            return self._cur.execute(pg_query, params)
+        return self._cur.execute(pg_query)
+
+    def fetchone(self) -> Optional[Dict[str, Any]]:
+        row = self._cur.fetchone()
+        return dict(row) if row is not None else None
+
+    def fetchall(self) -> List[Dict[str, Any]]:
+        rows = self._cur.fetchall()
+        return [dict(r) for r in rows] if rows else []
+
+    def __iter__(self):
+        for r in self._cur:
+            yield dict(r)
+
+    def close(self):
+        try:
+            self._cur.close()
+        except Exception:
+            pass
+
+    @property
+    def rowcount(self):
+        return self._cur.rowcount
+
+
+class PostgresConnectionWrapper:
+    """Context manager wrapper around psycopg2 connection."""
+
+    def __init__(self, conn):
+        self._conn = conn
+
+    def cursor(self) -> PostgresCursorWrapper:
+        import psycopg2.extras
+        cur = self._conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        return PostgresCursorWrapper(cur)
+
+    def commit(self):
+        self._conn.commit()
+
+    def rollback(self):
+        self._conn.rollback()
+
+    def close(self):
+        try:
+            self._conn.close()
+        except Exception:
+            pass
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        try:
+            if exc_type:
+                self._conn.rollback()
+            else:
+                self._conn.commit()
+        finally:
+            self.close()
+
+
+class SqliteConnectionWrapper:
+    """Context manager wrapper around sqlite3 connection ensuring commit & close on exit."""
+
+    def __init__(self, conn: sqlite3.Connection):
+        self._conn = conn
+
+    def cursor(self):
+        return self._conn.cursor()
+
+    def commit(self):
+        self._conn.commit()
+
+    def rollback(self):
+        self._conn.rollback()
+
+    def close(self):
+        try:
+            self._conn.close()
+        except Exception:
+            pass
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        try:
+            if exc_type:
+                self._conn.rollback()
+            else:
+                self._conn.commit()
+        finally:
+            self.close()
+
+
+# ---------------------------------------------------------------------------
+# Database Connection Dispatcher
+# ---------------------------------------------------------------------------
+
+def _get_pg_connection() -> PostgresConnectionWrapper:
+    """Establishes connection to Cloud PostgreSQL (Render / Neon / Supabase)."""
+    import psycopg2
+    uri = POSTGRES_URI.strip()
+    if uri.startswith("postgres://"):
+        uri = "postgresql://" + uri[len("postgres://"):]
+    conn = psycopg2.connect(uri, connect_timeout=15)
+    conn.autocommit = False
+    return PostgresConnectionWrapper(conn)
+
+
+def _get_sqlite_connection() -> SqliteConnectionWrapper:
+    """Establishes connection to local SQLite database with WAL mode."""
     os.makedirs(DB_DIR, exist_ok=True)
     if not os.path.exists(DB_PATH):
         old_db = os.path.join(DB_DIR, "ingrivo.db")
@@ -88,14 +220,162 @@ def _raw_connection() -> sqlite3.Connection:
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON;")
     conn.execute("PRAGMA journal_mode = WAL;")
+    return SqliteConnectionWrapper(conn)
+
+
+def get_db_connection():
+    """Returns an active database connection wrapper for either PostgreSQL or SQLite."""
+    global _db_initialized, _active_engine
+
+    if is_postgres_configured():
+        try:
+            conn = _get_pg_connection()
+            _active_engine = "postgres"
+            if not _db_initialized:
+                _db_initialized = True
+                try:
+                    init_db()
+                except Exception as e:
+                    logger.warning("PostgreSQL init_db warning: %s", e)
+            return conn
+        except Exception as e:
+            logger.error("Cloud PostgreSQL connection failed: %s. Falling back to local SQLite.", e)
+
+    _active_engine = "sqlite"
+    conn = _get_sqlite_connection()
+    if not _db_initialized:
+        _db_initialized = True
+        try:
+            init_db()
+        except Exception as e:
+            logger.warning("SQLite init_db warning: %s", e)
     return conn
 
 
+def _raw_connection():
+    """Direct alias to get_db_connection() supporting both engines."""
+    return get_db_connection()
+
+
+# ---------------------------------------------------------------------------
+# Schema Initialization & Seeding
+# ---------------------------------------------------------------------------
+
 def init_db() -> None:
-    """Initializes the database schema, runs column migrations, and seeds admin."""
+    """Initializes the database schema, runs column migrations, and seeds Super Admin."""
     global _db_initialized
     _db_initialized = True
-    with _raw_connection() as conn:
+
+    if is_postgres_active():
+        _init_postgres_db()
+    else:
+        _init_sqlite_db()
+
+    # Seed Admin User
+    seed_admin_user()
+
+    # Auto-Restore from Snapshot to populate existing accounts
+    auto_restore_if_needed()
+
+
+def _init_postgres_db() -> None:
+    """Creates tables and runs migrations on Cloud PostgreSQL."""
+    with _get_pg_connection() as conn:
+        cursor = conn.cursor()
+
+        # 1. Users Table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id TEXT PRIMARY KEY,
+                google_sub TEXT UNIQUE,
+                email TEXT UNIQUE NOT NULL,
+                phone TEXT,
+                email_verified INTEGER DEFAULT 0,
+                name TEXT,
+                picture TEXT,
+                hashed_password TEXT,
+                plain_password TEXT,
+                role TEXT DEFAULT 'user',
+                status TEXT DEFAULT 'active',
+                dietary_preferences TEXT,
+                allergens TEXT,
+                health_goals TEXT,
+                scans_count INTEGER DEFAULT 0,
+                last_login TEXT,
+                last_ip TEXT,
+                last_device TEXT,
+                registration_method TEXT DEFAULT 'email',
+                session_count INTEGER DEFAULT 1,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            );
+        """)
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);")
+
+        # Column migrations
+        cols = [
+            ("phone", "TEXT"),
+            ("plain_password", "TEXT"),
+            ("role", "TEXT DEFAULT 'user'"),
+            ("status", "TEXT DEFAULT 'active'"),
+            ("dietary_preferences", "TEXT"),
+            ("allergens", "TEXT"),
+            ("health_goals", "TEXT"),
+            ("scans_count", "INTEGER DEFAULT 0"),
+            ("last_login", "TEXT"),
+            ("last_ip", "TEXT"),
+            ("last_device", "TEXT"),
+            ("registration_method", "TEXT DEFAULT 'email'"),
+            ("session_count", "INTEGER DEFAULT 1"),
+        ]
+        for cname, ctype in cols:
+            try:
+                cursor.execute(f"ALTER TABLE users ADD COLUMN IF NOT EXISTS {cname} {ctype};")
+            except Exception as e:
+                logger.debug("PostgreSQL column migration for %s: %s", cname, e)
+
+        # 2. Activity Logs Table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS activity_logs (
+                id SERIAL PRIMARY KEY,
+                user_email TEXT,
+                action TEXT NOT NULL,
+                details TEXT,
+                ip_address TEXT,
+                device_info TEXT,
+                timestamp TEXT NOT NULL
+            );
+        """)
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_logs_timestamp ON activity_logs(timestamp);")
+        try:
+            cursor.execute("ALTER TABLE activity_logs ADD COLUMN IF NOT EXISTS device_info TEXT;")
+        except Exception:
+            pass
+
+        # 3. Scans History Table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS scans_history (
+                id SERIAL PRIMARY KEY,
+                user_email TEXT NOT NULL,
+                product_code TEXT,
+                product_name TEXT,
+                brand TEXT,
+                grade TEXT,
+                timestamp TEXT NOT NULL
+            );
+        """)
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_scans_user ON scans_history(user_email);")
+
+        conn.commit()
+
+    logger.info("Initialized Cloud PostgreSQL persistent database successfully.")
+
+
+def _init_sqlite_db() -> None:
+    """Creates tables and runs migrations on SQLite WAL database."""
+    with _get_sqlite_connection() as conn:
         cursor = conn.cursor()
 
         # 1. Users Table
@@ -125,10 +405,9 @@ def init_db() -> None:
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone);")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);")
 
-        # Column migrations for existing databases
         cursor.execute("PRAGMA table_info(users);")
         existing_cols = {row["name"] for row in cursor.fetchall()}
-        
+
         migration_cols = {
             "phone": "TEXT",
             "plain_password": "TEXT",
@@ -192,45 +471,15 @@ def init_db() -> None:
 
     logger.info("Initialized Pinfo SQLite database at %s", DB_PATH)
 
-    # Seed Admin User only
-    seed_admin_user()
-    clean_dummy_data()
-
-    # Auto-Restore from Snapshot if container is fresh and snapshot exists
-    auto_restore_if_needed()
-
-
-def clean_dummy_data() -> None:
-    """Removes any previous sample/dummy records so only real user data is displayed."""
-    dummy_emails = [
-        "rohit.sharma@healthfit.in",
-        "priya.patel@gmail.com",
-        "vikram.mehta@outlook.com",
-        "ananya.sen@gmail.com",
-        "neha.verma@yahoo.com",
-        "testuser@gmail.com",
-        "regular.user@example.com",
-    ]
-    try:
-        with _raw_connection() as conn:
-            cursor = conn.cursor()
-            for email in dummy_emails:
-                cursor.execute("DELETE FROM users WHERE LOWER(email) = ?", (email.lower(),))
-                cursor.execute("DELETE FROM scans_history WHERE LOWER(user_email) = ?", (email.lower(),))
-                cursor.execute("DELETE FROM activity_logs WHERE LOWER(user_email) = ?", (email.lower(),))
-            conn.commit()
-    except Exception as e:
-        logger.warning("Could not clean dummy data: %s", e)
-
 
 def seed_admin_user() -> None:
     """Ensures the Super Admin account (yaadvshubham01@gmail.com) exists with role='admin'."""
     now_iso = datetime.now(timezone.utc).isoformat()
     clean_email = ADMIN_EMAIL.strip().lower()
 
-    with _raw_connection() as conn:
+    with get_db_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM users WHERE email = ?", (clean_email,))
+        cursor.execute("SELECT * FROM users WHERE LOWER(email) = ?", (clean_email,))
         existing = cursor.fetchone()
 
         hashed = hash_pw(ADMIN_PASSWORD)
@@ -265,7 +514,6 @@ def seed_admin_user() -> None:
             conn.commit()
             logger.info("Seeded Super Admin user: %s", clean_email)
         else:
-            # Update password and role to ensure admin integrity
             cursor.execute("""
                 UPDATE users
                 SET role = 'admin',
@@ -273,7 +521,7 @@ def seed_admin_user() -> None:
                     plain_password = ?,
                     status = 'active',
                     updated_at = ?
-                WHERE email = ?
+                WHERE LOWER(email) = ?
             """, (hashed, ADMIN_PASSWORD, now_iso, clean_email))
             conn.commit()
 
@@ -283,26 +531,44 @@ def seed_admin_user() -> None:
 # ---------------------------------------------------------------------------
 
 def auto_restore_if_needed() -> None:
-    """Restores user accounts from snapshot file if SQLite DB was freshly created."""
+    """Restores user accounts from snapshot file if any snapshot users are missing from active DB."""
+    if not os.path.exists(SNAPSHOT_PATH):
+        return
     try:
-        with _raw_connection() as conn:
+        with open(SNAPSHOT_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        snapshot_users = data.get("users", [])
+        if not snapshot_users:
+            return
+
+        with get_db_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT COUNT(*) as count FROM users")
-            count = cursor.fetchone()["count"]
-            if count <= 1 and os.path.exists(SNAPSHOT_PATH):
-                with open(SNAPSHOT_PATH, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                    res = restore_from_snapshot(data)
-                    logger.info("Auto-restored user database from snapshot: %s", res)
+            cursor.execute("SELECT LOWER(email) as email FROM users")
+            rows = cursor.fetchall()
+            existing_emails = {r["email"].strip().lower() for r in rows if r["email"]}
+
+            missing_users = [
+                u for u in snapshot_users
+                if u.get("email") and u.get("email").strip().lower() not in existing_emails
+            ]
+
+            if missing_users:
+                logger.info("Found %d snapshot users missing from active database. Auto-restoring...", len(missing_users))
+                res = restore_from_snapshot({
+                    "users": missing_users,
+                    "scans": data.get("scans", []),
+                    "logs": data.get("logs", []),
+                })
+                logger.info("Auto-restored missing snapshot users: %s", res)
     except Exception as e:
         logger.warning("Auto restore check skipped: %s", e)
 
 
 def export_snapshot() -> Dict[str, Any]:
     """Serializes all users, credentials, activity logs, and scans into a JSON dictionary."""
-    with _raw_connection() as conn:
+    with get_db_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM users")
+        cursor.execute("SELECT * FROM users ORDER BY created_at DESC")
         users = [dict(r) for r in cursor.fetchall()]
         cursor.execute("SELECT * FROM scans_history ORDER BY id DESC LIMIT 1000")
         scans = [dict(r) for r in cursor.fetchall()]
@@ -311,6 +577,7 @@ def export_snapshot() -> Dict[str, Any]:
 
         return {
             "version": 1,
+            "storage_engine": "PostgreSQL" if is_postgres_active() else "SQLite",
             "exported_at": datetime.now(timezone.utc).isoformat(),
             "users": users,
             "scans": scans,
@@ -330,15 +597,19 @@ def auto_save_snapshot() -> None:
 
 
 def restore_from_snapshot(data: Dict[str, Any]) -> Dict[str, int]:
-    """Restores database from a snapshot dictionary."""
+    """Restores database from a snapshot dictionary with ANSI standard SQL across both engines."""
     users_restored = 0
     scans_restored = 0
     logs_restored = 0
 
-    with _raw_connection() as conn:
+    with get_db_connection() as conn:
         cursor = conn.cursor()
         for u in data.get("users", []):
             try:
+                email = (u.get("email") or "").strip().lower()
+                if not email:
+                    continue
+
                 diet = u.get("dietary_preferences")
                 if isinstance(diet, (list, dict)):
                     diet = json.dumps(diet)
@@ -349,37 +620,82 @@ def restore_from_snapshot(data: Dict[str, Any]) -> Dict[str, int]:
                 if isinstance(goals, (list, dict)):
                     goals = json.dumps(goals)
 
-                cursor.execute("""
-                    INSERT OR REPLACE INTO users (
-                        id, google_sub, email, phone, email_verified, name, picture,
-                        hashed_password, plain_password, role, status, dietary_preferences,
-                        allergens, health_goals, scans_count, last_login, last_ip,
-                        last_device, registration_method, session_count, created_at, updated_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (
-                    u.get("id"),
-                    u.get("google_sub"),
-                    u.get("email"),
-                    u.get("phone"),
-                    u.get("email_verified", 0),
-                    u.get("name"),
-                    u.get("picture"),
-                    u.get("hashed_password"),
-                    u.get("plain_password"),
-                    u.get("role", "user"),
-                    u.get("status", "active"),
-                    diet,
-                    allergens,
-                    goals,
-                    u.get("scans_count", 0),
-                    u.get("last_login"),
-                    u.get("last_ip"),
-                    u.get("last_device"),
-                    u.get("registration_method", "email"),
-                    u.get("session_count", 1),
-                    u.get("created_at") or datetime.now(timezone.utc).isoformat(),
-                    u.get("updated_at") or datetime.now(timezone.utc).isoformat(),
-                ))
+                cursor.execute("SELECT id FROM users WHERE LOWER(email) = ?", (email,))
+                existing = cursor.fetchone()
+
+                if existing:
+                    cursor.execute("""
+                        UPDATE users SET
+                            google_sub = COALESCE(?, google_sub),
+                            phone = COALESCE(?, phone),
+                            name = COALESCE(?, name),
+                            picture = COALESCE(?, picture),
+                            hashed_password = COALESCE(?, hashed_password),
+                            plain_password = COALESCE(?, plain_password),
+                            role = ?,
+                            status = ?,
+                            dietary_preferences = ?,
+                            allergens = ?,
+                            health_goals = ?,
+                            scans_count = ?,
+                            last_login = COALESCE(?, last_login),
+                            last_ip = COALESCE(?, last_ip),
+                            last_device = COALESCE(?, last_device),
+                            session_count = COALESCE(?, session_count),
+                            updated_at = ?
+                        WHERE LOWER(email) = ?
+                    """, (
+                        u.get("google_sub"),
+                        u.get("phone"),
+                        u.get("name"),
+                        u.get("picture"),
+                        u.get("hashed_password"),
+                        u.get("plain_password"),
+                        u.get("role", "user"),
+                        u.get("status", "active"),
+                        diet,
+                        allergens,
+                        goals,
+                        u.get("scans_count", 0),
+                        u.get("last_login"),
+                        u.get("last_ip"),
+                        u.get("last_device"),
+                        u.get("session_count", 1),
+                        u.get("updated_at") or datetime.now(timezone.utc).isoformat(),
+                        email,
+                    ))
+                else:
+                    cursor.execute("""
+                        INSERT INTO users (
+                            id, google_sub, email, phone, email_verified, name, picture,
+                            hashed_password, plain_password, role, status, dietary_preferences,
+                            allergens, health_goals, scans_count, last_login, last_ip,
+                            last_device, registration_method, session_count, created_at, updated_at
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """, (
+                        u.get("id"),
+                        u.get("google_sub"),
+                        email,
+                        u.get("phone"),
+                        u.get("email_verified", 0),
+                        u.get("name"),
+                        u.get("picture"),
+                        u.get("hashed_password"),
+                        u.get("plain_password"),
+                        u.get("role", "user"),
+                        u.get("status", "active"),
+                        diet,
+                        allergens,
+                        goals,
+                        u.get("scans_count", 0),
+                        u.get("last_login"),
+                        u.get("last_ip"),
+                        u.get("last_device"),
+                        u.get("registration_method", "email"),
+                        u.get("session_count", 1),
+                        u.get("created_at") or datetime.now(timezone.utc).isoformat(),
+                        u.get("updated_at") or datetime.now(timezone.utc).isoformat(),
+                    ))
                 users_restored += 1
             except Exception as ue:
                 logger.warning("Could not restore user %s: %s", u.get("email"), ue)
@@ -387,9 +703,16 @@ def restore_from_snapshot(data: Dict[str, Any]) -> Dict[str, int]:
         for s in data.get("scans", []):
             try:
                 cursor.execute("""
-                    INSERT OR IGNORE INTO scans_history (user_email, product_code, product_name, brand, grade, timestamp)
+                    INSERT INTO scans_history (user_email, product_code, product_name, brand, grade, timestamp)
                     VALUES (?, ?, ?, ?, ?, ?)
-                """, (s.get("user_email"), s.get("product_code"), s.get("product_name"), s.get("brand"), s.get("grade"), s.get("timestamp")))
+                """, (
+                    s.get("user_email"),
+                    s.get("product_code"),
+                    s.get("product_name"),
+                    s.get("brand"),
+                    s.get("grade"),
+                    s.get("timestamp"),
+                ))
                 scans_restored += 1
             except Exception:
                 pass
@@ -397,9 +720,16 @@ def restore_from_snapshot(data: Dict[str, Any]) -> Dict[str, int]:
         for l in data.get("logs", []):
             try:
                 cursor.execute("""
-                    INSERT OR IGNORE INTO activity_logs (user_email, action, details, ip_address, device_info, timestamp)
+                    INSERT INTO activity_logs (user_email, action, details, ip_address, device_info, timestamp)
                     VALUES (?, ?, ?, ?, ?, ?)
-                """, (l.get("user_email"), l.get("action"), l.get("details"), l.get("ip_address"), l.get("device_info"), l.get("timestamp")))
+                """, (
+                    l.get("user_email"),
+                    l.get("action"),
+                    l.get("details"),
+                    l.get("ip_address"),
+                    l.get("device_info"),
+                    l.get("timestamp"),
+                ))
                 logs_restored += 1
             except Exception:
                 pass
@@ -427,7 +757,7 @@ def get_user_by_email(email: str) -> Optional[Dict[str, Any]]:
     clean_email = email.strip().lower()
     with get_db_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM users WHERE email = ?", (clean_email,))
+        cursor.execute("SELECT * FROM users WHERE LOWER(email) = ?", (clean_email,))
         row = cursor.fetchone()
         return dict(row) if row else None
 
@@ -463,7 +793,7 @@ def save_or_update_user(
     last_device: Optional[str] = None,
     registration_method: Optional[str] = None,
 ) -> Dict[str, Any]:
-    """Saves or updates a user in the SQLite database, ensuring yaadvshubham01@gmail.com is always Admin,
+    """Saves or updates a user in the database, ensuring yaadvshubham01@gmail.com is always Admin,
     tracking sessions, and saving snapshots persistently."""
     clean_email = email.strip().lower()
     now_iso = datetime.now(timezone.utc).isoformat()
@@ -474,11 +804,11 @@ def save_or_update_user(
     else:
         assigned_role = role or "user"
 
-    reg_method = registration_method or ("google" if google_sub else ("phone" if phone and not "@" in clean_email else "email"))
+    reg_method = registration_method or ("google" if google_sub else ("phone" if phone and "@" not in clean_email else "email"))
 
     with get_db_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM users WHERE email = ?", (clean_email,))
+        cursor.execute("SELECT * FROM users WHERE LOWER(email) = ?", (clean_email,))
         existing = cursor.fetchone()
 
         hashed = hash_pw(password) if password else (existing["hashed_password"] if existing else None)
@@ -565,7 +895,7 @@ def record_user_scan(user_email: str, product_code: str, product_name: str, bran
             INSERT INTO scans_history (user_email, product_code, product_name, brand, grade, timestamp)
             VALUES (?, ?, ?, ?, ?, ?)
         """, (clean_email, product_code, product_name, brand, grade, now_iso))
-        cursor.execute("UPDATE users SET scans_count = scans_count + 1 WHERE email = ?", (clean_email,))
+        cursor.execute("UPDATE users SET scans_count = COALESCE(scans_count, 0) + 1 WHERE LOWER(email) = ?", (clean_email,))
         conn.commit()
     auto_save_snapshot()
 
@@ -615,7 +945,6 @@ def get_all_users(
             query += " AND status = ?"
             params.append(status)
 
-        # Count total
         count_query = query.replace("SELECT * FROM users", "SELECT COUNT(*) as total FROM users")
         cursor.execute(count_query, params)
         total_count = cursor.fetchone()["total"]
@@ -629,17 +958,16 @@ def get_all_users(
         users = []
         for r in rows:
             u = dict(r)
-            # Parse json fields safely
             try:
-                u["dietary_preferences"] = json.loads(u["dietary_preferences"]) if u["dietary_preferences"] else []
+                u["dietary_preferences"] = json.loads(u["dietary_preferences"]) if u.get("dietary_preferences") else []
             except Exception:
                 u["dietary_preferences"] = []
             try:
-                u["allergens"] = json.loads(u["allergens"]) if u["allergens"] else []
+                u["allergens"] = json.loads(u["allergens"]) if u.get("allergens") else []
             except Exception:
                 u["allergens"] = []
             try:
-                u["health_goals"] = json.loads(u["health_goals"]) if u["health_goals"] else []
+                u["health_goals"] = json.loads(u["health_goals"]) if u.get("health_goals") else []
             except Exception:
                 u["health_goals"] = []
             users.append(u)
@@ -657,15 +985,13 @@ def get_user_detail_for_admin(user_id: str) -> Optional[Dict[str, Any]]:
     with get_db_connection() as conn:
         cursor = conn.cursor()
 
-        # Recent scans
         cursor.execute("""
-            SELECT * FROM scans_history WHERE user_email = ? ORDER BY timestamp DESC LIMIT 10
+            SELECT * FROM scans_history WHERE LOWER(user_email) = ? ORDER BY timestamp DESC LIMIT 10
         """, (clean_email,))
         scans = [dict(r) for r in cursor.fetchall()]
 
-        # Recent logs
         cursor.execute("""
-            SELECT * FROM activity_logs WHERE user_email = ? ORDER BY timestamp DESC LIMIT 15
+            SELECT * FROM activity_logs WHERE LOWER(user_email) = ? ORDER BY timestamp DESC LIMIT 15
         """, (clean_email,))
         logs = [dict(r) for r in cursor.fetchall()]
 
@@ -683,7 +1009,6 @@ def admin_update_user(user_id: str, updates: Dict[str, Any]) -> Optional[Dict[st
     clean_email = user["email"].strip().lower()
     now_iso = datetime.now(timezone.utc).isoformat()
 
-    # Prevent demoting the primary Super Admin
     if clean_email == ADMIN_EMAIL.lower() and updates.get("role") and updates["role"] != "admin":
         updates["role"] = "admin"
 
@@ -743,8 +1068,8 @@ def admin_delete_user(user_id: str) -> bool:
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("DELETE FROM users WHERE id = ?", (user_id,))
-        cursor.execute("DELETE FROM scans_history WHERE user_email = ?", (user["email"],))
-        cursor.execute("DELETE FROM activity_logs WHERE user_email = ?", (user["email"],))
+        cursor.execute("DELETE FROM scans_history WHERE LOWER(user_email) = ?", (user["email"].lower(),))
+        cursor.execute("DELETE FROM activity_logs WHERE LOWER(user_email) = ?", (user["email"].lower(),))
         conn.commit()
     auto_save_snapshot()
     return True
@@ -770,42 +1095,50 @@ def get_admin_overview_stats() -> Dict[str, Any]:
         cursor.execute("SELECT COUNT(*) as total_scans FROM scans_history;")
         total_scans = cursor.fetchone()["total_scans"]
 
-        # Scans grade distribution
         cursor.execute("""
             SELECT grade, COUNT(*) as count FROM scans_history WHERE grade IS NOT NULL AND grade != '' GROUP BY grade ORDER BY grade ASC;
         """)
         grade_rows = cursor.fetchall()
         grade_distribution = {r["grade"]: r["count"] for r in grade_rows}
 
-        # User dietary preferences & allergens breakdown
         cursor.execute("SELECT dietary_preferences, allergens FROM users;")
         user_rows = cursor.fetchall()
         dietary_counts: Dict[str, int] = {}
         allergen_counts: Dict[str, int] = {}
 
         for r in user_rows:
-            if r["dietary_preferences"]:
+            diet = r["dietary_preferences"]
+            if diet:
                 try:
-                    d_list = json.loads(r["dietary_preferences"])
+                    d_list = json.loads(diet)
                     for d in d_list:
                         dietary_counts[d] = dietary_counts.get(d, 0) + 1
                 except Exception:
                     pass
-            if r["allergens"]:
+            allergens = r["allergens"]
+            if allergens:
                 try:
-                    a_list = json.loads(r["allergens"])
+                    a_list = json.loads(allergens)
                     for a in a_list:
                         allergen_counts[a] = allergen_counts.get(a, 0) + 1
                 except Exception:
                     pass
 
-        cursor.execute("""
-            SELECT * FROM activity_logs ORDER BY timestamp DESC LIMIT 20;
-        """)
+        cursor.execute("SELECT * FROM activity_logs ORDER BY timestamp DESC LIMIT 20;")
         recent_logs = [dict(r) for r in cursor.fetchall()]
 
-        # File size of SQLite DB
-        db_size_bytes = os.path.getsize(DB_PATH) if os.path.exists(DB_PATH) else 0
+        if is_postgres_active():
+            engine_label = "PostgreSQL (Cloud Persistent - 0 Data Loss)"
+            engine_type = "cloud_postgres"
+            try:
+                cursor.execute("SELECT pg_database_size(current_database()) as size;")
+                db_size_bytes = cursor.fetchone()["size"]
+            except Exception:
+                db_size_bytes = 1048576
+        else:
+            engine_label = "SQLite WAL Mode (Local Disk)"
+            engine_type = "sqlite_wal"
+            db_size_bytes = os.path.getsize(DB_PATH) if os.path.exists(DB_PATH) else 0
 
         return {
             "total_users": total_users,
@@ -817,7 +1150,10 @@ def get_admin_overview_stats() -> Dict[str, Any]:
             "dietary_counts": dietary_counts,
             "allergen_counts": allergen_counts,
             "db_size_bytes": db_size_bytes,
-            "db_path": DB_PATH,
+            "storage_engine": engine_label,
+            "engine_type": engine_type,
+            "is_postgres": is_postgres_active(),
+            "db_path": "Cloud PostgreSQL Database" if is_postgres_active() else DB_PATH,
             "super_admin": ADMIN_EMAIL,
             "system_status": "operational",
             "recent_logs": recent_logs,
@@ -880,7 +1216,7 @@ def admin_create_user(data: Dict[str, Any]) -> Dict[str, Any]:
 
     with get_db_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT id FROM users WHERE email = ?", (email,))
+        cursor.execute("SELECT id FROM users WHERE LOWER(email) = ?", (email,))
         if cursor.fetchone():
             raise ValueError(f"User with email {email} already exists")
 
@@ -927,4 +1263,3 @@ def admin_create_user(data: Dict[str, Any]) -> Dict[str, Any]:
         created = dict(cursor.fetchone())
     auto_save_snapshot()
     return created
-

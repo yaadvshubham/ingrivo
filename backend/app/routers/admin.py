@@ -26,6 +26,8 @@ from app.db.database import (
     DB_PATH,
     DB_DIR,
     SNAPSHOT_PATH,
+    is_postgres_active,
+    is_postgres_configured,
 )
 
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
@@ -286,18 +288,22 @@ async def get_database_diagnostics(admin: dict = Depends(require_admin_user)):
     snapshot_size = os.path.getsize(SNAPSHOT_PATH) if snapshot_exists else 0
     snapshot_mtime = os.path.getmtime(SNAPSHOT_PATH) if snapshot_exists else None
 
+    postgres_active = is_postgres_active()
     return {
         "success": True,
         "diagnostics": {
-            "db_path": DB_PATH,
+            "storage_engine": "PostgreSQL (Cloud Persistent - Zero Data Loss)" if postgres_active else "SQLite WAL (Ephemeral Container Disk)",
+            "is_cloud_persistent": postgres_active,
+            "is_postgres_configured": is_postgres_configured(),
+            "db_path": "Cloud PostgreSQL (Render / Neon / Supabase)" if postgres_active else DB_PATH,
             "db_dir": DB_DIR,
             "db_size_bytes": db_size,
-            "journal_mode": "WAL",
+            "journal_mode": "CLOUD_CONNECTION" if postgres_active else "WAL",
             "snapshot_path": SNAPSHOT_PATH,
             "snapshot_exists": snapshot_exists,
             "snapshot_size_bytes": snapshot_size,
             "snapshot_last_modified": snapshot_mtime,
-            "is_persistent_mount": os.path.exists("/var/data") or bool(os.getenv("PERSISTENT_DATA_DIR")),
+            "is_persistent_mount": postgres_active or os.path.exists("/var/data") or bool(os.getenv("PERSISTENT_DATA_DIR")),
         }
     }
 
