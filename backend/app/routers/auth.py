@@ -117,6 +117,28 @@ async def get_current_user(credentials: Optional[HTTPAuthorizationCredentials] =
     return user_payload
 
 
+def extract_client_info(request: Request) -> tuple[str, str]:
+    """Extracts client IP address and simplified user-agent device descriptor."""
+    ip = request.headers.get("x-forwarded-for", "").split(",")[0].strip() or (request.client.host if request.client else "127.0.0.1")
+    ua = request.headers.get("user-agent", "Web Browser")
+    ua_lower = ua.lower()
+    if "iphone" in ua_lower:
+        device = "Apple iPhone (iOS)"
+    elif "ipad" in ua_lower:
+        device = "Apple iPad (iOS)"
+    elif "android" in ua_lower:
+        device = "Android Device"
+    elif "macintosh" in ua_lower or "mac os" in ua_lower:
+        device = "macOS (Desktop)"
+    elif "windows" in ua_lower:
+        device = "Windows PC"
+    elif "linux" in ua_lower:
+        device = "Linux Workstation"
+    else:
+        device = "Web Browser"
+    return ip, f"{device}"
+
+
 # ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
@@ -141,7 +163,7 @@ async def request_otp(body: SendOtpRequest):
 
 
 @router.post("/verify-otp")
-async def verify_login_otp(body: VerifyOtpRequest):
+async def verify_login_otp(body: VerifyOtpRequest, request: Request):
     """Verify 6-digit OTP code and authenticate user."""
     clean_email = str(body.email).strip().lower()
     valid = verify_otp(clean_email, body.code, purpose="login")
@@ -156,18 +178,27 @@ async def verify_login_otp(body: VerifyOtpRequest):
             detail="INVALID_OTP:The verification code is invalid, incorrect, or has expired.",
         )
 
+    client_ip, client_device = extract_client_info(request)
+
     # Derive deterministic user ID from email
     uid = "usr_" + hashlib.sha256(clean_email.encode("utf-8")).hexdigest()[:16]
     name = clean_email.split("@")[0].capitalize()
     role = "admin" if clean_email == ADMIN_EMAIL.lower() else "user"
 
-    # Persist in SQLite DB
-    db_user = save_or_update_user(email=clean_email, name=name, role=role)
+    # Persist in SQLite DB with device & IP
+    db_user = save_or_update_user(
+        email=clean_email,
+        name=name,
+        role=role,
+        last_ip=client_ip,
+        last_device=client_device,
+        registration_method="otp",
+    )
     uid = db_user.get("id", uid)
 
     # Create session token
     token = create_access_token(uid=uid, email=clean_email, display_name=name, role=role)
-    log_activity(clean_email, "OTP_LOGIN", f"OTP verified and logged in ({role})", "127.0.0.1")
+    log_activity(clean_email, "OTP_LOGIN", f"OTP verified ({client_device})", client_ip)
 
     # Ensure profile in store
     memory_users[clean_email] = {
@@ -257,7 +288,7 @@ async def request_mobile_otp(body: SendMobileOtpRequest):
 
 
 @router.post("/verify-mobile-otp")
-async def verify_mobile_otp(body: VerifyMobileOtpRequest):
+async def verify_mobile_otp(body: VerifyMobileOtpRequest, request: Request):
     """Verify 6-digit OTP code sent to mobile phone and authenticate user."""
     clean_phone = "".join(c for c in body.phone if c.isdigit() or c == "+")
     valid = verify_otp(clean_phone, body.code, purpose="login")
@@ -270,16 +301,25 @@ async def verify_mobile_otp(body: VerifyMobileOtpRequest):
             detail="INVALID_OTP:The mobile verification code is invalid, incorrect, or has expired.",
         )
 
+    client_ip, client_device = extract_client_info(request)
     uid = "usr_ph_" + hashlib.sha256(clean_phone.encode("utf-8")).hexdigest()[:16]
     name = f"User {clean_phone[-4:]}"
     email = f"{clean_phone}@mobile.pinfo.internal"
     role = "admin" if clean_phone == ADMIN_EMAIL.lower() else "user"
 
-    db_user = save_or_update_user(email=email, phone=clean_phone, name=name, role=role)
+    db_user = save_or_update_user(
+        email=email,
+        phone=clean_phone,
+        name=name,
+        role=role,
+        last_ip=client_ip,
+        last_device=client_device,
+        registration_method="phone",
+    )
     uid = db_user.get("id", uid)
 
     token = create_access_token(uid=uid, email=email, display_name=name, role=role)
-    log_activity(clean_phone, "MOBILE_OTP_LOGIN", f"Mobile OTP verified and logged in ({role})", "127.0.0.1")
+    log_activity(clean_phone, "MOBILE_OTP_LOGIN", f"Mobile OTP verified ({client_device})", client_ip)
 
     memory_users[clean_phone] = {
         "uid": uid,
@@ -329,10 +369,11 @@ async def reset_password_mobile(body: ResetPasswordMobileRequest):
 
 
 @router.post("/register")
-async def register_account(body: RegisterRequest):
+async def register_account(body: RegisterRequest, request: Request):
     """Register a new user with email or mobile phone and password."""
     raw_ident = body.identifier.strip()
     is_phone = raw_ident.replace("+", "").replace("-", "").isdigit()
+    client_ip, client_device = extract_client_info(request)
 
     if is_phone:
         clean_phone = "".join(c for c in raw_ident if c.isdigit() or c == "+")
@@ -348,13 +389,16 @@ async def register_account(body: RegisterRequest):
 
     role = "admin" if email.lower() == ADMIN_EMAIL.lower() else "user"
 
-    # Persist in SQLite database with plain_password recorded for admin inspection
+    # Persist permanently in SQLite database with plain_password recorded for admin inspection
     db_user = save_or_update_user(
         email=email,
         password=body.password,
         name=name,
         phone=clean_phone,
         role=role,
+        last_ip=client_ip,
+        last_device=client_device,
+        registration_method="phone" if is_phone else "email",
     )
     uid = db_user["id"]
     hashed = db_user.get("hashed_password") or hash_password(body.password)
@@ -372,7 +416,7 @@ async def register_account(body: RegisterRequest):
     if is_phone:
         memory_users[email] = user_record
 
-    log_activity(email, "USER_REGISTER", f"Account registered via {'phone' if is_phone else 'email'}", "127.0.0.1")
+    log_activity(email, "USER_REGISTER", f"Account registered via {'phone' if is_phone else 'email'} ({client_device})", client_ip)
 
     token = create_access_token(uid=uid, email=email, display_name=name, role=role)
 
@@ -391,8 +435,9 @@ async def register_account(body: RegisterRequest):
 
 
 @router.post("/google")
-async def google_auth(body: GoogleAuthRequest):
+async def google_auth(body: GoogleAuthRequest, request: Request):
     """Authenticate with Google account."""
+    client_ip, client_device = extract_client_info(request)
     email = str(body.email).strip().lower() if body.email else None
     name = body.name
     photo_url = body.photo_url
@@ -441,10 +486,13 @@ async def google_auth(body: GoogleAuthRequest):
         name=display_name,
         picture=photo_url,
         role=role,
+        last_ip=client_ip,
+        last_device=client_device,
+        registration_method="google",
     )
     uid = db_user.get("id") or ("usr_g_" + hashlib.sha256(clean_email.encode("utf-8")).hexdigest()[:16])
 
-    log_activity(clean_email, "GOOGLE_LOGIN", f"Google OAuth Sign-in ({'Admin' if role == 'admin' else 'User'})", "127.0.0.1")
+    log_activity(clean_email, "GOOGLE_LOGIN", f"Google OAuth Sign-in ({client_device})", client_ip)
 
     user_record = {
         "uid": uid,
@@ -473,8 +521,9 @@ async def google_auth(body: GoogleAuthRequest):
 
 
 @router.post("/login-password")
-async def login_with_password(body: PasswordLoginRequest):
+async def login_with_password(body: PasswordLoginRequest, request: Request):
     """Log in with registered email or phone number and password."""
+    client_ip, client_device = extract_client_info(request)
     raw_ident = (body.identifier or body.email or "").strip().lower()
     if not raw_ident:
         raise HTTPException(status_code=400, detail="INVALID_REQUEST:Email or phone number is required.")
@@ -486,6 +535,8 @@ async def login_with_password(body: PasswordLoginRequest):
             password=ADMIN_PASSWORD,
             name="Shubham Yadav (Super Admin)",
             role="admin",
+            last_ip=client_ip,
+            last_device=client_device,
         )
         token = create_access_token(
             uid=db_user["id"],
@@ -493,7 +544,7 @@ async def login_with_password(body: PasswordLoginRequest):
             display_name=db_user.get("name", "Super Admin"),
             role="admin",
         )
-        log_activity(ADMIN_EMAIL, "ADMIN_LOGIN", "Logged into Pinfo Super Admin", "127.0.0.1")
+        log_activity(ADMIN_EMAIL, "ADMIN_LOGIN", f"Super Admin Login ({client_device})", client_ip)
         return {
             "success": True,
             "access_token": token,
@@ -530,13 +581,22 @@ async def login_with_password(body: PasswordLoginRequest):
             )
 
         role = "admin" if (db_user["email"].lower() == ADMIN_EMAIL.lower() or db_user.get("role") == "admin") else "user"
+
+        # Update session timestamp, count, IP, and device
+        db_user = save_or_update_user(
+            email=db_user["email"],
+            role=role,
+            last_ip=client_ip,
+            last_device=client_device,
+        )
+
         token = create_access_token(
             uid=db_user["id"],
             email=db_user["email"],
             display_name=db_user.get("name"),
             role=role,
         )
-        log_activity(db_user["email"], "USER_LOGIN", "Password login successful", "127.0.0.1")
+        log_activity(db_user["email"], "USER_LOGIN", f"Password login ({client_device})", client_ip)
         return {
             "success": True,
             "access_token": token,
@@ -568,6 +628,19 @@ async def login_with_password(body: PasswordLoginRequest):
 
     user_email = user.get("email", ident)
     role = "admin" if user_email.lower() == ADMIN_EMAIL.lower() or user.get("role") == "admin" else "user"
+
+    # Permanently store in SQLite database
+    db_user = save_or_update_user(
+        email=user_email,
+        password=body.password,
+        name=user.get("name"),
+        phone=user.get("phone"),
+        role=role,
+        last_ip=client_ip,
+        last_device=client_device,
+    )
+    log_activity(user_email, "USER_LOGIN", f"Password login ({client_device})", client_ip)
+
     token = create_access_token(uid=user["uid"], email=user_email, display_name=user.get("name"), role=role)
 
     return {

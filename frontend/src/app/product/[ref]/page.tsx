@@ -35,6 +35,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { AuthGuard } from "@/components/auth/AuthGuard";
+import { useAuth } from "@/context/AuthContext";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 
 // Helper: parse ingredient text into individual items
@@ -117,6 +118,30 @@ export function ProductDetailView({ refParam }: ProductDetailViewProps) {
   const [isOnline, setIsOnline] = useState<boolean>(() =>
     typeof navigator !== "undefined" ? navigator.onLine : true
   );
+
+  const { token, user } = useAuth();
+  const loggedScanRef = React.useRef<string | null>(null);
+
+  // Sync scan to backend database for logged-in user so admin sees live scan feed
+  useEffect(() => {
+    if (product && token && loggedScanRef.current !== refParam) {
+      loggedScanRef.current = refParam;
+      const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "https://ingrivo-3.onrender.com";
+      fetch(`${API_BASE}/api/v1/userdata/scans`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          product_code: barcode || refParam,
+          product_name: product.name || "Scanned Product",
+          brand: product.brand || "",
+          grade: (product.source_computed?.nutriscore || "").toUpperCase(),
+        }),
+      }).catch(() => {});
+    }
+  }, [product, token, refParam, barcode]);
 
   usePageTitle(product?.name || "Product Details");
 

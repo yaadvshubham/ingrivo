@@ -21,6 +21,11 @@ from app.db.database import (
     get_admin_logs,
     get_admin_scans,
     log_activity,
+    export_snapshot,
+    restore_from_snapshot,
+    DB_PATH,
+    DB_DIR,
+    SNAPSHOT_PATH,
 )
 
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
@@ -234,3 +239,65 @@ async def list_scans(
         "total": scans_data["total"],
         "scans": scans_data["scans"],
     }
+
+
+class AdminRestoreRequest(BaseModel):
+    snapshot: Dict[str, Any]
+
+
+@router.get("/database/export")
+async def export_database_snapshot(admin: dict = Depends(require_admin_user)):
+    """Exports full database snapshot with all users, passwords, sessions, scans, and audit logs."""
+    data = export_snapshot()
+    log_activity(admin.get("email", ADMIN_EMAIL), "ADMIN_DB_EXPORT", "Exported database snapshot JSON", "127.0.0.1")
+    return {
+        "success": True,
+        "exported_at": data.get("exported_at"),
+        "snapshot": data,
+    }
+
+
+@router.post("/database/restore")
+async def restore_database_snapshot(body: AdminRestoreRequest, admin: dict = Depends(require_admin_user)):
+    """Restores database from a snapshot JSON payload."""
+    if not body.snapshot or not isinstance(body.snapshot, dict):
+        raise HTTPException(status_code=400, detail="INVALID_SNAPSHOT:Valid snapshot dictionary is required.")
+
+    result = restore_from_snapshot(body.snapshot)
+    log_activity(
+        admin.get("email", ADMIN_EMAIL),
+        "ADMIN_DB_RESTORE",
+        f"Restored database: {result.get('users_restored', 0)} users, {result.get('scans_restored', 0)} scans",
+        "127.0.0.1",
+    )
+    return {
+        "success": True,
+        "message": f"Database restored successfully ({result.get('users_restored', 0)} users, {result.get('scans_restored', 0)} scans, {result.get('logs_restored', 0)} logs).",
+        "result": result,
+    }
+
+
+@router.get("/database/diagnostics")
+async def get_database_diagnostics(admin: dict = Depends(require_admin_user)):
+    """Provides storage diagnostics, disk persistence mode, and snapshot status."""
+    import os
+    db_size = os.path.getsize(DB_PATH) if os.path.exists(DB_PATH) else 0
+    snapshot_exists = os.path.exists(SNAPSHOT_PATH)
+    snapshot_size = os.path.getsize(SNAPSHOT_PATH) if snapshot_exists else 0
+    snapshot_mtime = os.path.getmtime(SNAPSHOT_PATH) if snapshot_exists else None
+
+    return {
+        "success": True,
+        "diagnostics": {
+            "db_path": DB_PATH,
+            "db_dir": DB_DIR,
+            "db_size_bytes": db_size,
+            "journal_mode": "WAL",
+            "snapshot_path": SNAPSHOT_PATH,
+            "snapshot_exists": snapshot_exists,
+            "snapshot_size_bytes": snapshot_size,
+            "snapshot_last_modified": snapshot_mtime,
+            "is_persistent_mount": os.path.exists("/var/data") or bool(os.getenv("PERSISTENT_DATA_DIR")),
+        }
+    }
+

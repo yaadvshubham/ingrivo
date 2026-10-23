@@ -61,3 +61,5 @@ blob-report/
 *.sqlite3
 backend/data/*.db*
 !backend/data/.gitkeep
+!backend/data/pinfo_snapshot.json
+

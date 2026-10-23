@@ -18,9 +18,17 @@ import bcrypt
 
 logger = logging.getLogger("pinfo.db")
 
-# Default database directory and path
-DB_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data")
+# Persistent storage directory detection (Render Persistent Disk, Custom Env, or local fallback)
+_env_dir = os.environ.get("PERSISTENT_DATA_DIR") or os.environ.get("DATA_DIR")
+if _env_dir and os.path.exists(_env_dir):
+    DB_DIR = _env_dir
+elif os.path.isdir("/var/data") and os.access("/var/data", os.W_OK):
+    DB_DIR = "/var/data"
+else:
+    DB_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data")
+
 DB_PATH = os.path.join(DB_DIR, "pinfo.db")
+SNAPSHOT_PATH = os.path.join(DB_DIR, "pinfo_snapshot.json")
 
 ADMIN_EMAIL = "yaadvshubham01@gmail.com"
 ADMIN_PASSWORD = "@jaishankar2931"
@@ -131,6 +139,10 @@ def init_db() -> None:
             "health_goals": "TEXT",
             "scans_count": "INTEGER DEFAULT 0",
             "last_login": "TEXT",
+            "last_ip": "TEXT",
+            "last_device": "TEXT",
+            "registration_method": "TEXT DEFAULT 'email'",
+            "session_count": "INTEGER DEFAULT 1",
         }
         for col_name, col_type in migration_cols.items():
             if col_name not in existing_cols:
@@ -148,10 +160,19 @@ def init_db() -> None:
                 action TEXT NOT NULL,
                 details TEXT,
                 ip_address TEXT,
+                device_info TEXT,
                 timestamp TEXT NOT NULL
             );
         """)
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_logs_timestamp ON activity_logs(timestamp);")
+
+        cursor.execute("PRAGMA table_info(activity_logs);")
+        existing_log_cols = {row["name"] for row in cursor.fetchall()}
+        if "device_info" not in existing_log_cols:
+            try:
+                cursor.execute("ALTER TABLE activity_logs ADD COLUMN device_info TEXT;")
+            except Exception:
+                pass
 
         # 3. Scans History Table
         cursor.execute("""
@@ -174,6 +195,9 @@ def init_db() -> None:
     # Seed Admin User only
     seed_admin_user()
     clean_dummy_data()
+
+    # Auto-Restore from Snapshot if container is fresh and snapshot exists
+    auto_restore_if_needed()
 
 
 def clean_dummy_data() -> None:
@@ -255,6 +279,137 @@ def seed_admin_user() -> None:
 
 
 # ---------------------------------------------------------------------------
+# Persistent Snapshot Backup & Auto-Recovery Layer
+# ---------------------------------------------------------------------------
+
+def auto_restore_if_needed() -> None:
+    """Restores user accounts from snapshot file if SQLite DB was freshly created."""
+    try:
+        with _raw_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT COUNT(*) as count FROM users")
+            count = cursor.fetchone()["count"]
+            if count <= 1 and os.path.exists(SNAPSHOT_PATH):
+                with open(SNAPSHOT_PATH, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    res = restore_from_snapshot(data)
+                    logger.info("Auto-restored user database from snapshot: %s", res)
+    except Exception as e:
+        logger.warning("Auto restore check skipped: %s", e)
+
+
+def export_snapshot() -> Dict[str, Any]:
+    """Serializes all users, credentials, activity logs, and scans into a JSON dictionary."""
+    with _raw_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users")
+        users = [dict(r) for r in cursor.fetchall()]
+        cursor.execute("SELECT * FROM scans_history ORDER BY id DESC LIMIT 1000")
+        scans = [dict(r) for r in cursor.fetchall()]
+        cursor.execute("SELECT * FROM activity_logs ORDER BY id DESC LIMIT 2000")
+        logs = [dict(r) for r in cursor.fetchall()]
+
+        return {
+            "version": 1,
+            "exported_at": datetime.now(timezone.utc).isoformat(),
+            "users": users,
+            "scans": scans,
+            "logs": logs,
+        }
+
+
+def auto_save_snapshot() -> None:
+    """Flushes full user and activity snapshot to disk to survive container restarts."""
+    try:
+        data = export_snapshot()
+        os.makedirs(DB_DIR, exist_ok=True)
+        with open(SNAPSHOT_PATH, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
+    except Exception as e:
+        logger.warning("Could not auto-save snapshot: %s", e)
+
+
+def restore_from_snapshot(data: Dict[str, Any]) -> Dict[str, int]:
+    """Restores database from a snapshot dictionary."""
+    users_restored = 0
+    scans_restored = 0
+    logs_restored = 0
+
+    with _raw_connection() as conn:
+        cursor = conn.cursor()
+        for u in data.get("users", []):
+            try:
+                diet = u.get("dietary_preferences")
+                if isinstance(diet, (list, dict)):
+                    diet = json.dumps(diet)
+                allergens = u.get("allergens")
+                if isinstance(allergens, (list, dict)):
+                    allergens = json.dumps(allergens)
+                goals = u.get("health_goals")
+                if isinstance(goals, (list, dict)):
+                    goals = json.dumps(goals)
+
+                cursor.execute("""
+                    INSERT OR REPLACE INTO users (
+                        id, google_sub, email, phone, email_verified, name, picture,
+                        hashed_password, plain_password, role, status, dietary_preferences,
+                        allergens, health_goals, scans_count, last_login, last_ip,
+                        last_device, registration_method, session_count, created_at, updated_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    u.get("id"),
+                    u.get("google_sub"),
+                    u.get("email"),
+                    u.get("phone"),
+                    u.get("email_verified", 0),
+                    u.get("name"),
+                    u.get("picture"),
+                    u.get("hashed_password"),
+                    u.get("plain_password"),
+                    u.get("role", "user"),
+                    u.get("status", "active"),
+                    diet,
+                    allergens,
+                    goals,
+                    u.get("scans_count", 0),
+                    u.get("last_login"),
+                    u.get("last_ip"),
+                    u.get("last_device"),
+                    u.get("registration_method", "email"),
+                    u.get("session_count", 1),
+                    u.get("created_at") or datetime.now(timezone.utc).isoformat(),
+                    u.get("updated_at") or datetime.now(timezone.utc).isoformat(),
+                ))
+                users_restored += 1
+            except Exception as ue:
+                logger.warning("Could not restore user %s: %s", u.get("email"), ue)
+
+        for s in data.get("scans", []):
+            try:
+                cursor.execute("""
+                    INSERT OR IGNORE INTO scans_history (user_email, product_code, product_name, brand, grade, timestamp)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                """, (s.get("user_email"), s.get("product_code"), s.get("product_name"), s.get("brand"), s.get("grade"), s.get("timestamp")))
+                scans_restored += 1
+            except Exception:
+                pass
+
+        for l in data.get("logs", []):
+            try:
+                cursor.execute("""
+                    INSERT OR IGNORE INTO activity_logs (user_email, action, details, ip_address, device_info, timestamp)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                """, (l.get("user_email"), l.get("action"), l.get("details"), l.get("ip_address"), l.get("device_info"), l.get("timestamp")))
+                logs_restored += 1
+            except Exception:
+                pass
+
+        conn.commit()
+
+    return {"users_restored": users_restored, "scans_restored": scans_restored, "logs_restored": logs_restored}
+
+
+# ---------------------------------------------------------------------------
 # User Query Functions
 # ---------------------------------------------------------------------------
 
@@ -304,8 +459,12 @@ def save_or_update_user(
     google_sub: Optional[str] = None,
     picture: Optional[str] = None,
     role: Optional[str] = None,
+    last_ip: Optional[str] = None,
+    last_device: Optional[str] = None,
+    registration_method: Optional[str] = None,
 ) -> Dict[str, Any]:
-    """Saves or updates a user in the SQLite database, ensuring yaadvshubham01@gmail.com is always Admin."""
+    """Saves or updates a user in the SQLite database, ensuring yaadvshubham01@gmail.com is always Admin,
+    tracking sessions, and saving snapshots persistently."""
     clean_email = email.strip().lower()
     now_iso = datetime.now(timezone.utc).isoformat()
 
@@ -314,6 +473,8 @@ def save_or_update_user(
         assigned_role = "admin"
     else:
         assigned_role = role or "user"
+
+    reg_method = registration_method or ("google" if google_sub else ("phone" if phone and not "@" in clean_email else "email"))
 
     with get_db_connection() as conn:
         cursor = conn.cursor()
@@ -335,6 +496,9 @@ def save_or_update_user(
                     plain_password = COALESCE(?, plain_password),
                     role = ?,
                     last_login = ?,
+                    last_ip = COALESCE(?, last_ip),
+                    last_device = COALESCE(?, last_device),
+                    session_count = COALESCE(session_count, 0) + 1,
                     updated_at = ?
                 WHERE id = ?
             """, (
@@ -346,12 +510,16 @@ def save_or_update_user(
                 plain,
                 assigned_role,
                 now_iso,
+                last_ip,
+                last_device,
                 now_iso,
                 user_id,
             ))
             conn.commit()
             cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
-            return dict(cursor.fetchone())
+            user_data = dict(cursor.fetchone())
+            auto_save_snapshot()
+            return user_data
         else:
             import uuid
             user_id = f"usr_{uuid.uuid4().hex[:14]}"
@@ -360,8 +528,9 @@ def save_or_update_user(
                 INSERT INTO users (
                     id, email, phone, google_sub, name, picture,
                     hashed_password, plain_password, role, status,
-                    email_verified, last_login, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', 1, ?, ?, ?)
+                    email_verified, last_login, last_ip, last_device,
+                    registration_method, session_count, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', 1, ?, ?, ?, ?, 1, ?, ?)
             """, (
                 user_id,
                 clean_email,
@@ -373,16 +542,21 @@ def save_or_update_user(
                 plain,
                 assigned_role,
                 now_iso,
+                last_ip or "127.0.0.1",
+                last_device or "Web Browser",
+                reg_method,
                 now_iso,
                 now_iso,
             ))
             conn.commit()
             cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
-            return dict(cursor.fetchone())
+            user_data = dict(cursor.fetchone())
+            auto_save_snapshot()
+            return user_data
 
 
 def record_user_scan(user_email: str, product_code: str, product_name: str, brand: str = "", grade: str = "") -> None:
-    """Logs a scan in scans_history and increments user's scans_count."""
+    """Logs a scan in scans_history, increments user's scans_count, and syncs snapshot."""
     clean_email = user_email.strip().lower()
     now_iso = datetime.now(timezone.utc).isoformat()
     with get_db_connection() as conn:
@@ -393,6 +567,7 @@ def record_user_scan(user_email: str, product_code: str, product_name: str, bran
         """, (clean_email, product_code, product_name, brand, grade, now_iso))
         cursor.execute("UPDATE users SET scans_count = scans_count + 1 WHERE email = ?", (clean_email,))
         conn.commit()
+    auto_save_snapshot()
 
 
 def log_activity(user_email: str, action: str, details: str = "", ip_address: str = "127.0.0.1") -> None:
@@ -551,7 +726,9 @@ def admin_update_user(user_id: str, updates: Dict[str, Any]) -> Optional[Dict[st
         conn.commit()
 
         cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
-        return dict(cursor.fetchone())
+        updated = dict(cursor.fetchone())
+    auto_save_snapshot()
+    return updated
 
 
 def admin_delete_user(user_id: str) -> bool:
@@ -569,7 +746,8 @@ def admin_delete_user(user_id: str) -> bool:
         cursor.execute("DELETE FROM scans_history WHERE user_email = ?", (user["email"],))
         cursor.execute("DELETE FROM activity_logs WHERE user_email = ?", (user["email"],))
         conn.commit()
-        return True
+    auto_save_snapshot()
+    return True
 
 
 def get_admin_overview_stats() -> Dict[str, Any]:
@@ -746,5 +924,7 @@ def admin_create_user(data: Dict[str, Any]) -> Dict[str, Any]:
         conn.commit()
 
         cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
-        return dict(cursor.fetchone())
+        created = dict(cursor.fetchone())
+    auto_save_snapshot()
+    return created
 

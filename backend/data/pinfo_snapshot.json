@@ -1,0 +1,876 @@
+{
+  "version": 1,
+  "exported_at": "2026-10-23T21:03:35.570502+00:00",
+  "users": [
+    {
+      "id": "usr_admin_01",
+      "google_sub": null,
+      "email": "yaadvshubham01@gmail.com",
+      "phone": null,
+      "email_verified": 1,
+      "name": "Shubham Yadav (Super Admin)",
+      "picture": "https://example.com/photo.jpg",
+      "hashed_password": "$2b$12$/rd9icu8i94r.Ag8w2SWluTh.NEVU8olkX316znbx6Q8ruscie8XC",
+      "plain_password": "@jaishankar2931",
+      "role": "admin",
+      "status": "active",
+      "dietary_preferences": "[\"clean_label\", \"high_protein\"]",
+      "allergens": "[]",
+      "health_goals": "[\"Weight Management\", \"Avoid Ultra-Processed\"]",
+      "scans_count": 48,
+      "last_login": "2026-10-23T20:03:25.599577+00:00",
+      "created_at": "2026-10-23T14:02:40.975079+00:00",
+      "updated_at": "2026-10-23T21:03:35.286883+00:00",
+      "last_ip": null,
+      "last_device": null,
+      "registration_method": "email",
+      "session_count": 1
+    },
+    {
+      "id": "usr_034ec0a1554247",
+      "google_sub": null,
+      "email": "mrstark2931@gmail.com",
+      "phone": null,
+      "email_verified": 1,
+      "name": "shubham",
+      "picture": "https://lh3.googleusercontent.com/a-/ALV-UjXOTC4iVgfNnLtqukN7yTqihbo_kMa62xYHiNf5GppvWH3gdkGMNB81k-Mic8b8yGiEQGzvk9seF63eoY1_6eTlo6zLoEyg1Fc0CCYfQv_1MX_vio2jRqE176xdLmgz7TuvOnwa_ipI9lNy0ABHThTp5-dSeJ11qFkVh0Ciq02XDnDm_6FPZ8RdNlemqCmSrRo537r0KhOCvG_nnf7rSnCczHruNbHl8gsMRnI99l3ZNqRrvv-RtticEXyau_BpB0ItDcnnblNTw8_17ILAH6xWuBsZEg5uYmQxvVLt3luyc2okzu5kHDRolrtWMjo-Yhw7cJyhk1tZs2wMwi9qC4vOJFPYyIsievIYCKSylsgvd5leLN-OpOB36P24FKrjSD-9ij3jfcbE1vah7PAgqb2JKwn53VLTb-a9-6E58N1EPu-laHretrp8n-haboqaDhz1a3VZLwvBgyXCfv7nKmYiMtiUrPcmW1_kB5eMuGXTm9bx--hViB_W5BHJNH8PAypqu1cnkVGBSSt2C1VgvgLYyk712XJHjZ8pM0ANaJAX_3B1VFrn0PoRFgHMo8dO8KRJNZmG6GMF7-ZENqRLokuWPdfJZZ0b7Fth21-82mVpz-JrlSocvJGYJ8c63JoDMQm0ifWYq59rQrQ1J91UUt9KBtTWN22ej8h6JvfBQyZAdI2LC75A9774-xwNcW1vTypJPpp4IovLairCtfY6MFx0ntc_MQVjMnxC2biGE5g2u56DRT4qXx__e1OGwiJMYqnV1o98UjzTNCo0EO5tyC0F4iZ993740zBZw8gSQj0pyUWDL2Rfk0PKu2Oj2-ML66-n_5Z4QbKr7O0A23pB2I9FMuneqIdREA4IzTerZeWBLScwsvrjqpVL5HCB0trDR_9a6qfXHXhlw9C16aaMsmRRovJVPKvBsafMgCi_YRiqK9-fhBVAqBI7S8p-6v_CPpntgeaMhVdAxFbL3A4LbENkyt6OObTMAPA3Qzk0p-4RWWn7spVvLox2rQrv9kDkDPmOhD6Nb-CPzRK6gujiTRPyDrKZV5kzOpIybzdhhazmQ65X4rKwsZX9rw=s96-c",
+      "hashed_password": null,
+      "plain_password": null,
+      "role": "user",
+      "status": "active",
+      "dietary_preferences": null,
+      "allergens": null,
+      "health_goals": null,
+      "scans_count": 0,
+      "last_login": "2026-10-23T14:40:26.938031+00:00",
+      "created_at": "2026-10-23T14:40:26.938031+00:00",
+      "updated_at": "2026-10-23T14:40:26.938031+00:00",
+      "last_ip": null,
+      "last_device": null,
+      "registration_method": "email",
+      "session_count": 1
+    }
+  ],
+  "scans": [],
+  "logs": [
+    {
+      "id": 137,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Pinfo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T20:03:25.812615+00:00",
+      "device_info": null
+    },
+    {
+      "id": 136,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_DELETE",
+      "details": "Deleted user ID usr_adc0117840854f",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T20:03:25.329061+00:00",
+      "device_info": null
+    },
+    {
+      "id": 135,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_UPDATE",
+      "details": "Updated user ID usr_adc0117840854f: ['name', 'status']",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T20:03:25.310030+00:00",
+      "device_info": null
+    },
+    {
+      "id": 134,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_CREATE",
+      "details": "Created user test.user.5f87d8@example.com with role=user",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T20:03:25.278899+00:00",
+      "device_info": null
+    },
+    {
+      "id": 132,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Pinfo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T20:03:25.017049+00:00",
+      "device_info": null
+    },
+    {
+      "id": 131,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Pinfo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T20:03:24.524117+00:00",
+      "device_info": null
+    },
+    {
+      "id": 128,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "GOOGLE_LOGIN",
+      "details": "Google OAuth Sign-in (Admin)",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T20:03:23.011141+00:00",
+      "device_info": null
+    },
+    {
+      "id": 127,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Pinfo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T20:03:22.736275+00:00",
+      "device_info": null
+    },
+    {
+      "id": 125,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Pinfo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T19:31:55.732984+00:00",
+      "device_info": null
+    },
+    {
+      "id": 124,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_DELETE",
+      "details": "Deleted user ID usr_9d4b0e8c415e4a",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T19:31:54.797775+00:00",
+      "device_info": null
+    },
+    {
+      "id": 123,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_UPDATE",
+      "details": "Updated user ID usr_9d4b0e8c415e4a: ['name', 'status']",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T19:31:54.738077+00:00",
+      "device_info": null
+    },
+    {
+      "id": 122,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_CREATE",
+      "details": "Created user test.user.9cd36e@example.com with role=user",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T19:31:54.677797+00:00",
+      "device_info": null
+    },
+    {
+      "id": 120,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Pinfo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T19:31:54.185689+00:00",
+      "device_info": null
+    },
+    {
+      "id": 119,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Pinfo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T19:31:52.936255+00:00",
+      "device_info": null
+    },
+    {
+      "id": 116,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "GOOGLE_LOGIN",
+      "details": "Google OAuth Sign-in (Admin)",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T19:31:50.208376+00:00",
+      "device_info": null
+    },
+    {
+      "id": 115,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Pinfo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T19:31:49.724114+00:00",
+      "device_info": null
+    },
+    {
+      "id": 113,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T17:27:50.153133+00:00",
+      "device_info": null
+    },
+    {
+      "id": 112,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_DELETE",
+      "details": "Deleted user ID usr_88d262cd584741",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T17:27:49.691747+00:00",
+      "device_info": null
+    },
+    {
+      "id": 111,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_UPDATE",
+      "details": "Updated user ID usr_88d262cd584741: ['name', 'status']",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T17:27:49.674781+00:00",
+      "device_info": null
+    },
+    {
+      "id": 110,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_CREATE",
+      "details": "Created user test.user.a5b18d@example.com with role=user",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T17:27:49.649899+00:00",
+      "device_info": null
+    },
+    {
+      "id": 108,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T17:27:49.397852+00:00",
+      "device_info": null
+    },
+    {
+      "id": 107,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T17:27:48.923187+00:00",
+      "device_info": null
+    },
+    {
+      "id": 104,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "GOOGLE_LOGIN",
+      "details": "Google OAuth Sign-in (Admin)",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T17:27:47.475859+00:00",
+      "device_info": null
+    },
+    {
+      "id": 103,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T17:27:47.184711+00:00",
+      "device_info": null
+    },
+    {
+      "id": 101,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T17:15:27.868907+00:00",
+      "device_info": null
+    },
+    {
+      "id": 100,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_DELETE",
+      "details": "Deleted user ID usr_7eb5513974bb4b",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T17:15:27.397599+00:00",
+      "device_info": null
+    },
+    {
+      "id": 99,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_UPDATE",
+      "details": "Updated user ID usr_7eb5513974bb4b: ['name', 'status']",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T17:15:27.377913+00:00",
+      "device_info": null
+    },
+    {
+      "id": 98,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_CREATE",
+      "details": "Created user test.user.e19726@example.com with role=user",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T17:15:27.349554+00:00",
+      "device_info": null
+    },
+    {
+      "id": 96,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T17:15:27.110328+00:00",
+      "device_info": null
+    },
+    {
+      "id": 95,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T17:15:26.613748+00:00",
+      "device_info": null
+    },
+    {
+      "id": 92,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "GOOGLE_LOGIN",
+      "details": "Google OAuth Sign-in (Admin)",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T17:15:25.163774+00:00",
+      "device_info": null
+    },
+    {
+      "id": 91,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T17:15:24.879729+00:00",
+      "device_info": null
+    },
+    {
+      "id": 89,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T16:01:25.079282+00:00",
+      "device_info": null
+    },
+    {
+      "id": 88,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_DELETE",
+      "details": "Deleted user ID usr_a61fd536454242",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T16:01:24.613212+00:00",
+      "device_info": null
+    },
+    {
+      "id": 87,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_UPDATE",
+      "details": "Updated user ID usr_a61fd536454242: ['name', 'status']",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T16:01:24.595743+00:00",
+      "device_info": null
+    },
+    {
+      "id": 86,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_CREATE",
+      "details": "Created user test.user.16b0cf@example.com with role=user",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T16:01:24.564832+00:00",
+      "device_info": null
+    },
+    {
+      "id": 84,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T16:01:24.321238+00:00",
+      "device_info": null
+    },
+    {
+      "id": 83,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T16:01:23.815194+00:00",
+      "device_info": null
+    },
+    {
+      "id": 80,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "GOOGLE_LOGIN",
+      "details": "Google OAuth Sign-in (Admin)",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T16:01:22.350630+00:00",
+      "device_info": null
+    },
+    {
+      "id": 79,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T16:01:22.073043+00:00",
+      "device_info": null
+    },
+    {
+      "id": 77,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T15:43:53.199888+00:00",
+      "device_info": null
+    },
+    {
+      "id": 76,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_DELETE",
+      "details": "Deleted user ID usr_c96e66b401a746",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T15:43:52.640528+00:00",
+      "device_info": null
+    },
+    {
+      "id": 75,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_UPDATE",
+      "details": "Updated user ID usr_c96e66b401a746: ['name', 'status']",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T15:43:52.613687+00:00",
+      "device_info": null
+    },
+    {
+      "id": 74,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_CREATE",
+      "details": "Created user test.user.20f8ae@example.com with role=user",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T15:43:52.576417+00:00",
+      "device_info": null
+    },
+    {
+      "id": 72,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T15:43:52.298696+00:00",
+      "device_info": null
+    },
+    {
+      "id": 71,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T15:43:51.750100+00:00",
+      "device_info": null
+    },
+    {
+      "id": 68,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "GOOGLE_LOGIN",
+      "details": "Google OAuth Sign-in (Admin)",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T15:43:48.508695+00:00",
+      "device_info": null
+    },
+    {
+      "id": 67,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T15:43:47.980121+00:00",
+      "device_info": null
+    },
+    {
+      "id": 65,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T15:35:29.519244+00:00",
+      "device_info": null
+    },
+    {
+      "id": 64,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_DELETE",
+      "details": "Deleted user ID usr_b7ea56bacd3441",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T15:35:29.045470+00:00",
+      "device_info": null
+    },
+    {
+      "id": 63,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_UPDATE",
+      "details": "Updated user ID usr_b7ea56bacd3441: ['name', 'status']",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T15:35:29.025023+00:00",
+      "device_info": null
+    },
+    {
+      "id": 62,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_CREATE",
+      "details": "Created user test.user.caf066@example.com with role=user",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T15:35:28.991466+00:00",
+      "device_info": null
+    },
+    {
+      "id": 60,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T15:35:28.737831+00:00",
+      "device_info": null
+    },
+    {
+      "id": 59,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T15:35:28.222679+00:00",
+      "device_info": null
+    },
+    {
+      "id": 56,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "GOOGLE_LOGIN",
+      "details": "Google OAuth Sign-in (Admin)",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T15:35:26.688337+00:00",
+      "device_info": null
+    },
+    {
+      "id": 55,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T15:35:26.414258+00:00",
+      "device_info": null
+    },
+    {
+      "id": 54,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "GOOGLE_LOGIN",
+      "details": "Google OAuth Sign-in (Admin)",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:41:34.725991+00:00",
+      "device_info": null
+    },
+    {
+      "id": 53,
+      "user_email": "mrstark2931@gmail.com",
+      "action": "GOOGLE_LOGIN",
+      "details": "Google OAuth Sign-in (User)",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:40:26.961182+00:00",
+      "device_info": null
+    },
+    {
+      "id": 52,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:35:00.454127+00:00",
+      "device_info": null
+    },
+    {
+      "id": 51,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_DELETE",
+      "details": "Deleted user ID usr_64b293e403624a",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:34:59.981428+00:00",
+      "device_info": null
+    },
+    {
+      "id": 50,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_UPDATE",
+      "details": "Updated user ID usr_64b293e403624a: ['name', 'status']",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:34:59.963053+00:00",
+      "device_info": null
+    },
+    {
+      "id": 49,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_CREATE",
+      "details": "Created user test.user.1ec8b2@example.com with role=user",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:34:59.931225+00:00",
+      "device_info": null
+    },
+    {
+      "id": 47,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:34:59.675157+00:00",
+      "device_info": null
+    },
+    {
+      "id": 46,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:34:59.169487+00:00",
+      "device_info": null
+    },
+    {
+      "id": 43,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "GOOGLE_LOGIN",
+      "details": "Google OAuth Sign-in (Admin)",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:34:57.710329+00:00",
+      "device_info": null
+    },
+    {
+      "id": 42,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:34:57.429678+00:00",
+      "device_info": null
+    },
+    {
+      "id": 40,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:12:20.887897+00:00",
+      "device_info": null
+    },
+    {
+      "id": 39,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_DELETE",
+      "details": "Deleted user ID usr_1562f807d5de45",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:12:20.401542+00:00",
+      "device_info": null
+    },
+    {
+      "id": 38,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_UPDATE",
+      "details": "Updated user ID usr_1562f807d5de45: ['name', 'status']",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:12:20.384938+00:00",
+      "device_info": null
+    },
+    {
+      "id": 37,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_CREATE",
+      "details": "Created user test.user.3f45f1@example.com with role=user",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:12:20.358219+00:00",
+      "device_info": null
+    },
+    {
+      "id": 35,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:12:20.119788+00:00",
+      "device_info": null
+    },
+    {
+      "id": 34,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:12:19.614461+00:00",
+      "device_info": null
+    },
+    {
+      "id": 31,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "GOOGLE_LOGIN",
+      "details": "Google OAuth Sign-in (Admin)",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:12:18.118776+00:00",
+      "device_info": null
+    },
+    {
+      "id": 30,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:12:17.835487+00:00",
+      "device_info": null
+    },
+    {
+      "id": 29,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:04:03.289730+00:00",
+      "device_info": null
+    },
+    {
+      "id": 28,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_DELETE",
+      "details": "Deleted user ID usr_364ac6907dcd47",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:04:02.810970+00:00",
+      "device_info": null
+    },
+    {
+      "id": 27,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_UPDATE",
+      "details": "Updated user ID usr_364ac6907dcd47: ['name', 'status']",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:04:02.791307+00:00",
+      "device_info": null
+    },
+    {
+      "id": 26,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_CREATE",
+      "details": "Created user test.user.d300e1@example.com with role=user",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:04:02.758810+00:00",
+      "device_info": null
+    },
+    {
+      "id": 24,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:04:02.509676+00:00",
+      "device_info": null
+    },
+    {
+      "id": 23,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:04:02.017784+00:00",
+      "device_info": null
+    },
+    {
+      "id": 20,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "GOOGLE_LOGIN",
+      "details": "Google OAuth Sign-in (Admin)",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:04:00.559927+00:00",
+      "device_info": null
+    },
+    {
+      "id": 19,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:04:00.289245+00:00",
+      "device_info": null
+    },
+    {
+      "id": 18,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:03:43.450027+00:00",
+      "device_info": null
+    },
+    {
+      "id": 17,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_DELETE",
+      "details": "Deleted user ID usr_c1e7a860946441",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:03:42.970798+00:00",
+      "device_info": null
+    },
+    {
+      "id": 16,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_UPDATE",
+      "details": "Updated user ID usr_c1e7a860946441: ['name', 'status']",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:03:42.952520+00:00",
+      "device_info": null
+    },
+    {
+      "id": 15,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_USER_CREATE",
+      "details": "Created user test.user.114881@example.com with role=user",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:03:42.913754+00:00",
+      "device_info": null
+    },
+    {
+      "id": 13,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:03:42.663278+00:00",
+      "device_info": null
+    },
+    {
+      "id": 12,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:03:42.147290+00:00",
+      "device_info": null
+    },
+    {
+      "id": 9,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "GOOGLE_LOGIN",
+      "details": "Google OAuth Sign-in (Admin)",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:03:40.567105+00:00",
+      "device_info": null
+    },
+    {
+      "id": 8,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "ADMIN_LOGIN",
+      "details": "Logged into Ingrivo Super Admin",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:03:40.285548+00:00",
+      "device_info": null
+    },
+    {
+      "id": 1,
+      "user_email": "yaadvshubham01@gmail.com",
+      "action": "SYSTEM_INIT",
+      "details": "Super Admin account provisioned successfully",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-23T14:02:40.975079+00:00",
+      "device_info": null
+    }
+  ]
+}

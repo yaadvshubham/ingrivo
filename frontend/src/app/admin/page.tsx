@@ -40,6 +40,16 @@ import {
   Server,
   Clock,
   Sparkles,
+  Laptop,
+  Smartphone,
+  Globe,
+  Calendar,
+  Hash,
+  LogIn,
+  UserPlus,
+  UploadCloud,
+  History,
+  Layers,
 } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 
@@ -61,8 +71,14 @@ interface UserRecord {
   health_goals?: string[];
   scans_count: number;
   last_login?: string;
+  last_ip?: string;
+  last_device?: string;
+  registration_method?: string;
+  session_count?: number;
   created_at: string;
   updated_at: string;
+  recent_scans?: ScanRecord[];
+  recent_activity?: ActivityLog[];
 }
 
 interface AdminStats {
@@ -123,9 +139,12 @@ export default function AdminPage() {
 
   // Modals state
   const [inspectUser, setInspectUser] = useState<any | null>(null);
+  const [inspectTab, setInspectTab] = useState<"session" | "activity" | "scans" | "profile">("session");
   const [editUser, setEditUser] = useState<UserRecord | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [deleteCandidate, setDeleteCandidate] = useState<UserRecord | null>(null);
+  const [isRestoring, setIsRestoring] = useState(false);
+  const [diagnostics, setDiagnostics] = useState<any>(null);
 
   // Form states for Create User
   const [createForm, setCreateForm] = useState({
@@ -180,6 +199,13 @@ export default function AdminPage() {
       if (scansRes.ok) {
         const scansJson = await scansRes.json();
         setScans(scansJson.scans || []);
+      }
+
+      // 5. Diagnostics
+      const diagRes = await fetch(`${API_BASE}/api/v1/admin/database/diagnostics`, { headers });
+      if (diagRes.ok) {
+        const diagJson = await diagRes.json();
+        setDiagnostics(diagJson.diagnostics);
       }
     } catch (err: any) {
       console.error("Admin fetch error:", err);
@@ -351,20 +377,80 @@ export default function AdminPage() {
     }
   };
 
-  // Export users to JSON
+  // Export complete database snapshot to JSON file
+  const handleDownloadBackup = async () => {
+    if (!token) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/admin/database/export`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data.snapshot, null, 2));
+        const downloadAnchor = document.createElement("a");
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", `pinfo_database_backup_${new Date().toISOString().slice(0, 10)}.json`);
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+        setActionMessage({ type: "success", text: "Database snapshot exported and downloaded successfully!" });
+      } else {
+        setActionMessage({ type: "error", text: "Failed to export database snapshot." });
+      }
+    } catch (err: any) {
+      setActionMessage({ type: "error", text: err.message || "Failed to export snapshot." });
+    }
+  };
+
+  // Restore complete database from uploaded JSON snapshot
+  const handleRestoreBackup = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !token) return;
+    setIsRestoring(true);
+    try {
+      const text = await file.text();
+      const snapshotJson = JSON.parse(text);
+      const res = await fetch(`${API_BASE}/api/v1/admin/database/restore`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ snapshot: snapshotJson }),
+      });
+      const result = await res.json();
+      if (res.ok) {
+        setActionMessage({
+          type: "success",
+          text: result.message || "Database successfully restored from snapshot!",
+        });
+        fetchData();
+      } else {
+        setActionMessage({ type: "error", text: result.detail || "Database restoration failed." });
+      }
+    } catch (err: any) {
+      setActionMessage({ type: "error", text: "Invalid JSON snapshot file: " + err.message });
+    } finally {
+      setIsRestoring(false);
+      event.target.value = "";
+    }
+  };
+
+  // Export users list only
   const handleExportJSON = () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(users, null, 2));
     const downloadAnchor = document.createElement("a");
     downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `ingrivo_users_backup_${new Date().toISOString().slice(0, 10)}.json`);
+    downloadAnchor.setAttribute("download", `pinfo_users_export_${new Date().toISOString().slice(0, 10)}.json`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
   };
 
-  // Open inspect drawer
+  // Open inspect drawer with detailed activity and scans
   const handleInspectUser = async (userRecord: UserRecord) => {
     if (!token) return;
+    setInspectTab("session");
     try {
       const res = await fetch(`${API_BASE}/api/v1/admin/users/${userRecord.id}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -1181,37 +1267,97 @@ export default function AdminPage() {
         {/* TAB 5: SYSTEM & DATABASE DIAGNOSTICS */}
         {activeTab === "system" && (
           <div className="space-y-6 animate-in fade-in duration-200">
-            <div className="p-6 rounded-2xl bg-[#141e19] border border-[#23352c] space-y-4">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <Server className="w-5 h-5 text-emerald-400" />
-                <span>Backend Database & Server Architecture</span>
-              </h3>
-              <p className="text-xs text-stone-300 leading-relaxed">
-                Pinfo employs a high-performance, WAL-journaled SQLite persistent database layer designed for zero-latency lookups, atomic ACID transactions, and robust user credentials management.
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3">
-                <div className="p-4 rounded-xl bg-black/40 border border-stone-800 space-y-2">
-                  <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider">Database Location</div>
-                  <div className="font-mono text-xs text-emerald-300 break-all">{stats?.db_path || "backend/data/pinfo.db"}</div>
+            {/* Storage Architecture & Persistent Snapshot Box */}
+            <div className="p-6 rounded-3xl bg-[#141e19] border border-[#23352c] space-y-6">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#23352c]">
+                <div>
+                  <h3 className="text-base font-bold text-white flex items-center gap-2">
+                    <Server className="w-5 h-5 text-emerald-400" />
+                    <span>Persistent Database Engine & Snapshot Security</span>
+                  </h3>
+                  <p className="text-xs text-stone-300 mt-1">
+                    Multi-tier zero-data-loss system: SQLite WAL local storage + auto-synced JSON snapshot engine.
+                  </p>
                 </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleDownloadBackup}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-950 transition-all"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>Export Database (.json)</span>
+                  </button>
 
-                <div className="p-4 rounded-xl bg-black/40 border border-stone-800 space-y-2">
-                  <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider">Engine Status</div>
-                  <div className="flex items-center gap-2 text-xs font-semibold text-emerald-400">
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>Operational (WAL Mode Enabled)</span>
+                  <label className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#192720] hover:bg-[#23352c] border border-emerald-500/30 text-emerald-300 font-bold text-xs cursor-pointer transition-all">
+                    <UploadCloud className="w-4 h-4" />
+                    <span>{isRestoring ? "Restoring..." : "Restore from Backup"}</span>
+                    <input
+                      type="file"
+                      accept=".json"
+                      disabled={isRestoring}
+                      onChange={handleRestoreBackup}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+              </div>
+
+              {/* Status Indicator Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="p-4 rounded-2xl bg-black/40 border border-stone-800 space-y-1">
+                  <span className="text-[10px] uppercase tracking-wider font-bold text-stone-400">Database Engine</span>
+                  <div className="text-white font-bold text-sm flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>SQLite 3 (WAL Mode)</span>
                   </div>
+                  <p className="text-[11px] text-stone-400 font-mono">
+                    {diagnostics?.db_size_bytes ? `${(diagnostics.db_size_bytes / 1024).toFixed(1)} KB` : `${((stats?.db_size_bytes || 0) / 1024).toFixed(1)} KB`}
+                  </p>
                 </div>
 
-                <div className="p-4 rounded-xl bg-black/40 border border-stone-800 space-y-2">
-                  <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider">Master Administrator</div>
-                  <div className="font-mono text-xs text-amber-300">{stats?.super_admin || "yaadvshubham01@gmail.com"}</div>
+                <div className="p-4 rounded-2xl bg-black/40 border border-stone-800 space-y-1">
+                  <span className="text-[10px] uppercase tracking-wider font-bold text-stone-400">Auto-Snapshot Engine</span>
+                  <div className="text-emerald-300 font-bold text-sm flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                    <span>Active & Persistent</span>
+                  </div>
+                  <p className="text-[11px] text-stone-400 font-mono">pinfo_snapshot.json</p>
                 </div>
 
-                <div className="p-4 rounded-xl bg-black/40 border border-stone-800 space-y-2">
-                  <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider">Access Token Protocol</div>
-                  <div className="text-xs text-stone-200 font-mono">HMAC-SHA256 (HS256) JWT + Role Claims</div>
+                <div className="p-4 rounded-2xl bg-black/40 border border-stone-800 space-y-1">
+                  <span className="text-[10px] uppercase tracking-wider font-bold text-stone-400">Disk Mount Status</span>
+                  <div className="text-stone-200 font-bold text-sm flex items-center gap-1.5">
+                    <Database className="w-4 h-4 text-blue-400" />
+                    <span>{diagnostics?.is_persistent_mount ? "Persistent Disk Mounted" : "Git Baseline + Ephemeral WAL"}</span>
+                  </div>
+                  <p className="text-[11px] text-stone-400">Automatic recovery on cold starts</p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-black/40 border border-stone-800 space-y-1">
+                  <span className="text-[10px] uppercase tracking-wider font-bold text-stone-400">Total Registered Users</span>
+                  <div className="text-amber-300 font-bold text-sm flex items-center gap-1.5">
+                    <Users className="w-4 h-4 text-amber-400" />
+                    <span>{users.length} Users Stored</span>
+                  </div>
+                  <p className="text-[11px] text-stone-400">1 Super Admin • {Math.max(0, users.length - 1)} Consumers</p>
+                </div>
+              </div>
+
+              {/* Technical Details */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+                <div className="p-4 rounded-2xl bg-black/40 border border-stone-800 space-y-2">
+                  <span className="text-[11px] font-bold text-stone-400 uppercase tracking-wider block">Database File Location</span>
+                  <div className="font-mono text-xs text-emerald-300 break-all">{diagnostics?.db_path || stats?.db_path || "backend/data/pinfo.db"}</div>
+                  <p className="text-[11px] text-stone-400">Configured to write in persistent Render data directory or local fallback.</p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-black/40 border border-stone-800 space-y-2">
+                  <span className="text-[11px] font-bold text-stone-400 uppercase tracking-wider block">Master Super Administrator</span>
+                  <div className="font-mono text-xs text-amber-300 font-bold flex items-center gap-2">
+                    <Crown className="w-3.5 h-3.5 text-amber-400" />
+                    <span>{stats?.super_admin || "yaadvshubham01@gmail.com"}</span>
+                  </div>
+                  <p className="text-[11px] text-stone-400">Protected against deletion, demotion, or unauthorized privilege removal.</p>
                 </div>
               </div>
             </div>
@@ -1219,109 +1365,426 @@ export default function AdminPage() {
         )}
       </main>
 
-      {/* MODAL 1: INSPECT USER PROFILE & PREFERENCES */}
+      {/* MODAL 1: PROFESSIONAL USER INTELLIGENCE & ACTIVITY DRAWER */}
       {inspectUser && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="max-w-xl w-full bg-[#141e19] border border-[#2d4338] rounded-3xl p-6 shadow-2xl space-y-5 animate-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between pb-3 border-b border-[#23352c]">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-5">
+          <div className="max-w-2xl w-full bg-[#121b16] border border-[#2d4338] rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-150">
+            {/* Header */}
+            <div className="p-5 sm:p-6 bg-gradient-to-r from-[#17241d] to-[#121c17] border-b border-[#23352c] flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3.5 min-w-0">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/30 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-bold text-base shrink-0">
                   {(inspectUser.name || inspectUser.email)[0].toUpperCase()}
                 </div>
-                <div>
-                  <h3 className="font-bold text-white text-base">{inspectUser.name || "Member Profile"}</h3>
-                  <p className="text-xs text-stone-400 font-mono">{inspectUser.email}</p>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-bold text-white text-base truncate">{inspectUser.name || "Member Profile"}</h3>
+                    {inspectUser.email.toLowerCase() === "yaadvshubham01@gmail.com" ? (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1 shrink-0">
+                        <Crown className="w-3 h-3 text-amber-400" />
+                        <span>Super Admin</span>
+                      </span>
+                    ) : (
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border shrink-0 ${
+                        inspectUser.status === "active"
+                          ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+                          : "bg-red-500/15 text-red-400 border-red-500/30"
+                      }`}>
+                        {inspectUser.status === "active" ? "Active" : "Suspended"}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-stone-400 font-mono truncate">{inspectUser.email}</p>
                 </div>
               </div>
-              <button onClick={() => setInspectUser(null)} className="p-2 text-stone-400 hover:text-white rounded-xl">
-                <X className="w-5 h-5" />
+
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={() => {
+                    setEditUser(inspectUser);
+                    setEditForm({
+                      name: inspectUser.name || "",
+                      phone: inspectUser.phone || "",
+                      password: "",
+                      role: inspectUser.role || "user",
+                      status: inspectUser.status || "active",
+                    });
+                  }}
+                  className="p-2 rounded-xl bg-stone-800/80 hover:bg-stone-700 text-stone-300 hover:text-white transition-all text-xs font-semibold flex items-center gap-1.5"
+                  title="Edit details or password"
+                >
+                  <Edit3 className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Edit</span>
+                </button>
+                <button
+                  onClick={() => setInspectUser(null)}
+                  className="p-2 text-stone-400 hover:text-white hover:bg-stone-800/80 rounded-xl transition-all"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Navigation Tabs */}
+            <div className="flex items-center gap-2 px-5 sm:px-6 pt-3 pb-2 border-b border-[#23352c] bg-black/20 text-xs overflow-x-auto">
+              <button
+                onClick={() => setInspectTab("session")}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl font-bold transition-all shrink-0 ${
+                  inspectTab === "session"
+                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+                    : "text-stone-400 hover:text-stone-200"
+                }`}
+              >
+                <KeyRound className="w-3.5 h-3.5" />
+                <span>Session & Credentials</span>
+              </button>
+
+              <button
+                onClick={() => setInspectTab("activity")}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl font-bold transition-all shrink-0 ${
+                  inspectTab === "activity"
+                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+                    : "text-stone-400 hover:text-stone-200"
+                }`}
+              >
+                <Activity className="w-3.5 h-3.5" />
+                <span>Activity Trail ({inspectUser.recent_activity?.length || 0})</span>
+              </button>
+
+              <button
+                onClick={() => setInspectTab("scans")}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl font-bold transition-all shrink-0 ${
+                  inspectTab === "scans"
+                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+                    : "text-stone-400 hover:text-stone-200"
+                }`}
+              >
+                <ScanBarcode className="w-3.5 h-3.5" />
+                <span>Scans ({inspectUser.scans_count || 0})</span>
+              </button>
+
+              <button
+                onClick={() => setInspectTab("profile")}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl font-bold transition-all shrink-0 ${
+                  inspectTab === "profile"
+                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+                    : "text-stone-400 hover:text-stone-200"
+                }`}
+              >
+                <Sliders className="w-3.5 h-3.5" />
+                <span>Preferences</span>
               </button>
             </div>
 
-            <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1 text-xs">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="p-3 rounded-xl bg-black/40 border border-stone-800">
-                  <span className="text-[10px] text-stone-400 uppercase font-bold block mb-1">User ID</span>
-                  <span className="font-mono text-stone-200 break-all">{inspectUser.id}</span>
-                </div>
-                <div className="p-3 rounded-xl bg-black/40 border border-stone-800">
-                  <span className="text-[10px] text-stone-400 uppercase font-bold block mb-1">Phone Number</span>
-                  <span className="font-mono text-stone-200">{inspectUser.phone || "Not provided"}</span>
-                </div>
-                <div className="p-3 rounded-xl bg-black/40 border border-stone-800">
-                  <span className="text-[10px] text-stone-400 uppercase font-bold block mb-1">Plain Password</span>
-                  <span className="font-mono text-amber-300 font-bold">{inspectUser.plain_password || "Google SSO"}</span>
-                </div>
-                <div className="p-3 rounded-xl bg-black/40 border border-stone-800">
-                  <span className="text-[10px] text-stone-400 uppercase font-bold block mb-1">Total Scans</span>
-                  <span className="font-mono text-emerald-400 font-bold">{inspectUser.scans_count || 0}</span>
-                </div>
-              </div>
+            {/* Tab Body */}
+            <div className="p-5 sm:p-6 overflow-y-auto space-y-4 text-xs">
+              {/* TAB 1: Session & Credentials */}
+              {inspectTab === "session" && (
+                <div className="space-y-4 animate-in fade-in duration-150">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* User ID */}
+                    <div className="p-3.5 rounded-2xl bg-black/40 border border-stone-800 space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] text-stone-400 uppercase font-bold flex items-center gap-1">
+                          <Hash className="w-3 h-3 text-stone-400" />
+                          <span>Internal User ID</span>
+                        </span>
+                        <button
+                          onClick={() => handleCopy(inspectUser.id, `id_${inspectUser.id}`)}
+                          className="text-stone-400 hover:text-white"
+                          title="Copy User ID"
+                        >
+                          {copiedKey === `id_${inspectUser.id}` ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                        </button>
+                      </div>
+                      <div className="font-mono text-stone-200 break-all">{inspectUser.id}</div>
+                    </div>
 
-              {/* Dietary Preferences */}
-              <div className="p-4 rounded-xl bg-black/30 border border-stone-800 space-y-2">
-                <h4 className="font-bold text-stone-200 text-xs flex items-center gap-1.5">
-                  <Sliders className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Dietary Preferences</span>
-                </h4>
-                {inspectUser.dietary_preferences && inspectUser.dietary_preferences.length > 0 ? (
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    {inspectUser.dietary_preferences.map((d: string) => (
-                      <span key={d} className="px-2 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-300 text-[11px] font-semibold">
-                        {d.replace("_", " ")}
+                    {/* Registration Source */}
+                    <div className="p-3.5 rounded-2xl bg-black/40 border border-stone-800 space-y-1">
+                      <span className="text-[10px] text-stone-400 uppercase font-bold flex items-center gap-1">
+                        <UserPlus className="w-3 h-3 text-blue-400" />
+                        <span>Registration Source</span>
                       </span>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-stone-400 text-xs italic">No dietary preferences set.</p>
-                )}
-              </div>
+                      <div className="font-semibold text-stone-200 flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-blue-400" />
+                        <span>
+                          {inspectUser.registration_method === "google"
+                            ? "Google OAuth 2.0 SSO"
+                            : inspectUser.registration_method === "phone"
+                            ? "Mobile Phone OTP"
+                            : "Email & Password"}
+                        </span>
+                      </div>
+                    </div>
 
-              {/* Allergen Alerts */}
-              <div className="p-4 rounded-xl bg-black/30 border border-stone-800 space-y-2">
-                <h4 className="font-bold text-stone-200 text-xs flex items-center gap-1.5">
-                  <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Allergen Alert Filters</span>
-                </h4>
-                {inspectUser.allergens && inspectUser.allergens.length > 0 ? (
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    {inspectUser.allergens.map((a: string) => (
-                      <span key={a} className="px-2 py-0.5 rounded-lg bg-red-500/20 text-red-300 text-[11px] font-semibold">
-                        {a}
+                    {/* Account Created */}
+                    <div className="p-3.5 rounded-2xl bg-black/40 border border-stone-800 space-y-1">
+                      <span className="text-[10px] text-stone-400 uppercase font-bold flex items-center gap-1">
+                        <Calendar className="w-3 h-3 text-emerald-400" />
+                        <span>Account Created At</span>
                       </span>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-stone-400 text-xs italic">No allergens configured.</p>
-                )}
-              </div>
+                      <div className="font-mono text-stone-200">
+                        {inspectUser.created_at ? new Date(inspectUser.created_at).toLocaleString() : "Recently"}
+                      </div>
+                    </div>
 
-              {/* Health Goals */}
-              <div className="p-4 rounded-xl bg-black/30 border border-stone-800 space-y-2">
-                <h4 className="font-bold text-stone-200 text-xs flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-yellow-400" />
-                  <span>Health & Lifestyle Goals</span>
-                </h4>
-                {inspectUser.health_goals && inspectUser.health_goals.length > 0 ? (
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    {inspectUser.health_goals.map((g: string) => (
-                      <span key={g} className="px-2 py-0.5 rounded-lg bg-yellow-500/20 text-yellow-300 text-[11px] font-semibold">
-                        {g}
+                    {/* Last Login & Session Count */}
+                    <div className="p-3.5 rounded-2xl bg-black/40 border border-stone-800 space-y-1">
+                      <span className="text-[10px] text-stone-400 uppercase font-bold flex items-center gap-1">
+                        <LogIn className="w-3 h-3 text-amber-400" />
+                        <span>Last Session Time</span>
                       </span>
-                    ))}
+                      <div className="font-mono text-stone-200">
+                        {inspectUser.last_login ? new Date(inspectUser.last_login).toLocaleString() : "Active today"}
+                      </div>
+                      <div className="text-[11px] text-emerald-400 font-semibold">
+                        Total Sessions: {inspectUser.session_count || 1} logins recorded
+                      </div>
+                    </div>
+
+                    {/* Client IP Address */}
+                    <div className="p-3.5 rounded-2xl bg-black/40 border border-stone-800 space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] text-stone-400 uppercase font-bold flex items-center gap-1">
+                          <Globe className="w-3 h-3 text-cyan-400" />
+                          <span>Last Client IP Address</span>
+                        </span>
+                        {inspectUser.last_ip && (
+                          <button
+                            onClick={() => handleCopy(inspectUser.last_ip, `ip_${inspectUser.id}`)}
+                            className="text-stone-400 hover:text-white"
+                          >
+                            {copiedKey === `ip_${inspectUser.id}` ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                          </button>
+                        )}
+                      </div>
+                      <div className="font-mono text-cyan-300 font-bold">
+                        {inspectUser.last_ip || "127.0.0.1 (Loopback / Local)"}
+                      </div>
+                    </div>
+
+                    {/* Last Device & Browser */}
+                    <div className="p-3.5 rounded-2xl bg-black/40 border border-stone-800 space-y-1">
+                      <span className="text-[10px] text-stone-400 uppercase font-bold flex items-center gap-1">
+                        <Laptop className="w-3 h-3 text-purple-400" />
+                        <span>Last Device / Browser</span>
+                      </span>
+                      <div className="text-stone-200 font-medium truncate">
+                        {inspectUser.last_device || "Web Browser (Standard)"}
+                      </div>
+                    </div>
+
+                    {/* Plaintext Password with Reveal & Copy */}
+                    <div className="p-3.5 rounded-2xl bg-black/40 border border-amber-500/20 sm:col-span-2 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] text-amber-400 uppercase font-bold flex items-center gap-1">
+                          <KeyRound className="w-3.5 h-3.5 text-amber-400" />
+                          <span>Plaintext Master Password (Admin Inspection)</span>
+                        </span>
+                        {inspectUser.plain_password && (
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => togglePasswordVisibility(inspectUser.id)}
+                              className="text-xs text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1"
+                            >
+                              {visiblePasswords[inspectUser.id] ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                              <span>{visiblePasswords[inspectUser.id] ? "Hide" : "Reveal"}</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleCopy(inspectUser.plain_password, `modal_pw_${inspectUser.id}`)}
+                              className="p-1 rounded bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-white"
+                              title="Copy password"
+                            >
+                              {copiedKey === `modal_pw_${inspectUser.id}` ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-black/60 border border-stone-800 font-mono text-sm">
+                        {inspectUser.plain_password ? (
+                          visiblePasswords[inspectUser.id] ? (
+                            <span className="text-amber-300 font-bold">{inspectUser.plain_password}</span>
+                          ) : (
+                            <span className="text-stone-500 tracking-widest">••••••••••••••</span>
+                          )
+                        ) : (
+                          <span className="text-blue-400 text-xs italic">
+                            Google SSO Managed (Authenticated via Google OAuth)
+                          </span>
+                        )}
+                      </div>
+                      {inspectUser.hashed_password && (
+                        <div className="pt-1">
+                          <span className="text-[9px] uppercase font-bold text-stone-500 block mb-0.5">Bcrypt Hash:</span>
+                          <span className="font-mono text-[10px] text-stone-400 break-all">{inspectUser.hashed_password}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                ) : (
-                  <p className="text-stone-400 text-xs italic">No specific goals set.</p>
-                )}
-              </div>
+                </div>
+              )}
+
+              {/* TAB 2: Activity Trail */}
+              {inspectTab === "activity" && (
+                <div className="space-y-3 animate-in fade-in duration-150">
+                  <div className="flex items-center justify-between pb-1">
+                    <span className="text-xs font-bold text-stone-300">Live Audit Trail for this User</span>
+                    <span className="text-[11px] text-stone-400 font-mono">{inspectUser.recent_activity?.length || 0} events</span>
+                  </div>
+
+                  {(!inspectUser.recent_activity || inspectUser.recent_activity.length === 0) ? (
+                    <div className="py-12 text-center text-stone-500 text-xs rounded-2xl bg-black/20 border border-stone-800">
+                      No activity events recorded for this user yet.
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-[#23352c] rounded-2xl bg-black/30 border border-stone-800 overflow-hidden">
+                      {inspectUser.recent_activity.map((act: any, i: number) => (
+                        <div key={i} className="p-3.5 flex items-start justify-between gap-3 hover:bg-white/[0.02] transition-all">
+                          <div className="space-y-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                {act.action}
+                              </span>
+                              <span className="text-xs text-stone-200 font-medium truncate">{act.details}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-[10px] text-stone-400 font-mono">
+                              <span>IP: {act.ip_address || "127.0.0.1"}</span>
+                              {act.device_info && (
+                                <>
+                                  <span>•</span>
+                                  <span>{act.device_info}</span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                          <span className="text-[11px] text-stone-400 font-mono shrink-0">
+                            {act.timestamp ? new Date(act.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Just now"}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* TAB 3: Scans History */}
+              {inspectTab === "scans" && (
+                <div className="space-y-3 animate-in fade-in duration-150">
+                  <div className="flex items-center justify-between pb-1">
+                    <span className="text-xs font-bold text-stone-300">Product Scans History</span>
+                    <span className="text-[11px] text-emerald-400 font-mono font-bold">{inspectUser.scans_count || 0} Total Scans</span>
+                  </div>
+
+                  {(!inspectUser.recent_scans || inspectUser.recent_scans.length === 0) ? (
+                    <div className="py-12 text-center text-stone-500 text-xs rounded-2xl bg-black/20 border border-stone-800">
+                      This user has not scanned or analyzed any products yet.
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {inspectUser.recent_scans.map((s: any, idx: number) => (
+                        <div key={idx} className="p-3 rounded-2xl bg-black/30 border border-stone-800 flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <span className={`w-8 h-8 rounded-xl font-black text-sm flex items-center justify-center shrink-0 border ${
+                              s.grade === "A" ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40" :
+                              s.grade === "B" ? "bg-lime-500/20 text-lime-300 border-lime-500/40" :
+                              s.grade === "C" ? "bg-yellow-500/20 text-yellow-300 border-yellow-500/40" :
+                              s.grade === "D" ? "bg-orange-500/20 text-orange-300 border-orange-500/40" :
+                              "bg-red-500/20 text-red-300 border-red-500/40"
+                            }`}>
+                              {s.grade || "A"}
+                            </span>
+                            <div className="min-w-0">
+                              <div className="font-bold text-white text-xs truncate">{s.product_name}</div>
+                              <div className="text-[11px] text-stone-400 font-mono truncate">
+                                {s.brand ? `${s.brand} • ` : ""}{s.product_code}
+                              </div>
+                            </div>
+                          </div>
+                          <span className="text-[11px] text-stone-400 font-mono shrink-0">
+                            {s.timestamp ? new Date(s.timestamp).toLocaleDateString() : "Today"}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* TAB 4: Profile & Preferences */}
+              {inspectTab === "profile" && (
+                <div className="space-y-4 animate-in fade-in duration-150">
+                  {/* Dietary Preferences */}
+                  <div className="p-4 rounded-2xl bg-black/30 border border-stone-800 space-y-2">
+                    <h4 className="font-bold text-stone-200 text-xs flex items-center gap-1.5">
+                      <Sliders className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Dietary Preferences</span>
+                    </h4>
+                    {inspectUser.dietary_preferences && inspectUser.dietary_preferences.length > 0 ? (
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {inspectUser.dietary_preferences.map((d: string) => (
+                          <span key={d} className="px-2.5 py-1 rounded-xl bg-emerald-500/20 text-emerald-300 text-[11px] font-semibold border border-emerald-500/30">
+                            {d.replace(/_/g, " ").replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-stone-400 text-xs italic">No dietary preferences set.</p>
+                    )}
+                  </div>
+
+                  {/* Allergen Alerts */}
+                  <div className="p-4 rounded-2xl bg-black/30 border border-stone-800 space-y-2">
+                    <h4 className="font-bold text-stone-200 text-xs flex items-center gap-1.5">
+                      <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Allergen Alert Filters</span>
+                    </h4>
+                    {inspectUser.allergens && inspectUser.allergens.length > 0 ? (
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {inspectUser.allergens.map((a: string) => (
+                          <span key={a} className="px-2.5 py-1 rounded-xl bg-red-500/20 text-red-300 text-[11px] font-semibold border border-red-500/30">
+                            {a}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-stone-400 text-xs italic">No allergens configured.</p>
+                    )}
+                  </div>
+
+                  {/* Health Goals */}
+                  <div className="p-4 rounded-2xl bg-black/30 border border-stone-800 space-y-2">
+                    <h4 className="font-bold text-stone-200 text-xs flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-yellow-400" />
+                      <span>Health & Lifestyle Goals</span>
+                    </h4>
+                    {inspectUser.health_goals && inspectUser.health_goals.length > 0 ? (
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {inspectUser.health_goals.map((g: string) => (
+                          <span key={g} className="px-2.5 py-1 rounded-xl bg-yellow-500/20 text-yellow-300 text-[11px] font-semibold border border-yellow-500/30">
+                            {g}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-stone-400 text-xs italic">No specific goals set.</p>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
-            <div className="pt-2 flex justify-end">
+            {/* Footer */}
+            <div className="p-4 bg-black/40 border-t border-[#23352c] flex items-center justify-between">
+              <span className="text-[11px] text-stone-400">
+                Pinfo Super Admin • Live User Telemetry
+              </span>
               <button
                 onClick={() => setInspectUser(null)}
                 className="px-4 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-white font-semibold text-xs"
               >
-                Close
+                Close Drawer
               </button>
             </div>
           </div>
