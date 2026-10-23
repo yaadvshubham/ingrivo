@@ -1,0 +1,30 @@
+# Version control
+.git
+.gitignore
+
+# Environment & Secrets (Never bake into Docker image)
+**/.env
+**/.env.*
+*.env
+*.env.*
+
+# Python caches and virtual environments
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/*.pyd
+**/.venv
+**/env
+**/.pytest_cache
+**/.coverage
+**/htmlcov
+
+# Frontend (not needed for backend container build)
+frontend/
+node_modules/
+
+# Documentation & miscellaneous
+docs/
+*.md
+.vscode/
+.idea/

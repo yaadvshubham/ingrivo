@@ -41,8 +41,16 @@ class Settings(BaseSettings):
 
     @property
     def allowed_origins_list(self) -> list[str]:
-        """Parse comma-separated ALLOWED_ORIGINS into a list."""
-        return [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",") if origin.strip()]
+        """Parse comma-separated ALLOWED_ORIGINS into a list, safely handling trailing slashes."""
+        origins: list[str] = []
+        for origin in self.ALLOWED_ORIGINS.split(","):
+            cleaned = origin.strip()
+            if cleaned:
+                origins.append(cleaned)
+                trimmed = cleaned.rstrip("/")
+                if trimmed and trimmed not in origins:
+                    origins.append(trimmed)
+        return origins
 
     @property
     def is_docs_enabled(self) -> bool:
