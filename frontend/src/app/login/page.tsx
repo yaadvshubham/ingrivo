@@ -385,34 +385,54 @@ function LoginContent() {
           {/* =================================================================== */}
           {/* LEFT BRAND & TRUST HERO COLUMN */}
           {/* =================================================================== */}
-          <div className="lg:col-span-5 bg-gradient-to-br from-[#1E5B45] via-[#164634] to-[#12382A] p-7 sm:p-9 text-white flex flex-col justify-between relative overflow-hidden">
+          <div className="lg:col-span-5 bg-gradient-to-br from-[#1E5B45] via-[#164634] to-[#12382A] p-5 sm:p-8 md:p-9 text-white flex flex-col justify-between relative overflow-hidden">
             <div className="absolute -top-16 -left-16 w-44 h-44 bg-white/5 rounded-full blur-2xl pointer-events-none" />
             <div className="absolute -bottom-16 -right-16 w-52 h-52 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none" />
 
             <div>
               {/* Logo */}
-              <Link href="/" className="inline-block mb-7 group">
+              <Link href="/" className="inline-block mb-3 sm:mb-7 group">
                 <Logo size="lg" light />
               </Link>
 
               {/* Value Proposition */}
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight leading-snug mb-3">
-                Know what you eat. <br />
-                Understand what you buy.
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight leading-snug mb-2 sm:mb-3">
+                Know what you eat. <br className="hidden sm:inline" />
+                <span className="text-emerald-200">Understand what you buy.</span>
               </h1>
 
-              <p className="text-xs sm:text-sm text-emerald-100/80 leading-relaxed mb-7">
-                Sign in to unlock real-time ingredient analysis, on-device barcode & label OCR scanner, and conversational Pinfo AI.
+              <p className="text-xs sm:text-sm text-emerald-100/85 leading-relaxed mb-3.5 sm:mb-7">
+                Sign in to unlock real-time ingredient analysis, on-device barcode &amp; label OCR scanner, and conversational Pinfo AI.
               </p>
 
-              {/* Feature Cards Checklist */}
-              <div className="space-y-3">
+              {/* Phone View: Compact 2x2 Feature Badges (Prevents pushing/hiding form on mobile) */}
+              <div className="sm:hidden grid grid-cols-2 gap-2 mb-2">
+                <div className="flex items-center gap-1.5 p-2 rounded-lg bg-white/10 border border-white/15 text-[11px] text-emerald-50">
+                  <Search className="w-3.5 h-3.5 text-emerald-300 shrink-0" />
+                  <span className="font-medium truncate">3M+ Foods Catalog</span>
+                </div>
+                <div className="flex items-center gap-1.5 p-2 rounded-lg bg-white/10 border border-white/15 text-[11px] text-emerald-50">
+                  <ScanBarcode className="w-3.5 h-3.5 text-emerald-300 shrink-0" />
+                  <span className="font-medium truncate">Camera Label OCR</span>
+                </div>
+                <div className="flex items-center gap-1.5 p-2 rounded-lg bg-white/10 border border-white/15 text-[11px] text-emerald-50">
+                  <Sparkles className="w-3.5 h-3.5 text-emerald-300 shrink-0" />
+                  <span className="font-medium truncate">Nutri AI Assistant</span>
+                </div>
+                <div className="flex items-center gap-1.5 p-2 rounded-lg bg-white/10 border border-white/15 text-[11px] text-emerald-50">
+                  <Heart className="w-3.5 h-3.5 text-emerald-300 shrink-0" />
+                  <span className="font-medium truncate">Allergen Safety</span>
+                </div>
+              </div>
+
+              {/* Tablet & Desktop: Full Detailed Feature Cards */}
+              <div className="hidden sm:block space-y-3">
                 <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/5 border border-white/10 text-xs text-emerald-50">
                   <div className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-300 flex items-center justify-center shrink-0">
                     <Search className="w-3.5 h-3.5" />
                   </div>
                   <div>
-                    <strong className="block font-semibold">Search 3,000,000+ Indian & Global Foods</strong>
+                    <strong className="block font-semibold">Search 3,000,000+ Indian &amp; Global Foods</strong>
                   </div>
                 </div>
 
@@ -421,7 +441,7 @@ function LoginContent() {
                     <ScanBarcode className="w-3.5 h-3.5" />
                   </div>
                   <div>
-                    <strong className="block font-semibold">High-Speed Camera Barcode & Label OCR</strong>
+                    <strong className="block font-semibold">High-Speed Camera Barcode &amp; Label OCR</strong>
                   </div>
                 </div>
 
@@ -430,7 +450,7 @@ function LoginContent() {
                     <Sparkles className="w-3.5 h-3.5" />
                   </div>
                   <div>
-                    <strong className="block font-semibold">Pinfo AI Avatar Chat in Hinglish & Hindi</strong>
+                    <strong className="block font-semibold">Pinfo AI Avatar Chat in Hinglish &amp; Hindi</strong>
                   </div>
                 </div>
 
@@ -439,14 +459,14 @@ function LoginContent() {
                     <Heart className="w-3.5 h-3.5" />
                   </div>
                   <div>
-                    <strong className="block font-semibold">Personalized Allergen & Diet Suitability</strong>
+                    <strong className="block font-semibold">Personalized Allergen &amp; Diet Suitability</strong>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Bottom Trust Badges */}
-            <div className="mt-8 pt-5 border-t border-white/15 text-[11px] text-emerald-200/70 flex items-center justify-between">
+            <div className="hidden sm:flex mt-8 pt-5 border-t border-white/15 text-[11px] text-emerald-200/70 items-center justify-between">
               <span className="flex items-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
                 Evidence-Based Transparency
