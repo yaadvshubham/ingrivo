@@ -72,6 +72,20 @@ const TOKEN_KEY = "ingrivo.auth.token";
 const USER_KEY = "ingrivo.auth.user";
 const PREFS_KEY = "ingrivo.auth.preferences";
 
+function extractErrorMessage(data: any, fallback: string): string {
+  if (!data) return fallback;
+  if (typeof data === "string") return data;
+  if (data.error && typeof data.error === "object" && data.error.message) return data.error.message;
+  if (data.detail) {
+    if (typeof data.detail === "string") {
+      return data.detail.includes(":") ? data.detail.split(":")[1] : data.detail;
+    }
+    return JSON.stringify(data.detail);
+  }
+  if (data.message) return data.message;
+  return fallback;
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -318,7 +332,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.detail?.split(":")[1] || data.detail || "Invalid login credentials.");
+        throw new Error(extractErrorMessage(data, "Invalid login credentials."));
       }
 
       saveSession(data.access_token, data.user);
@@ -354,7 +368,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.detail?.split(":")[1] || data.detail || "Failed to create account.");
+        throw new Error(extractErrorMessage(data, "Failed to create account."));
       }
 
       saveSession(data.access_token, data.user);
@@ -374,7 +388,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
     const data = await res.json();
     if (!res.ok) {
-      throw new Error(data.detail?.split(":")[1] || data.detail || "Failed to send OTP code.");
+      throw new Error(extractErrorMessage(data, "Failed to send OTP code."));
     }
     return data;
   };
@@ -390,7 +404,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.detail?.split(":")[1] || data.detail || "Invalid verification code.");
+        throw new Error(extractErrorMessage(data, "Invalid verification code."));
       }
 
       saveSession(data.access_token, data.user);
@@ -409,7 +423,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
     const data = await res.json();
     if (!res.ok) {
-      throw new Error(data.detail?.split(":")[1] || data.detail || "Failed to send reset code.");
+      throw new Error(extractErrorMessage(data, "Failed to send reset code."));
     }
     return data;
   };
@@ -425,7 +439,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.detail?.split(":")[1] || data.detail || "Failed to reset password.");
+        throw new Error(extractErrorMessage(data, "Failed to reset password."));
       }
       return data;
     } finally {
@@ -442,7 +456,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
     const data = await res.json();
     if (!res.ok) {
-      throw new Error(data.detail?.split(":")[1] || data.detail || "Failed to send mobile verification code.");
+      throw new Error(extractErrorMessage(data, "Failed to send mobile verification code."));
     }
     return data;
   };
@@ -458,7 +472,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.detail?.split(":")[1] || data.detail || "Invalid mobile verification code.");
+        throw new Error(extractErrorMessage(data, "Invalid mobile verification code."));
       }
 
       saveSession(data.access_token, data.user);
@@ -479,7 +493,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.detail?.split(":")[1] || data.detail || "Failed to reset password.");
+        throw new Error(extractErrorMessage(data, "Failed to reset password."));
       }
       return data;
     } finally {
