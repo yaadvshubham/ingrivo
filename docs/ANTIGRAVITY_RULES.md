@@ -1,10 +1,10 @@
-# Ingrivo — Antigravity Guardrails
+# Pinfo — Antigravity Guardrails
 
 These rules apply to every phase of development.
 
 ## Project
 
-- **Project:** Ingrivo, an AI-powered packaged food and beverage intelligence web app.
+- **Project:** Pinfo, an AI-powered packaged food and beverage intelligence web app.
 - **Stack:** Next.js 16 (App Router) + TypeScript + Tailwind + shadcn/ui frontend; Python FastAPI + Pydantic backend; Open Food Facts for product data; Gemini API (server-side only).
 
 ## Rules

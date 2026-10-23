@@ -98,7 +98,7 @@ def test_ai_daily_quota():
 
 def main():
     print("==================================================")
-    print("INGRIVO LOCAL RATE LIMITER AUDIT (OFFLINE)")
+    print("PINFO LOCAL RATE LIMITER AUDIT (OFFLINE)")
     print("==================================================")
 
     success = (

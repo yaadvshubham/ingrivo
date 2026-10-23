@@ -1,4 +1,4 @@
-"""Ingrivo Backend — FastAPI Application."""
+"""Pinfo Backend — FastAPI Application."""
 
 import uuid
 import logging
@@ -20,19 +20,19 @@ logger = logging.getLogger("ingrivo")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan handler."""
-    logger.info("Ingrivo backend starting (env=%s)", settings.APP_ENV)
+    logger.info("Pinfo backend starting (env=%s)", settings.APP_ENV)
     try:
         from app.db.database import init_db
         init_db()
-        logger.info("Ingrivo SQLite database initialized successfully.")
+        logger.info("Pinfo SQLite database initialized successfully.")
     except Exception as e:
         logger.error("Failed to initialize database: %s", e)
     yield
-    logger.info("Ingrivo backend shutting down")
+    logger.info("Pinfo backend shutting down")
 
 
 app = FastAPI(
-    title="Ingrivo API",
+    title="Pinfo API",
     version=APP_VERSION,
     docs_url="/docs" if settings.is_docs_enabled else None,
     openapi_url="/openapi.json" if settings.is_docs_enabled else None,

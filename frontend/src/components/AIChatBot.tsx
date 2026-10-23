@@ -38,9 +38,9 @@ interface ActiveProductSummary {
 
 const GREETINGS: Record<ChatLanguage, string> = {
   english:
-    "Hi! I'm **Nutri** 🌿 — your Ingrivo AI food guide. Ask me anything about any food brand (new or established), ingredients, additives, or the product you're currently viewing!",
+    "Hi! I'm **Nutri** 🌿 — your Pinfo AI food guide. Ask me anything about any food brand (new or established), ingredients, additives, or the product you're currently viewing!",
   hinglish:
-    "Hi! Main hoon **Nutri** 🌿 — aapka Ingrivo AI food guide! Kisi bhi food brand, naye clean-label startups, ingredients, ya is product ke baare mein kuch bhi poochiye.",
+    "Hi! Main hoon **Nutri** 🌿 — aapka Pinfo AI food guide! Kisi bhi food brand, naye clean-label startups, ingredients, ya is product ke baare mein kuch bhi poochiye.",
   hindi:
     "नमस्ते! मैं **नूट्री** 🌿 हूँ — आपका इनग्रिवो AI फ़ूड साथी! किसी भी ब्रांड, नई फ़ूड कंपनियों, सामग्री या इस उत्पाद के बारे में कुछ भी पूछें।",
 };
@@ -318,7 +318,7 @@ export function AIChatBot() {
 
         const pageContext = isProductPage
           ? `User is currently viewing a product detail page: ${pathname}`
-          : "User is on the Ingrivo homepage/app";
+          : "User is on the Pinfo homepage/app";
 
         const res = await fetch("/api/chat", {
           method: "POST",
@@ -498,7 +498,7 @@ export function AIChatBot() {
                         display: "inline-block",
                       }}
                     />
-                    Ingrivo AI · Food Intelligence Guide
+                    Pinfo AI · Food Intelligence Guide
                   </p>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>

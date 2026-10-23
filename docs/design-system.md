@@ -1,8 +1,8 @@
-# Ingrivo — Design System & Front-End Guidelines
+# Pinfo — Design System & Front-End Guidelines
 
 ## Overview
 
-Phase 2 established Ingrivo's design system, design tokens, app shell, and foundational component library adhering strictly to our core principles:
+Phase 2 established Pinfo's design system, design tokens, app shell, and foundational component library adhering strictly to our core principles:
 - **Evidence-First:** Every fact has explicit provenance.
 - **Neutrality:** No judgmental labeling ("good/bad", "healthy/unhealthy").
 - **Clarity:** Missing values are explicitly flagged and never replaced with `0`.
@@ -59,7 +59,7 @@ Located in `src/components/`:
 - `DataRow`: Label-value row supporting `ProvenanceBadge`. Displays `MissingChip` when value is `null` or `undefined`; correctly renders numeric `0`.
 - `SampleBanner`: Distinct amber banner wrapping illustrative fictional data.
 - `DisabledAction`: Accessible button (`aria-disabled="true"`, "Coming soon" badge, explanatory text) for inactive features.
-- `Disclaimer`: Standard mandatory disclosure ("Ingrivo is for general information only. It is not medical advice.").
+- `Disclaimer`: Standard mandatory disclosure ("Pinfo is for general information only. It is not medical advice.").
 - `Header` / `Footer`: App shell with responsive navigation, skip link, and data attributions.
 - `FlaggedFeaturePlaceholder`: Standard placeholder for flagged-off routes.
 

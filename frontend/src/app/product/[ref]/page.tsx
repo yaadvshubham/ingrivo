@@ -931,7 +931,7 @@ export function ProductDetailView({ refParam }: ProductDetailViewProps) {
                 className="flex items-center justify-between w-full text-left text-xs font-semibold text-[#5E6B63] hover:text-[#1B2A22]"
                 aria-expanded={showOffComputed}
               >
-                <span>Computed by Open Food Facts, not by Ingrivo</span>
+                <span>Computed by Open Food Facts, not by Pinfo</span>
                 <ChevronDown
                   className={`h-4 w-4 transition-transform ${
                     showOffComputed ? "rotate-180" : ""
@@ -1014,8 +1014,8 @@ interface PageProps {
 export default function ProductPage({ params }: PageProps) {
   return (
     <AuthGuard
-      featureName="Food Product Facts & Ingrivo AI"
-      description="Sign in to view verified ingredient breakdowns, ultra-processed food indicators, allergen suitability, and chat live with Ingrivo AI."
+      featureName="Food Product Facts & Pinfo AI"
+      description="Sign in to view verified ingredient breakdowns, ultra-processed food indicators, allergen suitability, and chat live with Pinfo AI."
     >
       <Suspense
         fallback={

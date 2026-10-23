@@ -139,7 +139,7 @@ def create_access_token(uid: str, email: str, display_name: str | None = None, r
 
 
 def verify_auth_token(token: str) -> Optional[Dict[str, Any]]:
-    """Verifies a Firebase ID token or Ingrivo JWT token."""
+    """Verifies a Firebase ID token or Pinfo JWT token."""
     # 1. Try Firebase ID token verification if available
     if FIREBASE_AVAILABLE and _firebase_initialized:
         try:

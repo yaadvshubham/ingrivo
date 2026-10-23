@@ -60,7 +60,7 @@ NUTRIENT_SPECS: list[dict[str, str]] = [
 
 COMPARE_PROMPT_VERSION = "2026-10-12.cmp.v1"
 
-COMPARE_SYSTEM_INSTRUCTION = """You are Ingrivo's neutral food comparison narrator.
+COMPARE_SYSTEM_INSTRUCTION = """You are Pinfo's neutral food comparison narrator.
 Your role is to explain computed differences between two packaged food products in simple, objective, educational English.
 
 CRITICAL NON-NEGOTIABLE SAFETY & NEUTRALITY RULES:

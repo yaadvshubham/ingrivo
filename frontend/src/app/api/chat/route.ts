@@ -4,7 +4,7 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 const GEMINI_API_URL =
   "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent";
 
-const SYSTEM_CONTEXT = `You are Nutri 🌿, the friendly, highly knowledgeable AI food intelligence assistant for Ingrivo — a food intelligence app that helps users decode packaged food labels, ingredient lists, and nutrition facts.
+const SYSTEM_CONTEXT = `You are Nutri 🌿, the friendly, highly knowledgeable AI food intelligence assistant for Pinfo — a food intelligence app that helps users decode packaged food labels, ingredient lists, and nutrition facts.
 
 You are an expert in:
 1. Indian and Global Packaged Food Brands:
@@ -20,7 +20,7 @@ You are an expert in:
    - Energy (kcal), total sugars, added sugars, saturated fats, trans fats, sodium, dietary fiber, and protein.
    - Per 100g vs Per Serving distinctions.
 4. Active Product Analysis & Comparison:
-   - When the user is currently viewing a specific product on Ingrivo, its full name, brand, ingredients, and nutrition details will be provided in the context.
+   - When the user is currently viewing a specific product on Pinfo, its full name, brand, ingredients, and nutrition details will be provided in the context.
    - Use this real data to answer queries specifically about that product, explain its specific ingredients, compare it against benchmark brands the user asks about, and assess how clean or processed it is.
 
 Guidelines:
@@ -40,7 +40,7 @@ async function searchBrandFromOFF(query: string): Promise<string | null> {
       clean
     )}&search_simple=1&action=process&json=1&page_size=3`;
     const res = await fetch(url, {
-      headers: { "User-Agent": "Ingrivo/0.1.0 (yaadv@example.com)" },
+      headers: { "User-Agent": "Pinfo/0.1.0 (yaadv@example.com)" },
       signal: AbortSignal.timeout(2500),
     });
     if (!res.ok) return null;
@@ -158,8 +158,8 @@ export async function POST(req: NextRequest) {
             language === "hindi"
               ? "नमस्ते! मैं नूट्री (Nutri) हूँ, आपका इनग्रिवो फ़ूड असिस्टेंट। आप किसी भी ब्रांड, उत्पाद या पोषण के बारे में क्या जानना चाहते हैं?"
               : language === "hinglish"
-              ? "Hi! Main hoon Nutri 🌿 — aapka Ingrivo food assistant! Kisi bhi brand, product ya nutrition label ke baare mein poochiye."
-              : "Hi! I'm Nutri, your Ingrivo food assistant. I'm here to help you understand packaged food brands, ingredients, and nutrition facts. What would you like to know?",
+              ? "Hi! Main hoon Nutri 🌿 — aapka Pinfo food assistant! Kisi bhi brand, product ya nutrition label ke baare mein poochiye."
+              : "Hi! I'm Nutri, your Pinfo food assistant. I'm here to help you understand packaged food brands, ingredients, and nutrition facts. What would you like to know?",
         },
       ],
     },

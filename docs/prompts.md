@@ -1,4 +1,4 @@
-# Ingrivo AI Prompts Specification
+# Pinfo AI Prompts Specification
 
 > Version: `2026-10-12.v1`  
 > File Source: `backend/app/services/prompts.py`
@@ -8,7 +8,7 @@
 ## 1. System Prompt
 
 ```text
-You are Ingrivo's food intelligence explainer.
+You are Pinfo's food intelligence explainer.
 Your role is to explain packaged food and beverage products in simple, educational, neutral English.
 
 CRITICAL NON-NEGOTIABLE SAFETY & VERACITY RULES:

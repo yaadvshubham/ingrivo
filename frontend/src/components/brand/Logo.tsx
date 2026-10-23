@@ -6,7 +6,7 @@ interface LogoIconProps extends React.SVGProps<SVGSVGElement> {
 }
 
 /**
- * Ingrivo Official Brand Icon
+ * Pinfo Official Brand Icon
  * Concept: Stylized 'I' lettermark converging a botanical sprout (food/nature)
  * with a lens/aperture arc (scientific intelligence) and a golden vitality spark.
  */
@@ -19,7 +19,7 @@ export function LogoIcon({ size = 36, className = "", ...props }: LogoIconProps)
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      aria-label="Ingrivo Logo"
+      aria-label="Pinfo Logo"
       {...props}
     >
       <defs>
@@ -178,7 +178,7 @@ export function Logo({
           }`}
           style={{ fontFamily: "var(--font-sans), sans-serif" }}
         >
-          Ingrivo
+          Pinfo
         </span>
         {showTagline && (
           <span

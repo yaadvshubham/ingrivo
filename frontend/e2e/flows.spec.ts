@@ -1,14 +1,14 @@
 import { test, expect } from "@playwright/test";
 import { setupDefaultMocks } from "./fixtures";
 
-test.describe("Ingrivo E2E Core Flows", () => {
+test.describe("Pinfo E2E Core Flows", () => {
   test.beforeEach(async ({ page }) => {
     await setupDefaultMocks(page);
   });
 
   test("manual barcode lookup: complete product facts display", async ({ page }) => {
     await page.goto("/scan");
-    await expect(page).toHaveTitle(/Scan Barcode | Ingrivo/i);
+    await expect(page).toHaveTitle(/Scan Barcode | Pinfo/i);
 
     // Enter valid complete barcode
     const input = page.locator("#barcode-input");
@@ -216,7 +216,7 @@ test.describe("Ingrivo E2E Core Flows", () => {
 
     // 2. Open /history
     await page.goto("/history");
-    await expect(page).toHaveTitle(/Scan History | Ingrivo/i);
+    await expect(page).toHaveTitle(/Scan History | Pinfo/i);
     await expect(page.getByText("Nutella Hazelnut Spread")).toBeVisible();
 
     // 3. Reopen from history

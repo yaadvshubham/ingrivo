@@ -1,4 +1,4 @@
-"""Tests for the Ingrivo backend API."""
+"""Tests for the Pinfo backend API."""
 
 import pytest
 from httpx import AsyncClient, ASGITransport

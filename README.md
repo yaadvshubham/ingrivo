@@ -1,8 +1,8 @@
-# Ingrivo
+# Pinfo
 
 > **Know what you eat. Understand what you buy.**
 
-Ingrivo is an AI-powered packaged food and beverage intelligence web app. It combines Open Food Facts data, barcode scanning, label OCR, and AI explanations to help users understand what they consume.
+Pinfo is an AI-powered packaged food and beverage intelligence web app. It combines Open Food Facts data, barcode scanning, label OCR, and AI explanations to help users understand what they consume.
 
 ## Current Status
 - **Phase 1 Completed:** Foundation & Project Scaffolding.

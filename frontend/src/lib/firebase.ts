@@ -42,9 +42,9 @@ if (typeof window !== "undefined") {
       if (getApps().length === 0) {
         app = initializeApp({
           apiKey: "AIzaSyFakeKeyForLocalDevelopmentOnly000",
-          authDomain: "ingrivo-demo.firebaseapp.com",
-          projectId: "ingrivo-demo",
-          storageBucket: "ingrivo-demo.appspot.com",
+          authDomain: "pinfo-demo.firebaseapp.com",
+          projectId: "pinfo-demo",
+          storageBucket: "pinfo-demo.appspot.com",
           messagingSenderId: "1234567890",
           appId: "1:1234567890:web:abcdef123456",
         });

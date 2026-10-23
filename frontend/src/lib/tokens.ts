@@ -1,5 +1,5 @@
 /**
- * Canonical Design System Tokens for Ingrivo
+ * Canonical Design System Tokens for Pinfo
  *
  * Primary: Forest (#1E5B45)
  * Secondary / Natural leaf: Leaf (#2E8B63)

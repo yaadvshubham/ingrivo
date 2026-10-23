@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: ingrivo-backend
+    name: pinfo-backend
     runtime: python
     rootDir: backend
     buildCommand: pip install -r requirements.txt

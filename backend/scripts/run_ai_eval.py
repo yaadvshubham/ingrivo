@@ -35,7 +35,7 @@ from tests.eval.test_ai_eval import COMPARE_GOLDEN_CASES, GOLDEN_PACKETS
 
 
 async def run_live_eval():
-    parser = argparse.ArgumentParser(description="Ingrivo AI Evaluation Runner")
+    parser = argparse.ArgumentParser(description="Pinfo AI Evaluation Runner")
     parser.add_argument("--yes", action="store_true", help="Explicit confirmation to consume real Gemini quota")
     args = parser.parse_args()
 

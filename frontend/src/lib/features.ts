@@ -8,7 +8,7 @@ export interface FeatureFlags {
 }
 
 /**
- * Feature flags for Ingrivo.
+ * Feature flags for Pinfo.
  *
  * Activation roadmap:
  * - Phase 2: All flags false (scaffolding app shell, homepage preview, sample insights)

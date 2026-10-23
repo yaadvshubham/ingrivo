@@ -19,7 +19,7 @@ class Settings(BaseSettings):
 
     # Open Food Facts
     OFF_BASE_URL: str = "https://world.openfoodfacts.org"
-    OFF_USER_AGENT: str = "Ingrivo/0.1.0"
+    OFF_USER_AGENT: str = "Pinfo/0.1.0"
     OFF_API_VERSION: str = "v3"
     OFF_STAGING_BASIC_AUTH: str = ""
     OFF_MAX_REQUESTS_PER_MIN: int = 12
@@ -69,7 +69,7 @@ class Settings(BaseSettings):
     SMTP_USER: str = ""
     SMTP_PASSWORD: str = ""
     SMTP_FROM_EMAIL: str = ""
-    SMTP_FROM_NAME: str = "Ingrivo Food Intelligence"
+    SMTP_FROM_NAME: str = "Pinfo Food Intelligence"
     SMTP_USE_SSL: bool = False
 
     # Firebase Admin & JWT Settings

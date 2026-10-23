@@ -23,7 +23,7 @@ FIXTURES_DIR = BACKEND_DIR / "tests" / "fixtures" / "search"
 QUERIES_FILE = REPO_ROOT / "docs" / "test-queries.txt"
 
 SEARCH_BASE_URL = "https://search.openfoodfacts.org"
-USER_AGENT = "Ingrivo/0.1.0 (yaadv@example.com)"
+USER_AGENT = "Pinfo/0.1.0 (yaadv@example.com)"
 FIELDS = "code,product_name,brands,image_front_url,categories,ingredients_text,nutriments"
 
 

@@ -5,7 +5,7 @@ import { useEffect } from "react";
 export function usePageTitle(title: string): void {
   useEffect(() => {
     if (typeof document !== "undefined") {
-      document.title = `${title} | Ingrivo`;
+      document.title = `${title} | Pinfo`;
     }
   }, [title]);
 }

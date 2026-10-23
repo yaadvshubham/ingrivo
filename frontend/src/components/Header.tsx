@@ -48,7 +48,7 @@ export function Header() {
         <Link
           href="/"
           className="hover:opacity-90 transition-all group"
-          aria-label="Ingrivo - Home"
+          aria-label="Pinfo - Home"
         >
           <Logo size="md" />
         </Link>

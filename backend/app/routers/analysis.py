@@ -60,7 +60,7 @@ class ChatResponse(BaseModel):
 # Chat system prompt
 # ---------------------------------------------------------------------------
 
-CHAT_SYSTEM_INSTRUCTION = """You are "Ingrivo AI" — a friendly, knowledgeable food intelligence assistant for the Ingrivo app.
+CHAT_SYSTEM_INSTRUCTION = """You are "Pinfo AI" — a friendly, knowledgeable food intelligence assistant for the Pinfo app.
 Your job is to help users understand packaged food products based strictly on the product evidence provided.
 
 LANGUAGE RULES:
@@ -90,7 +90,7 @@ def build_chat_prompt(evidence_serialized: str, messages: List[ChatMessage], lan
     }.get(language, "Reply in Hinglish.")
 
     conversation = "\n".join(
-        f"{'User' if m.role == 'user' else 'Ingrivo AI'}: {m.content}"
+        f"{'User' if m.role == 'user' else 'Pinfo AI'}: {m.content}"
         for m in messages
     )
 
@@ -103,7 +103,7 @@ def build_chat_prompt(evidence_serialized: str, messages: List[ChatMessage], lan
 Conversation so far:
 {conversation}
 
-Now respond as Ingrivo AI to the last user message. Be concise, friendly, and strictly evidence-based."""
+Now respond as Pinfo AI to the last user message. Be concise, friendly, and strictly evidence-based."""
 
 
 # ---------------------------------------------------------------------------

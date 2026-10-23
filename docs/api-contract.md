@@ -1,4 +1,4 @@
-# Ingrivo API Contract
+# Pinfo API Contract
 
 ## Standard Error Envelope
 All error responses (4xx and 5xx) follow a consistent JSON envelope:
@@ -34,7 +34,7 @@ Fetches, caches, and normalizes a product by barcode.
 ```http
 GET /api/v1/products/barcode/5449000000996 HTTP/1.1
 Host: api.ingrivo.com
-User-Agent: Ingrivo-Frontend/0.1.0
+User-Agent: Pinfo-Frontend/0.1.0
 ```
 
 ### Response `200 OK` (Normalized Product Schema)

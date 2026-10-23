@@ -286,7 +286,7 @@ export function AuthModal() {
               <LogoIcon size={32} className="shrink-0" />
               <div>
                 <h2 id="auth-modal-title" className="text-base font-bold text-[#1B2A22]">
-                  {authModalTab === "signin" && "Welcome Back to Ingrivo"}
+                  {authModalTab === "signin" && "Welcome Back to Pinfo"}
                   {authModalTab === "signup" && "Create Your Account"}
                   {authModalTab === "otp" && "Email OTP Verification"}
                   {authModalTab === "forgot" && "Reset Your Password"}
@@ -734,7 +734,7 @@ export function AuthModal() {
 
         {/* Footer Note */}
         <div className="px-6 py-3 bg-[#EFEAE0]/50 border-t border-[#E4DEC3]/50 flex items-center justify-between text-[11px] text-[#64748B]">
-          <span>Protected by Firebase & Ingrivo Shield</span>
+          <span>Protected by Firebase & Pinfo Shield</span>
           <span className="flex items-center gap-1">
             <Info className="w-3 h-3" /> Real SMTP Delivery
           </span>

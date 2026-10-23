@@ -55,7 +55,7 @@ def send_email(to_email: str, subject: str, html_content: str, text_content: str
 def send_otp_email(to_email: str, otp_code: str, purpose: str = "login") -> bool:
     """Send a branded 6-digit OTP verification code."""
     purpose_title = "Login Verification" if purpose == "login" else "Password Reset Request"
-    purpose_action = "log in to your Ingrivo account" if purpose == "login" else "reset your Ingrivo account password"
+    purpose_action = "log in to your Pinfo account" if purpose == "login" else "reset your Pinfo account password"
 
     html = f"""
     <!DOCTYPE html>
@@ -72,7 +72,7 @@ def send_otp_email(to_email: str, otp_code: str, purpose: str = "login") -> bool
               <tr>
                 <td align="center" style="padding-bottom: 24px;">
                   <div style="display: inline-block; background-color: #1E5B45; color: #FFFFFF; font-weight: 800; font-size: 20px; width: 44px; height: 44px; line-height: 44px; border-radius: 10px; text-align: center;">I</div>
-                  <h1 style="margin: 12px 0 4px 0; font-size: 22px; color: #1E5B45; font-weight: 700;">Ingrivo</h1>
+                  <h1 style="margin: 12px 0 4px 0; font-size: 22px; color: #1E5B45; font-weight: 700;">Pinfo</h1>
                   <p style="margin: 0; font-size: 13px; color: #64748B;">Food Intelligence & Product Transparency</p>
                 </td>
               </tr>
@@ -98,7 +98,7 @@ def send_otp_email(to_email: str, otp_code: str, purpose: str = "login") -> bool
               <tr>
                 <td align="center" style="padding-top: 32px; border-top: 1px solid #F1ECE1; margin-top: 32px;">
                   <p style="margin: 0; font-size: 11px; color: #94A3B8;">
-                    Ingrivo • Know what you eat. Understand what you buy.
+                    Pinfo • Know what you eat. Understand what you buy.
                   </p>
                 </td>
               </tr>
@@ -110,12 +110,12 @@ def send_otp_email(to_email: str, otp_code: str, purpose: str = "login") -> bool
     </html>
     """
 
-    plain = f"Your Ingrivo {purpose_title} code is: {otp_code}. Valid for 10 minutes."
-    sent = send_email(to_email, f"Ingrivo: {otp_code} is your {purpose_title} code", html, plain)
+    plain = f"Your Pinfo {purpose_title} code is: {otp_code}. Valid for 10 minutes."
+    sent = send_email(to_email, f"Pinfo: {otp_code} is your {purpose_title} code", html, plain)
 
     # Always log clearly in the console so developers and admins can test immediately
     print(f"\n{'='*55}")
-    print(f" [INGRIVO OTP NOTIFICATION] ")
+    print(f" [PINFO OTP NOTIFICATION] ")
     print(f" To:       {to_email}")
     print(f" Purpose:  {purpose_title}")
     print(f" Code:     >>> {otp_code} <<< (valid for 10 min)")

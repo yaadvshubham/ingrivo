@@ -1,6 +1,6 @@
-# Ingrivo Backend API
+# Pinfo Backend API
 
-The FastAPI backend powering **Ingrivo**, an AI-powered packaged food and beverage intelligence platform.
+The FastAPI backend powering **Pinfo**, an AI-powered packaged food and beverage intelligence platform.
 
 ## Architecture & Features
 

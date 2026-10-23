@@ -9,7 +9,7 @@ interface DisclaimerProps {
 
 /**
  * Disclaimer: Mandatory legal and informational disclosure.
- * "Ingrivo is for general information only. It is not medical advice."
+ * "Pinfo is for general information only. It is not medical advice."
  */
 export function Disclaimer({ className, variant = "inline" }: DisclaimerProps) {
   if (variant === "banner") {
@@ -26,7 +26,7 @@ export function Disclaimer({ className, variant = "inline" }: DisclaimerProps) {
         <Info className="h-4 w-4 shrink-0 text-[#1E5B45] mt-0.5" aria-hidden="true" />
         <div>
           <p className="font-medium text-[#1B2A22]">Important Notice</p>
-          <p>Ingrivo is for general information only. It is not medical advice.</p>
+          <p>Pinfo is for general information only. It is not medical advice.</p>
         </div>
       </div>
     );
@@ -37,7 +37,7 @@ export function Disclaimer({ className, variant = "inline" }: DisclaimerProps) {
       data-testid="disclaimer-text"
       className={cn("text-xs text-[#5E6B63] leading-relaxed", className)}
     >
-      Ingrivo is for general information only. It is not medical advice.
+      Pinfo is for general information only. It is not medical advice.
     </p>
   );
 }

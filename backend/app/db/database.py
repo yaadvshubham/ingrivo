@@ -1,4 +1,4 @@
-"""Ingrivo Persistent SQLite Database Layer.
+"""Pinfo Persistent SQLite Database Layer.
 
 Provides lightweight, robust, zero-dependency persistence for user accounts,
 Google OAuth profiles, audit activity logs, and scan history.
@@ -16,11 +16,11 @@ from typing import Optional, Dict, Any, List
 
 import bcrypt
 
-logger = logging.getLogger("ingrivo.db")
+logger = logging.getLogger("pinfo.db")
 
 # Default database directory and path
 DB_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data")
-DB_PATH = os.path.join(DB_DIR, "ingrivo.db")
+DB_PATH = os.path.join(DB_DIR, "pinfo.db")
 
 ADMIN_EMAIL = "yaadvshubham01@gmail.com"
 ADMIN_PASSWORD = "@jaishankar2931"
@@ -32,6 +32,14 @@ def get_db_connection() -> sqlite3.Connection:
     """Creates a connection to the SQLite database with row factory enabled."""
     global _db_initialized
     os.makedirs(DB_DIR, exist_ok=True)
+    if not os.path.exists(DB_PATH):
+        old_db = os.path.join(DB_DIR, "ingrivo.db")
+        if os.path.exists(old_db):
+            import shutil
+            try:
+                shutil.copyfile(old_db, DB_PATH)
+            except Exception:
+                pass
     conn = sqlite3.connect(DB_PATH, timeout=15.0)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON;")
@@ -60,6 +68,14 @@ def verify_pw(password: str, hashed: str) -> bool:
 
 def _raw_connection() -> sqlite3.Connection:
     os.makedirs(DB_DIR, exist_ok=True)
+    if not os.path.exists(DB_PATH):
+        old_db = os.path.join(DB_DIR, "ingrivo.db")
+        if os.path.exists(old_db):
+            import shutil
+            try:
+                shutil.copyfile(old_db, DB_PATH)
+            except Exception:
+                pass
     conn = sqlite3.connect(DB_PATH, timeout=15.0)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON;")
@@ -153,7 +169,7 @@ def init_db() -> None:
 
         conn.commit()
 
-    logger.info("Initialized Ingrivo SQLite database at %s", DB_PATH)
+    logger.info("Initialized Pinfo SQLite database at %s", DB_PATH)
 
     # Seed Admin User only
     seed_admin_user()
@@ -693,7 +709,7 @@ def admin_create_user(data: Dict[str, Any]) -> Dict[str, Any]:
     import uuid
     user_id = f"usr_{uuid.uuid4().hex[:14]}"
     now_iso = datetime.now(timezone.utc).isoformat()
-    password = data.get("password") or "Ingrivo@2026"
+    password = data.get("password") or "Pinfo@2026"
     name = data.get("name") or email.split("@")[0].capitalize()
     phone = data.get("phone")
     role = data.get("role", "user")

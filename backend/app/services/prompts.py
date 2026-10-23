@@ -2,7 +2,7 @@
 
 PROMPT_VERSION = "2026-10-12.v1"
 
-SYSTEM_INSTRUCTION = """You are Ingrivo's food intelligence explainer.
+SYSTEM_INSTRUCTION = """You are Pinfo's food intelligence explainer.
 Your role is to explain packaged food and beverage products in simple, educational, neutral English.
 
 CRITICAL NON-NEGOTIABLE SAFETY & VERACITY RULES:

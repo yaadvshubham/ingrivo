@@ -1,5 +1,5 @@
 /**
- * Universal Cross-Platform Google Authentication Helper for Ingrivo
+ * Universal Cross-Platform Google Authentication Helper for Pinfo
  * Works seamlessly across Windows, macOS, Android, and iOS browsers (Safari, Chrome, Edge, Firefox).
  */
 

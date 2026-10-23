@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { setupDefaultMocks } from "./fixtures";
 
-test.describe("Ingrivo E2E Automated Accessibility & Keyboard Audit", () => {
+test.describe("Pinfo E2E Automated Accessibility & Keyboard Audit", () => {
   test.beforeEach(async ({ page }) => {
     await setupDefaultMocks(page);
   });

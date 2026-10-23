@@ -9,8 +9,8 @@
 ---
 
 ## 1. General API Requirements & Server Policy
-- **User-Agent:** Mandatory. Format: `<AppName>/<Version> (<ContactEmailOrURL>)`. Set in Ingrivo as `Ingrivo/0.1.0 (yaadv@example.com)`.
-- **Outbound Rate Limit:** Officially 15 product requests per minute per IP. Ingrivo's outbound sliding-window limiter is configured to `OFF_MAX_REQUESTS_PER_MIN=12` to guarantee compliance. Every fixture recording script and live test enforces at least 5 seconds between consecutive upstream requests.
+- **User-Agent:** Mandatory. Format: `<AppName>/<Version> (<ContactEmailOrURL>)`. Set in Pinfo as `Pinfo/0.1.0 (yaadv@example.com)`.
+- **Outbound Rate Limit:** Officially 15 product requests per minute per IP. Pinfo's outbound sliding-window limiter is configured to `OFF_MAX_REQUESTS_PER_MIN=12` to guarantee compliance. Every fixture recording script and live test enforces at least 5 seconds between consecutive upstream requests.
 - **API Version Pinning:** Pinned to `v3` via `OFF_API_VERSION=v3`. Endpoints use `/api/v3/product/{barcode}.json`.
 - **Staging Server:** Located at `https://world.openfoodfacts.net`, requiring HTTP Basic Auth `off:off` (configured via `OFF_STAGING_BASIC_AUTH`).
 
@@ -26,7 +26,7 @@
 ### Not-Found Products (`status: "failure"`)
 - Observed on nonexistent or unregistered barcodes (e.g., `7622300710260`, `0000000000000`, `9999999999999`):
   Response has HTTP 404 or `"status": "failure"`, `"result": {"id": "product_not_found"}`, and an `errors` array.
-- In Ingrivo, these map to `PRODUCT_NOT_FOUND` with available fallbacks: `["label_scan", "manual_search"]`.
+- In Pinfo, these map to `PRODUCT_NOT_FOUND` with available fallbacks: `["label_scan", "manual_search"]`.
 
 ### Nutrition Data & Basis Representation
 - The basis is indicated by `nutrition_data_per`: `"100g"`, `"100ml"`, or `"serving"`.
@@ -49,7 +49,7 @@
 - `last_modified_t`: Integer UNIX timestamp, converted to ISO-8601 UTC.
 - `retrieved_at`: Current timestamp of retrieval.
 - `license`: Open Database License (`ODbL`).
-- Open Food Facts' own calculated classifications (`nutriscore_grade`, `nova_group`, `additives_tags`) are isolated in `source_computed` so users can never mistake them for Ingrivo's analysis.
+- Open Food Facts' own calculated classifications (`nutriscore_grade`, `nova_group`, `additives_tags`) are isolated in `source_computed` so users can never mistake them for Pinfo's analysis.
 
 ---
 

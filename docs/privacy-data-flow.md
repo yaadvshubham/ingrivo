@@ -1,6 +1,6 @@
 # Privacy and Data Flow Architecture
 
-This document details exactly what data is transmitted, processed, stored, and shared when using Ingrivo, in compliance with our zero-retention principles.
+This document details exactly what data is transmitted, processed, stored, and shared when using Pinfo, in compliance with our zero-retention principles.
 
 ---
 
@@ -29,7 +29,7 @@ When you explicitly click **"Explain this product"**:
 - **Never Sent**: Photos, images, user accounts, geolocation, or browser fingerprints are **never** sent to the backend or AI provider.
 
 ### Where It Goes
-1. Sent to Ingrivo's backend server via `POST /api/v1/analysis/explain`.
+1. Sent to Pinfo's backend server via `POST /api/v1/analysis/explain`.
 2. Normalized into an explicit, character-capped Evidence Packet (`MAX_EVIDENCE_CHARS=4000`).
 3. Sent securely to **Google's Gemini API** via the official Google GenAI Python SDK using `GenerateContentConfig(response_schema=ExplainStructuredData)`.
 
@@ -50,7 +50,7 @@ When you explicitly click **"Explain this product"**:
 ## 5. Third-Party Product Images & Referrer Privacy (Phase 9)
 - **Direct Image Loading**: Product packaging photos originating from Open Food Facts are loaded directly by the user's browser from third-party image hosts (e.g. `images.openfoodfacts.org`).
 - **No Proxy Quota Consumption**: We do not proxy images through an image-optimization server, avoiding consumption of hosting provider bandwidth and optimization quotas.
-- **Referrer Protection**: All third-party images use `referrerPolicy="no-referrer"` on standard HTML `<img>` elements. This prevents your browser from transmitting Ingrivo route URLs, query parameters, or browsing context to the external image host.
+- **Referrer Protection**: All third-party images use `referrerPolicy="no-referrer"` on standard HTML `<img>` elements. This prevents your browser from transmitting Pinfo route URLs, query parameters, or browsing context to the external image host.
 - **Lazy Loading**: Images include `loading="lazy"` to defer loading until scrolled into viewport, reducing user mobile data usage.
 
 ---

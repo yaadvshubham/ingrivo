@@ -68,9 +68,9 @@ const defaultPreferences: UserPreferences = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "https://ingrivo-3.onrender.com";
-const TOKEN_KEY = "ingrivo.auth.token";
-const USER_KEY = "ingrivo.auth.user";
-const PREFS_KEY = "ingrivo.auth.preferences";
+const TOKEN_KEY = "pinfo.auth.token";
+const USER_KEY = "pinfo.auth.user";
+const PREFS_KEY = "pinfo.auth.preferences";
 
 function extractErrorMessage(data: any, fallback: string): string {
   if (!data) return fallback;

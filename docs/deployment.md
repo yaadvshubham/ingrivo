@@ -1,6 +1,6 @@
-# Ingrivo Deployment Guide
+# Pinfo Deployment Guide
 
-This guide covers deploying the **Ingrivo** web application across modern cloud hosting platforms:
+This guide covers deploying the **Pinfo** web application across modern cloud hosting platforms:
 - **Frontend (Next.js 16 App Router)**: [Vercel](https://vercel.com) (Recommended) or [Netlify](https://netlify.com)
 - **Backend (FastAPI Python Service)**: [Render](https://render.com), [Railway](https://railway.app), or any Docker host
 
@@ -56,7 +56,7 @@ Add the following in **Render Environment Variables**:
 |---|---|---|
 | `APP_ENV` | `production` | Production mode |
 | `ALLOWED_ORIGINS` | `https://your-frontend.vercel.app` | CORS whitelist for frontend |
-| `OFF_USER_AGENT` | `Ingrivo/1.0.0 (contact@ingrivo.com)` | Polite User-Agent for Open Food Facts |
+| `OFF_USER_AGENT` | `Pinfo/1.0.0 (contact@ingrivo.com)` | Polite User-Agent for Open Food Facts |
 | `GEMINI_API_KEY` | `AIza...` | Google AI Studio Key |
 | `GEMINI_MODEL` | `gemini-2.5-flash` | Gemini model |
 | `ADMIN_EMAIL` | `your-admin@example.com` | Super admin account email |
@@ -70,7 +70,7 @@ Once deployed, verify the endpoints:
 1. **Backend Health Check**:
    ```bash
    curl https://your-backend.onrender.com/health
-   # Returns: {"status": "ok", "app": "ingrivo-backend"}
+   # Returns: {"status": "ok", "app": "pinfo-backend"}
    ```
 2. **Frontend UI**:
    - Navigate to `https://your-frontend.vercel.app`.

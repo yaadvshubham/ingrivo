@@ -235,7 +235,7 @@ Fat 12 g 3.6 g 5%
     expect(screen.queryByText(/View on Open Food Facts/i)).toBeNull();
 
     // Verify legal disclaimer is rendered
-    expect(screen.getByText(/Ingrivo is for general information only/i)).toBeInTheDocument();
+    expect(screen.getByText(/Pinfo is for general information only/i)).toBeInTheDocument();
   });
 
   it("Handles expired/missing label product session entry gracefully", () => {

@@ -39,7 +39,7 @@ export default function AuthCallbackPage() {
           return;
         }
 
-        // Authenticate with Ingrivo backend
+        // Authenticate with Pinfo backend
         await loginWithGoogle({
           email: profile.email,
           name: profile.name,
@@ -108,7 +108,7 @@ export default function AuthCallbackPage() {
                 Authentication Successful!
               </h2>
               <p className="text-xs text-[#5E6B63]">
-                Redirecting you to Ingrivo...
+                Redirecting you to Pinfo...
               </p>
             </div>
           )}

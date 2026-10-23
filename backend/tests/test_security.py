@@ -1,4 +1,4 @@
-"""Security, headers, request size, and robustness tests for Ingrivo API."""
+"""Security, headers, request size, and robustness tests for Pinfo API."""
 
 import pytest
 import logging

@@ -1,4 +1,4 @@
-# Ingrivo Security Review & Audit Report
+# Pinfo Security Review & Audit Report
 
 **Date of Audit:** October 2026  
 **Auditor:** Antigravity Engineering  
@@ -8,7 +8,7 @@
 
 ## 1. Executive Summary
 
-Ingrivo was subjected to a comprehensive security and robustness audit covering:
+Pinfo was subjected to a comprehensive security and robustness audit covering:
 1. Python dependencies vulnerability audit (`pip-audit`).
 2. Node dependencies vulnerability audit (`npm audit`).
 3. Repository-wide secret and credential scan (`scripts/secret_scan.py`).

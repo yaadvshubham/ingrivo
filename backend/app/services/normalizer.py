@@ -243,7 +243,7 @@ def normalize_off_product(raw_data: Dict[str, Any], api_version: str) -> Product
         missing=missing_fields
     )
     
-    # 7. Source Computed Fields (OFF's own algorithms, isolated from Ingrivo)
+    # 7. Source Computed Fields (OFF's own algorithms, isolated from Pinfo)
     source_computed = SourceComputedData(
         nutriscore=raw_data.get("nutriscore_grade"),
         nova_group=raw_data.get("nova_group"),

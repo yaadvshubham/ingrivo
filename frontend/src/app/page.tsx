@@ -83,7 +83,7 @@ export default function HomePage() {
         <TypewriterTagline className="mb-4" />
 
         <p className="text-base sm:text-lg md:text-xl text-[#5E6B63] max-w-2xl mx-auto leading-relaxed">
-          Ingrivo translates complex packaged food labels into plain English using transparent,
+          Pinfo translates complex packaged food labels into plain English using transparent,
           verifiable evidence. Open Food Facts database facts, on-device label OCR, and educational
           AI explanations—with zero moral judgments.
         </p>
@@ -406,7 +406,7 @@ export default function HomePage() {
         </ScrollReveal>
       </section>
 
-      {/* 3. HOW INGRIVO WORKS (3 STEPS) */}
+      {/* 3. HOW PINFO WORKS (3 STEPS) */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6">
         <ScrollReveal blur={10} yOffset={20}>
           <div className="text-center space-y-3 mb-10">
@@ -415,7 +415,7 @@ export default function HomePage() {
               <span>Simple &amp; Transparent</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1B2A22]">
-              How Ingrivo Works
+              How Pinfo Works
             </h2>
             <p className="text-sm sm:text-base text-[#5E6B63] max-w-xl mx-auto">
               A three-step pipeline designed for clarity, verifiable provenance, and user privacy.
@@ -455,7 +455,7 @@ export default function HomePage() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-[#5E6B63] leading-relaxed">
-                  Ingrivo tags every fact: Open Food Facts community entries, label OCR,
+                  Pinfo tags every fact: Open Food Facts community entries, label OCR,
                   mathematically derived values, or missing information.
                 </p>
               </CardContent>
@@ -635,12 +635,12 @@ export default function HomePage() {
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm font-bold text-amber-800">
                   <AlertTriangle className="h-4 w-4" />
-                  <span>What Ingrivo Cannot Do</span>
+                  <span>What Pinfo Cannot Do</span>
                 </div>
                 <p className="text-xs sm:text-sm text-[#5E6B63] leading-relaxed">
-                  Ingrivo cannot determine if a food is safe for your specific allergens,
+                  Pinfo cannot determine if a food is safe for your specific allergens,
                   diagnose metabolic conditions, or evaluate overall diet suitability.
-                  Ingrivo does not provide medical or clinical nutritional advice.
+                  Pinfo does not provide medical or clinical nutritional advice.
                 </p>
               </div>
 

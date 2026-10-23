@@ -1,4 +1,4 @@
-"""Gemini Client wrapper for Ingrivo.
+"""Gemini Client wrapper for Pinfo.
 
 The ONLY file that imports the google-genai SDK.
 Enforces:

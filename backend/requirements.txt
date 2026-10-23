@@ -1,4 +1,4 @@
-# Ingrivo Backend — Python Dependencies
+# Pinfo Backend — Python Dependencies
 # Pinned to the versions actually installed via pip.
 # Run: pip install -r requirements.txt
 

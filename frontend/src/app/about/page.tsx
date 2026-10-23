@@ -11,8 +11,8 @@ import { buttonVariants } from "@/components/ui/button";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 
 export const metadata: Metadata = {
-  title: "About Ingrivo & Provenance Standards",
-  description: "Learn how Ingrivo processes food facts honestly, our provenance badges, and strict data privacy commitments.",
+  title: "About Pinfo & Provenance Standards",
+  description: "Learn how Pinfo processes food facts honestly, our provenance badges, and strict data privacy commitments.",
 };
 
 const BADGE_LEGEND_ITEMS: {
@@ -59,10 +59,10 @@ export default function AboutPage() {
             Back to Home
           </Link>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-[#1B2A22]">
-            About Ingrivo
+            About Pinfo
           </h1>
           <p className="text-base text-[#5E6B63] max-w-2xl leading-relaxed">
-            Ingrivo is an evidence-first packaged food intelligence tool. Our goal is to
+            Pinfo is an evidence-first packaged food intelligence tool. Our goal is to
             empower everyday consumers with clear, traceable, and neutral nutritional
             data without marketing claims or judgment.
           </p>
@@ -123,7 +123,7 @@ export default function AboutPage() {
           <Card className="border border-[#E4DEC3] bg-white shadow-xs">
             <CardContent className="pt-4 space-y-3 text-sm text-[#5E6B63] leading-relaxed">
               <p>
-                Product information displayed on Ingrivo is sourced from Open Food Facts,
+                Product information displayed on Pinfo is sourced from Open Food Facts,
                 a collaborative, non-profit database created by volunteers worldwide under
                 the Open Database License (ODbL).
               </p>
@@ -154,7 +154,7 @@ export default function AboutPage() {
             <CardContent className="pt-4 space-y-3 text-sm text-[#5E6B63] leading-relaxed">
               <ul className="list-disc pl-5 space-y-2 text-xs md:text-sm">
                 <li>
-                  <strong>No moral verdicts:</strong> Ingrivo does not score foods as
+                  <strong>No moral verdicts:</strong> Pinfo does not score foods as
                   &quot;good&quot;, &quot;bad&quot;, &quot;healthy&quot;, or &quot;unhealthy&quot;.
                 </li>
                 <li>
@@ -182,7 +182,7 @@ export default function AboutPage() {
           <Card className="border border-[#E4DEC3] bg-white shadow-xs">
             <CardContent className="pt-4 space-y-3 text-sm text-[#5E6B63] leading-relaxed">
               <p>
-                Ingrivo follows an evidence-first, zero-retention architecture:
+                Pinfo follows an evidence-first, zero-retention architecture:
               </p>
               <ul className="list-disc pl-5 space-y-1.5 text-xs">
                 <li>

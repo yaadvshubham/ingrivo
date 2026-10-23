@@ -51,7 +51,7 @@ class AdminCreateUserRequest(BaseModel):
     email: EmailStr
     name: Optional[str] = None
     phone: Optional[str] = None
-    password: Optional[str] = Field(default="Ingrivo@2026", min_length=6)
+    password: Optional[str] = Field(default="Pinfo@2026", min_length=6)
     role: str = Field(default="user", pattern="^(user|admin)$")
     status: str = Field(default="active", pattern="^(active|suspended|pending)$")
     dietary_preferences: List[str] = Field(default_factory=list)

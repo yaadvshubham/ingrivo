@@ -15,17 +15,17 @@
 - **Parameters Verified in OpenAPI Spec:**
   - `q`: String. Full-text search and Lucene query syntax. Words not recognized by the Lucene parser are executed as full-text search.
   - `page`: Integer (1-based, default 1).
-  - `page_size`: Integer (default 10, Ingrivo uses fixed 12).
+  - `page_size`: Integer (default 10, Pinfo uses fixed 12).
   - `fields`: Comma-separated list of fields to include in each hit. Reduces network bandwidth and latency.
   - `langs`: Comma-separated language codes (defaults to `['en']`).
   - `sort_by`: Optional sort field.
 - **User-Agent Requirement:**
   Mandatory per Open Food Facts terms. Format: `<AppName>/<Version> (<ContactEmailOrURL>)`.
-  Ingrivo transmits: `Ingrivo/0.1.0 (yaadv@example.com)`.
+  Pinfo transmits: `Pinfo/0.1.0 (yaadv@example.com)`.
 - **Documented Rate Limits:**
   - The Open Food Facts API documentation mentions a general guideline of 10 requests/minute/IP for search endpoints.
   - While Search-a-licious's OpenAPI specification does not define an explicit HTTP header rate-limit contract, we adhere strictly to the conservative 10 requests/minute figure as our hard ceiling.
-  - Ingrivo sets `SEARCH_MAX_PER_MIN=8` (outbound limiter) and client inbound limit to `6` searches/minute to ensure full compliance.
+  - Pinfo sets `SEARCH_MAX_PER_MIN=8` (outbound limiter) and client inbound limit to `6` searches/minute to ensure full compliance.
 - **Response Shape:**
   ```json
   {

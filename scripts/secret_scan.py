@@ -126,7 +126,7 @@ def main():
         repo_root = Path.cwd()
 
     print("==================================================")
-    print("INGRIVO SECRET SCAN AUDIT (TRACKED FILES & GIT)")
+    print("PINFO SECRET SCAN AUDIT (TRACKED FILES & GIT)")
     print("==================================================")
     print(f"Repository root: {repo_root}")
 

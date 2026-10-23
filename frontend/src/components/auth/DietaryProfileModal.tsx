@@ -101,7 +101,7 @@ export function DietaryProfileModal({ isOpen, onClose }: DietaryProfileModalProp
               <h4 className="text-xs font-bold text-[#1B2A22] uppercase tracking-wider">Dietary Preferences</h4>
             </div>
             <p className="text-xs text-[#64748B] mb-3">
-              Ingrivo will flag foods that conflict with your chosen diets.
+              Pinfo will flag foods that conflict with your chosen diets.
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {DIETARY_OPTIONS.map((opt) => {

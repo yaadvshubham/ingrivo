@@ -476,7 +476,7 @@ export default function AdminPage() {
               </div>
               <div className="flex flex-col">
                 <span className="font-black text-base tracking-tight text-white flex items-center gap-1.5">
-                  INGRIVO <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">SUPER ADMIN</span>
+                  PINFO <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">SUPER ADMIN</span>
                 </span>
                 <span className="text-[10px] text-emerald-400/80 font-mono">Platform Master Command Center</span>
               </div>
@@ -1187,13 +1187,13 @@ export default function AdminPage() {
                 <span>Backend Database & Server Architecture</span>
               </h3>
               <p className="text-xs text-stone-300 leading-relaxed">
-                Ingrivo employs a high-performance, WAL-journaled SQLite persistent database layer designed for zero-latency lookups, atomic ACID transactions, and robust user credentials management.
+                Pinfo employs a high-performance, WAL-journaled SQLite persistent database layer designed for zero-latency lookups, atomic ACID transactions, and robust user credentials management.
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3">
                 <div className="p-4 rounded-xl bg-black/40 border border-stone-800 space-y-2">
                   <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider">Database Location</div>
-                  <div className="font-mono text-xs text-emerald-300 break-all">{stats?.db_path || "backend/data/ingrivo.db"}</div>
+                  <div className="font-mono text-xs text-emerald-300 break-all">{stats?.db_path || "backend/data/pinfo.db"}</div>
                 </div>
 
                 <div className="p-4 rounded-xl bg-black/40 border border-stone-800 space-y-2">

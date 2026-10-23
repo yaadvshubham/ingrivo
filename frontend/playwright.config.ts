@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 /**
- * Playwright E2E configuration for Ingrivo (Phase 10).
+ * Playwright E2E configuration for Pinfo (Phase 10).
  *
  * All backend API network calls (/api/v1/*) are intercepted and mocked inside
  * test specs using real recorded fixtures. Tests NEVER contact real external services.

@@ -241,7 +241,7 @@ async def request_mobile_otp(body: SendMobileOtpRequest):
 
     # Log with highlighted SMS notification box
     print(f"\n{'='*55}")
-    print(f" [INGRIVO MOBILE SMS NOTIFICATION] ")
+    print(f" [PINFO MOBILE SMS NOTIFICATION] ")
     print(f" Mobile Phone: {clean_phone}")
     print(f" Purpose:      {body.purpose.replace('_', ' ').title()}")
     print(f" SMS OTP Code: >>> {otp_code} <<< (valid for 10 min)")
@@ -272,7 +272,7 @@ async def verify_mobile_otp(body: VerifyMobileOtpRequest):
 
     uid = "usr_ph_" + hashlib.sha256(clean_phone.encode("utf-8")).hexdigest()[:16]
     name = f"User {clean_phone[-4:]}"
-    email = f"{clean_phone}@mobile.ingrivo.internal"
+    email = f"{clean_phone}@mobile.pinfo.internal"
     role = "admin" if clean_phone == ADMIN_EMAIL.lower() else "user"
 
     db_user = save_or_update_user(email=email, phone=clean_phone, name=name, role=role)
@@ -337,7 +337,7 @@ async def register_account(body: RegisterRequest):
     if is_phone:
         clean_phone = "".join(c for c in raw_ident if c.isdigit() or c == "+")
         name = body.name or f"User {clean_phone[-4:]}"
-        email = f"{clean_phone}@mobile.ingrivo.internal"
+        email = f"{clean_phone}@mobile.pinfo.internal"
         ident_key = clean_phone
     else:
         clean_phone = None
@@ -493,7 +493,7 @@ async def login_with_password(body: PasswordLoginRequest):
             display_name=db_user.get("name", "Super Admin"),
             role="admin",
         )
-        log_activity(ADMIN_EMAIL, "ADMIN_LOGIN", "Logged into Ingrivo Super Admin", "127.0.0.1")
+        log_activity(ADMIN_EMAIL, "ADMIN_LOGIN", "Logged into Pinfo Super Admin", "127.0.0.1")
         return {
             "success": True,
             "access_token": token,

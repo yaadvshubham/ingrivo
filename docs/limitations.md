@@ -1,6 +1,6 @@
 # Known Limitations & Scope Boundaries
 
-This document provides a realistic record of known limitations, environmental constraints, and scope boundaries in Ingrivo as of Phase 6.
+This document provides a realistic record of known limitations, environmental constraints, and scope boundaries in Pinfo as of Phase 6.
 
 ---
 
@@ -44,8 +44,8 @@ This document provides a realistic record of known limitations, environmental co
 ## 3. Data Source Limitations (Open Food Facts)
 
 - **Coverage Gaps:** Emerging and local Indian regional products frequently lack entries or have incomplete nutrient listings in Open Food Facts.
-- **Community Data Quality:** Nutritional metrics in Open Food Facts are user-contributed. Missing nutrients remain `null` in Ingrivo (never assumed to be `0`).
-- **Search Latency & Rate Limits:** The Search-a-licious API enforces an upstream rate limit (10 requests/minute/IP ceiling). Ingrivo implements client and server token-bucket rate limits and 1-hour response caching.
+- **Community Data Quality:** Nutritional metrics in Open Food Facts are user-contributed. Missing nutrients remain `null` in Pinfo (never assumed to be `0`).
+- **Search Latency & Rate Limits:** The Search-a-licious API enforces an upstream rate limit (10 requests/minute/IP ceiling). Pinfo implements client and server token-bucket rate limits and 1-hour response caching.
 
 ---
 
@@ -54,7 +54,7 @@ This document provides a realistic record of known limitations, environmental co
 ### A. Browser-Local History Scope
 - **Device & Profile Isolation:** Local history is saved exclusively within `localStorage` under `ingrivo.history.v1`. It does not sync between different browsers (e.g. Chrome vs Firefox), separate user profiles, or across devices.
 - **Data Eviction & Capacity:** History is capped at 50 items. Saving a 51st item automatically evicts the least recently viewed product.
-- **Storage Degradation in Private Browsing / Blocked Storage:** If browser storage is disabled (e.g., strict private browsing or quota exhaustion), Ingrivo falls back to an in-memory session store. An informational status badge alerts the user that history will not persist beyond the current browser session.
+- **Storage Degradation in Private Browsing / Blocked Storage:** If browser storage is disabled (e.g., strict private browsing or quota exhaustion), Pinfo falls back to an in-memory session store. An informational status badge alerts the user that history will not persist beyond the current browser session.
 - **Label Product Retention:** Confirmed label products are saved to local history snapshot. If browser history is cleared, visiting a previous `/product/lb-<uuid>` URL will report that the product is no longer available in local history and prompt the user to recapture or upload the label photo again.
 
 ### B. Offline & Slow Network Operations

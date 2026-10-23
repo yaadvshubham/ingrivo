@@ -14,7 +14,7 @@ interface AuthGuardProps {
 export function AuthGuard({
   children,
   featureName = "this feature",
-  description = "Unlock complete ingredient analysis, nutrition breakdowns, camera barcode scanning, and Ingrivo AI intelligence.",
+  description = "Unlock complete ingredient analysis, nutrition breakdowns, camera barcode scanning, and Pinfo AI intelligence.",
 }: AuthGuardProps) {
   const { user, isLoading, openAuthModal, loginWithGoogle } = useAuth();
 

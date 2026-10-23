@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { setupDefaultMocks } from "./fixtures";
 
-test.describe("Ingrivo E2E Label OCR & Review Flow", () => {
+test.describe("Pinfo E2E Label OCR & Review Flow", () => {
   test.beforeEach(async ({ page }) => {
     await setupDefaultMocks(page);
   });
@@ -53,7 +53,7 @@ test.describe("Ingrivo E2E Label OCR & Review Flow", () => {
 
     // 2. Navigate to /label page
     await page.goto("/label");
-    await expect(page).toHaveTitle(/Label Review & OCR | Ingrivo/i);
+    await expect(page).toHaveTitle(/Label Review & OCR | Pinfo/i);
 
     // 3. Upload synthetic label image via file upload input
     const fileInput = page.locator("input[type='file']:not([capture])");

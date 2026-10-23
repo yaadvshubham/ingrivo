@@ -206,7 +206,7 @@ function LoginContent() {
     const id = customClientId.trim();
     if (!id) return;
     if (typeof window !== "undefined") {
-      localStorage.setItem("ingrivo_google_client_id", id);
+      localStorage.setItem("pinfo_google_client_id", id);
     }
     setShowGoogleSetup(false);
     handleGoogleSignIn();
@@ -268,7 +268,7 @@ function LoginContent() {
     setIsLoading(true);
     try {
       await signUpWithPassword(identifier, password, name.trim());
-      setSuccessMsg("Account created successfully! Welcome to Ingrivo.");
+      setSuccessMsg("Account created successfully! Welcome to Pinfo.");
       router.push(redirectUrl);
     } catch (err: any) {
       setErrorMsg(err.message || "Could not register account. You may already have an account with these credentials.");
@@ -402,7 +402,7 @@ function LoginContent() {
               </h1>
 
               <p className="text-xs sm:text-sm text-emerald-100/80 leading-relaxed mb-7">
-                Sign in to unlock real-time ingredient analysis, on-device barcode & label OCR scanner, and conversational Ingrivo AI.
+                Sign in to unlock real-time ingredient analysis, on-device barcode & label OCR scanner, and conversational Pinfo AI.
               </p>
 
               {/* Feature Cards Checklist */}
@@ -430,7 +430,7 @@ function LoginContent() {
                     <Sparkles className="w-3.5 h-3.5" />
                   </div>
                   <div>
-                    <strong className="block font-semibold">Ingrivo AI Avatar Chat in Hinglish & Hindi</strong>
+                    <strong className="block font-semibold">Pinfo AI Avatar Chat in Hinglish & Hindi</strong>
                   </div>
                 </div>
 
@@ -961,7 +961,7 @@ function LoginContent() {
                     className="mt-0.5 rounded text-[#1E5B45] focus:ring-[#1E5B45]"
                   />
                   <label htmlFor="agree">
-                    I agree to Ingrivo&apos;s <span className="underline font-medium">Terms of Service</span> and <span className="underline font-medium">Privacy Policy</span>.
+                    I agree to Pinfo&apos;s <span className="underline font-medium">Terms of Service</span> and <span className="underline font-medium">Privacy Policy</span>.
                   </label>
                 </div>
 

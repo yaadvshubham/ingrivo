@@ -1,6 +1,6 @@
 # Accessibility & Responsive Audit Notes (Phase 9)
 
-This document provides a systematic verification record and architectural evidence for every accessibility and responsive requirement implemented in Ingrivo as part of Phase 9.
+This document provides a systematic verification record and architectural evidence for every accessibility and responsive requirement implemented in Pinfo as part of Phase 9.
 
 ---
 
@@ -8,17 +8,17 @@ This document provides a systematic verification record and architectural eviden
 - **Requirement:** Unique, meaningful page titles per route.
 - **Evidence:**
   - Dynamic client hook `usePageTitle` implemented in `frontend/src/hooks/usePageTitle.ts`.
-  - Static metadata defined in `layout.tsx` (`"Ingrivo — Evidence-Based Food Intelligence"`).
+  - Static metadata defined in `layout.tsx` (`"Pinfo — Evidence-Based Food Intelligence"`).
   - Routes verified:
-    - `/` (Home): `"Home | Ingrivo"`
-    - `/scan`: `"Scan Barcode | Ingrivo"`
-    - `/search`: `"Search Catalog | Ingrivo"` (or `"Search: <query> | Ingrivo"`)
-    - `/label`: `"Label Review & OCR | Ingrivo"`
-    - `/compare`: `"Compare Products | Ingrivo"`
-    - `/history`: `"Scan History | Ingrivo"`
-    - `/status`: `"System Status | Ingrivo"`
-    - `/about`: `"About & Methodology | Ingrivo"`
-    - `/product/[ref]`: `"<Product Name> | Ingrivo"` (or `"Product Details | Ingrivo"`)
+    - `/` (Home): `"Home | Pinfo"`
+    - `/scan`: `"Scan Barcode | Pinfo"`
+    - `/search`: `"Search Catalog | Pinfo"` (or `"Search: <query> | Pinfo"`)
+    - `/label`: `"Label Review & OCR | Pinfo"`
+    - `/compare`: `"Compare Products | Pinfo"`
+    - `/history`: `"Scan History | Pinfo"`
+    - `/status`: `"System Status | Pinfo"`
+    - `/about`: `"About & Methodology | Pinfo"`
+    - `/product/[ref]`: `"<Product Name> | Pinfo"` (or `"Product Details | Pinfo"`)
 
 ## 2. Language Attribute
 - **Requirement:** Root HTML element must declare language.
@@ -34,7 +34,7 @@ This document provides a systematic verification record and architectural eviden
   - `/compare`: Single `<h1>` ("Compare Packaged Foods").
   - `/history`: Single `<h1>` ("Scan History").
   - `/status`: Single `<h1>` ("System Status").
-  - `/about`: Single `<h1>` ("About Ingrivo").
+  - `/about`: Single `<h1>` ("About Pinfo").
   - `/product/[ref]`: Single `<h1>` for product title (or fallback "Product Details"). Child sections use `<h2>` ("Nutrition Facts", "Ingredients", "Allergen Declarations").
 
 ## 4. Landmark Roles

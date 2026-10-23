@@ -1,4 +1,4 @@
-# Ingrivo Test Matrix & Error-Handling Audit
+# Pinfo Test Matrix & Error-Handling Audit
 
 **Scope:** End-to-End, Integration, Unit, and Manual Test Coverage for All User-Facing Flows and Failure Modes.  
 **Last Updated:** October 2026  

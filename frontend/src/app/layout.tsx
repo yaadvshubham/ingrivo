@@ -15,7 +15,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Ingrivo — Know what you eat. Understand what you buy.",
+  title: "Pinfo — Know what you eat. Understand what you buy.",
   description:
     "Packaged food and beverage intelligence powered by Open Food Facts, barcode scanning, label OCR, and educational AI explanations.",
 };
