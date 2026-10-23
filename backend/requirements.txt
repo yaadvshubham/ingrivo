@@ -7,6 +7,8 @@ fastapi==0.143.0           # Web framework for building APIs
 uvicorn[standard]==0.54.0  # ASGI server to run FastAPI
 pydantic==2.14.0           # Data validation and serialization
 pydantic-settings==2.15.0  # Settings management from env vars
+email-validator==2.3.0     # Required by Pydantic EmailStr
+dnspython==2.9.0           # Required by email-validator
 starlette==1.7.0           # ASGI toolkit (FastAPI dependency)
 
 # --- HTTP Client & AI SDK ---
