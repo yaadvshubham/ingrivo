@@ -136,11 +136,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const unsubscribe = onAuthStateChanged(auth, async (fbUser: FirebaseUser | null) => {
         if (fbUser) {
           const idToken = await fbUser.getIdToken();
+          const cleanEmail = fbUser.email || "";
+          const displayName = fbUser.displayName || cleanEmail.split("@")[0] || "User";
+          const photo = fbUser.photoURL || undefined;
+
+          // Automatically sync user to backend SQLite database so they appear in Super Admin Panel
+          try {
+            const syncRes = await fetch(`${API_BASE}/api/v1/auth/google`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                email: cleanEmail,
+                name: displayName,
+                photo_url: photo,
+                id_token: idToken,
+              }),
+            });
+            if (syncRes.ok) {
+              const syncData = await syncRes.json();
+              if (syncData.user) {
+                const role = syncData.user.role || (cleanEmail.toLowerCase() === "yaadvshubham01@gmail.com" ? "admin" : "user");
+                const syncedProfile: UserProfile = {
+                  uid: syncData.user.uid,
+                  email: syncData.user.email,
+                  name: syncData.user.name,
+                  photoURL: syncData.user.photo_url || photo,
+                  role: role,
+                };
+                setUser(syncedProfile);
+                setToken(syncData.access_token || idToken);
+                localStorage.setItem(TOKEN_KEY, syncData.access_token || idToken);
+                localStorage.setItem(USER_KEY, JSON.stringify(syncedProfile));
+                fetchPreferences(syncData.access_token || idToken);
+                return;
+              }
+            }
+          } catch (syncErr) {
+            console.warn("Background Firebase to backend sync error:", syncErr);
+          }
+
           const profile: UserProfile = {
             uid: fbUser.uid,
-            email: fbUser.email || "",
-            name: fbUser.displayName || fbUser.email?.split("@")[0],
-            photoURL: fbUser.photoURL || undefined,
+            email: cleanEmail,
+            name: displayName,
+            photoURL: photo,
           };
           setUser(profile);
           setToken(idToken);
