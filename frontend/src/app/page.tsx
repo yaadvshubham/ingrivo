@@ -80,9 +80,9 @@ export default function HomePage() {
           </div>
         )}
 
-        <TypewriterTagline className="mb-4" />
+        <TypewriterTagline className="mt-1 mb-2.5 sm:mb-4" />
 
-        <p className="text-sm sm:text-base md:text-lg text-[#5E6B63] max-w-2xl mx-auto leading-relaxed px-2">
+        <p className="text-[14px] sm:text-base md:text-lg text-[#5E6B63] max-w-xl sm:max-w-2xl mx-auto leading-relaxed px-1 sm:px-2 font-normal">
           Pinfo translates complex packaged food labels into plain English using transparent,
           verifiable evidence. Open Food Facts database facts, on-device label OCR, and educational
           AI explanations—with zero moral judgments.

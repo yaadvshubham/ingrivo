@@ -79,7 +79,7 @@ export function TypewriterTagline({ className = "" }: TypewriterTaglineProps) {
 
   return (
     <h1
-      className={`text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-[#1B2A22] max-w-4xl mx-auto leading-tight sm:leading-[1.18] select-none ${className}`}
+      className={`text-[26px] xs:text-[28px] sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-[#1B2A22] max-w-4xl mx-auto leading-[1.16] sm:leading-[1.18] select-none ${className}`}
       aria-label="Know what you eat. Understand what you buy."
     >
       {/* Line 1: Know what you eat. */}

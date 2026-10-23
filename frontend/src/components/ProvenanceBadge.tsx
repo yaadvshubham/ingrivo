@@ -14,6 +14,7 @@ const BADGE_CONFIG: Record<
   ProvenanceVariant,
   {
     label: string;
+    shortLabel: string;
     icon: React.ComponentType<{ className?: string; "aria-hidden"?: boolean | "true" | "false" }>;
     bgClass: string;
     textClass: string;
@@ -22,6 +23,7 @@ const BADGE_CONFIG: Record<
 > = {
   source: {
     label: "Source data",
+    shortLabel: "Source",
     icon: Database,
     bgClass: "bg-emerald-50",
     textClass: "text-[#1E5B45]",
@@ -29,6 +31,7 @@ const BADGE_CONFIG: Record<
   },
   label: {
     label: "From your label",
+    shortLabel: "Label",
     icon: Camera,
     bgClass: "bg-sky-50",
     textClass: "text-sky-800",
@@ -36,6 +39,7 @@ const BADGE_CONFIG: Record<
   },
   ocr: {
     label: "From your label",
+    shortLabel: "Label",
     icon: Camera,
     bgClass: "bg-sky-50",
     textClass: "text-sky-800",
@@ -43,6 +47,7 @@ const BADGE_CONFIG: Record<
   },
   ai: {
     label: "AI explanation",
+    shortLabel: "AI",
     icon: Sparkles,
     bgClass: "bg-purple-50",
     textClass: "text-purple-800",
@@ -50,6 +55,7 @@ const BADGE_CONFIG: Record<
   },
   derived: {
     label: "Calculated",
+    shortLabel: "Calc",
     icon: Calculator,
     bgClass: "bg-amber-50",
     textClass: "text-amber-800",
@@ -57,6 +63,7 @@ const BADGE_CONFIG: Record<
   },
   user_corrected: {
     label: "User verified",
+    shortLabel: "Verified",
     icon: Camera,
     bgClass: "bg-emerald-50",
     textClass: "text-emerald-800",
@@ -64,6 +71,7 @@ const BADGE_CONFIG: Record<
   },
   missing: {
     label: "Not available",
+    shortLabel: "Missing",
     icon: HelpCircle,
     bgClass: "bg-stone-100",
     textClass: "text-[#5E6B63]",
@@ -75,6 +83,9 @@ const BADGE_CONFIG: Record<
  * ProvenanceBadge indicates where a piece of information originates.
  * Rule: Provenance colors must never be the only signal.
  * Each badge renders an icon AND a visible text label.
+ *
+ * On mobile (<640px), renders a compact, sleek badge with a short text label
+ * so it never overpowers the nutrient name or causes ugly text truncation.
  */
 export function ProvenanceBadge({ variant, customLabel, className, ...props }: ProvenanceBadgeProps) {
   const config = BADGE_CONFIG[variant] || BADGE_CONFIG.missing;
@@ -84,7 +95,7 @@ export function ProvenanceBadge({ variant, customLabel, className, ...props }: P
     <span
       data-testid={`provenance-badge-${variant}`}
       className={cn(
-        "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium border shadow-xs transition-colors",
+        "inline-flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium border shadow-2xs transition-colors shrink-0",
         config.bgClass,
         config.textClass,
         config.borderClass,
@@ -92,8 +103,17 @@ export function ProvenanceBadge({ variant, customLabel, className, ...props }: P
       )}
       {...props}
     >
-      <IconComponent className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-      <span>{customLabel || config.label}</span>
+      <IconComponent className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" aria-hidden="true" />
+      <span>
+        {customLabel ? (
+          customLabel
+        ) : (
+          <>
+            <span className="hidden sm:inline">{config.label}</span>
+            <span className="sm:hidden">{config.shortLabel}</span>
+          </>
+        )}
+      </span>
     </span>
   );
 }
