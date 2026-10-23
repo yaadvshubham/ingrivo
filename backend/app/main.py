@@ -197,6 +197,17 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
     )
 
 
+@app.get("/health", tags=["health"])
+async def root_health():
+    """Root health check for cloud platform monitors (Render/Railway)."""
+    return {
+        "status": "ok",
+        "version": APP_VERSION,
+        "environment": settings.APP_ENV,
+        "gemini_configured": settings.gemini_configured,
+    }
+
+
 from app.routers import health, products, analysis, compare, auth, userdata, admin
 
 # ---------------------------------------------------------------------------
