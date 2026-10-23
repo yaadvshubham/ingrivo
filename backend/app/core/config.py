@@ -13,7 +13,7 @@ class Settings(BaseSettings):
 
     # General
     APP_ENV: str = "development"
-    ALLOWED_ORIGINS: str = "http://localhost:3000"
+    ALLOWED_ORIGINS: str = "https://trypinfo.vercel.app,https://ingrivo.vercel.app,http://localhost:3000"
     DOCS_ENABLED: bool | None = None
     MAX_REQUEST_BODY_BYTES: int = 1_048_576  # 1 MB default limit for request bodies
 
